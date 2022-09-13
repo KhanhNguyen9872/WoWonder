@@ -4,11 +4,7 @@ if [[ "$(which bash)" == "/data/data/com.termux/files/usr/bin/bash" ]]; then
 	echo "Unsupported Termux!"
 	exit 1
 else
-	if [[ "$(which sudo)" == "" ]]; then
-		sudo=""
-	else
-		sudo="sudo "
-	fi
+	sudo="$(which sudo)"
 	${sudo}git clone https://KhanhNguyen9872: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@github.com/KhanhNguyen9872/WoWonder.git && {
 		${sudo}rm -rf /var/www/html > /dev/null 2>&1
 		${sudo}mv ./WoWonder /var/www/html
