@@ -4,6 +4,8 @@ sudo="$(which sudo)"
 apache2_conf="/etc/apache2/apache2.conf"
 apache2_security="/etc/apache2/conf-available/security.conf"
 mysql_conf="/etc/mysql/mariadb.conf.d/50-server.cnf"
+mysql_conf2="/etc/mysql/mysql.conf.d/mysqld.cnf"
+phpmyadmin_conf="/etc/phpmyadmin/config-db.php"
 
 # Function
 function stop_mysql () {
@@ -80,6 +82,7 @@ EOF
 EOF
         stop_mysql
         ${sudo} sed -i 's/= 3306/= 3307/g' ${mysql_conf}
+        ${sudo} sed -i 's/= 3306/= 3307/g' ${mysql_conf2}
         nohup mysqld --skip-grant-tables &> /dev/null &
         unset password
         while [[ "${password}" == "" ]]; do
@@ -97,6 +100,7 @@ EOF
 EOF
         stop_mysql
         ${sudo} a2enmod rewrite
+        printf "<?php\n\$dbuser='wowonder';\n\$dbpass=\"${password}\";\n\$basepath='';\n\$dbname='phpmyadmin';\n\$dbserver='localhost';\n\$dbport='3307';\n\$dbtype='mysql';\n" > ${phpmyadmin_conf}
         clear
         echo "Starting wowonder...."
         ${sudo} service apache2 start > /dev/null 2>&1
