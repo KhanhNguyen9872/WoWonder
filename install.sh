@@ -4,12 +4,11 @@ sudo="$(which sudo)"
 apache2_conf="/etc/apache2/apache2.conf"
 apache2_security="/etc/apache2/conf-available/security.conf"
 mysql_conf="/etc/mysql/mariadb.conf.d/50-server.cnf"
-mysql_conf2="/etc/mysql/mysql.conf.d/mysqld.cnf"
 phpmyadmin_conf="/etc/phpmyadmin/config-db.php"
 
 # Function
 function stop_mysql () {
-	${sudo} service mysql stop
+	${sudo} service mysql stop > /dev/null 2>&1
 	${sudo} killall mysqld > /dev/null 2>&1
 }
 
@@ -20,7 +19,7 @@ if [[ -d /goorm/bin ]]; then
         if [[ "$(cat /etc/hosts | grep -a -w -m1 '127.0.0.1 localhost')" == "" ]]; then
         	${sudo} printf "\n127.0.0.1 localhost\n" >> /etc/hosts
         fi
-        ${sudo} rm -rf ${apache2_conf}
+        ${sudo} rm -rf ${apache2_conf} > /dev/null 2>&1
         ${sudo} cat > ${apache2_conf} << EOF
         ServerName 0.0.0.0
         DefaultRuntimeDir \${APACHE_RUN_DIR}
@@ -64,11 +63,11 @@ if [[ -d /goorm/bin ]]; then
         IncludeOptional conf-enabled/*.conf
         IncludeOptional sites-enabled/*.conf
 EOF
-        ${sudo} sed -i '/ServerTokens /d' ${apache2_security}
-        ${sudo} sed -i '/ServerSignature /d' ${apache2_security}
-        ${sudo} sed -i '1 a ServerTokens Prod' ${apache2_security}
-        ${sudo} sed -i '2 a ServerSignature Off' ${apache2_security}
-        ${sudo} service mysql start
+        ${sudo} sed -i '/ServerTokens /d' ${apache2_security} > /dev/null 2>&1
+        ${sudo} sed -i '/ServerSignature /d' ${apache2_security} > /dev/null 2>&1
+        ${sudo} sed -i '1 a ServerTokens Prod' ${apache2_security} > /dev/null 2>&1
+        ${sudo} sed -i '2 a ServerSignature Off' ${apache2_security} > /dev/null 2>&1
+        ${sudo} service mysql start > /dev/null 2>&1
         ${sudo} mysql_secure_installation << EOF
 
         y
@@ -81,8 +80,7 @@ EOF
 
 EOF
         stop_mysql
-        ${sudo} sed -i 's/= 3306/= 3307/g' ${mysql_conf}
-        ${sudo} sed -i 's/= 3306/= 3307/g' ${mysql_conf2}
+        ${sudo} sed -i 's/= 3306/= 3307/g' ${mysql_conf} > /dev/null 2>&1
         nohup mysqld --skip-grant-tables &> /dev/null &
         unset password
         while [[ "${password}" == "" ]]; do
@@ -99,7 +97,7 @@ EOF
 
 EOF
         stop_mysql
-        ${sudo} a2enmod rewrite
+        ${sudo} a2enmod rewrite > /dev/null 2>&1
         printf "<?php\n\$dbuser='wowonder';\n\$dbpass=\"${password}\";\n\$basepath='';\n\$dbname='phpmyadmin';\n\$dbserver='localhost';\n\$dbport='3307';\n\$dbtype='mysql';\n" > ${phpmyadmin_conf}
         clear
         echo "Starting wowonder...."
