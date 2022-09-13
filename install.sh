@@ -78,28 +78,13 @@ EOF
 		printf "\n\n New Password MySQL: "
 		read password
 	done
-        ${sudo} mysql_secure_installation << EOF
-
-        y
-        khanhnguyen9872
-        khanhnguyen9872
-        y
-        n
-        y
-        y
-
-EOF
         mysql -u root << EOF
         DROP USER IF EXISTS 'wowonder'@'localhost';
         CREATE USER 'wowonder'@'localhost' IDENTIFIED BY "${password}";
         GRANT ALL PRIVILEGES ON *.* TO 'wowonder'@'localhost' IDENTIFIED BY "${password}";
         GRANT ALL PRIVILEGES ON *.* TO 'wowonder'@'%' IDENTIFIED BY "${password}";
+        DROP USER IF EXISTS 'root'@'localhost';
         FLUSH PRIVILEGES;
-
-EOF
-	mysql -h 127.0.0.1 -P 3307 -u root << EOF
-	DROP USER IF EXISTS 'root'@'localhost';
-	FLUSH PRIVILEGES;
 
 EOF
 	stop_mysql
