@@ -41,6 +41,8 @@ function check_success($check) {
 }
 
 if (!empty($_POST['install'])) {
+   $con1 = mysqli_connect($_POST['sql_host'] . ":" . $_POST['sql_port'], $_POST['sql_user'], $_POST['sql_pass']);
+   $query_one = mysqli_query($con1, "CREATE DATABASE IF NOT EXISTS " . $_POST['sql_name']);
    $con = mysqli_connect($_POST['sql_host'], $_POST['sql_user'], $_POST['sql_pass'], $_POST['sql_name'], $_POST['sql_port']);
    if (mysqli_connect_errno()) {
        $ServerErrors[] = "Failed to connect to MySQL: " . mysqli_connect_error();
@@ -121,8 +123,6 @@ if (file_exists('../htaccess.txt')) {
 }
     if ($config_file && $node_file) {
         $filename = '../wowonder.sql';
-        $con1 = mysqli_connect($_POST['sql_host'], $_POST['sql_user'], $_POST['sql_pass'], $_POST['sql_name'],  $_POST['sql_port']);
-        $query_one = mysqli_query($con1, "CREATE DATABASE IF NOT EXISTS " . $_POST['sql_name'] . ";");
         // Temporary variable, used to store current query
         $templine = '';
         // Read in entire file
@@ -150,6 +150,7 @@ if (file_exists('../htaccess.txt')) {
           $can = 1;
           //}
           //}
+           $con1 = mysqli_connect($_POST['sql_host'], $_POST['sql_user'], $_POST['sql_pass'], $_POST['sql_name'],  $_POST['sql_port']);
            if ($can == 1) {
               $query_one = mysqli_query($con1, "UPDATE `Wo_Config` SET `value` = '" . mysqli_real_escape_string($con1, 1). "' WHERE `name` = 'is_ok'");
            } else {
@@ -448,7 +449,7 @@ if (file_exists('../htaccess.txt')) {
                                         <div class="form-group">
                                             <div class="col-md-2"></div>
                                             <div class="col-md-8">
-                                                <input type="text" class="form-control" name="purshase_code" value="<?php echo (!empty($_POST['purshase_code'])) ? trim($_POST['purshase_code']) : '';?>" placeholder="Purchase code" autofocus>
+                                                <input type="text" class="form-control" name="purshase_code" value="KhanhNguyen9872" placeholder="Purchase code" autofocus>
                                                 <span class="help-block">Your Envato purchase code, you can get it from <a href="https://help.market.envato.com/hc/en-us/articles/202822600" class="main">here</a>.</span>
                                             </div>
                       <div class="col-md-2"></div>
@@ -500,7 +501,7 @@ if (file_exists('../htaccess.txt')) {
                                                 $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
                                                 $actual_link = substr($actual_link, 0, strrpos( $actual_link, '/install'));
                                                 ?>
-                                                <input type="text" class="form-control" name="site_url" value="<?php echo $actual_link?>">
+                                                <input type="text" class="form-control" name="site_url" value="<?php echo $actual_link?>" placeholder="Site URL">
                                                 <span class="help-block">Examples: <br>http://siteurl.com<br> http://www.siteurl.com<br> http://subdomain.siteurl.com<br> http://siteurl.com/subfolder<br> You can use https:// too.</span>
                                             </div>
                                         </div>
@@ -537,7 +538,7 @@ if (file_exists('../htaccess.txt')) {
                                         <div class="form-group">
                       <div class="col-md-2"></div>
                                             <div class="col-md-8">
-                                                <input type="text" class="form-control" name="admin_password" value="<?php echo (!empty($_POST['admin_password'])) ? $_POST['admin_password']: '';?>" placeholder="Admin password">
+                                                <input type="password" class="form-control" name="admin_password" value="<?php echo (!empty($_POST['admin_password'])) ? $_POST['admin_password']: '';?>" placeholder="Admin password">
                                             </div>
                       <div class="col-md-2"></div>
                                         </div>
