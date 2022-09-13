@@ -15,7 +15,8 @@ function stop_mysql () {
 # Main
 if [[ -d /goorm/bin ]]; then
         ${sudo} apt update -y
-        printf "1\nno\n" | ${sudo} apt install p7zip-full unzip tar curl zip wget nano mesa-utils php-gettext pv ffmpeg nodejs apache2 php mariadb-server phpmyadmin -y
+        ${sudo} dpkg --configure -a
+        ${sudo} apt install p7zip-full unzip tar curl zip wget nano mesa-utils dialog php-gettext pv ffmpeg nodejs apache2 php mariadb-server phpmyadmin -y
         if [[ "$(cat /etc/hosts | grep -a -w -m1 '127.0.0.1 localhost')" == "" ]]; then
         	${sudo} printf "\n127.0.0.1 localhost\n" >> /etc/hosts
         fi
