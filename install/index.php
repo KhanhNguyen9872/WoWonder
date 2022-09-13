@@ -65,20 +65,21 @@ if (!empty($_POST['install'])) {
    if (empty($_POST['admin_username']) || empty($_POST['admin_password'])) {
        $ServerErrors[] = "Please provide right admin username/password";
    }
-   $p = check_(trim($_POST['purshase_code']));
-   if (isset($p['status'])) {
-      if ($p['status'] == 'ERROR') {
-        $ServerErrors[] = $p['ERROR_NAME'];
-      }
-   } else {
-     $ServerErrors[] = 'Failed to connect to server, please try again later, or contact us.';
-   }
+   //$p = check_(trim($_POST['purshase_code']));
+   //if (isset($p['status'])) {
+   //if ($p['status'] == 'ERROR') {
+   //$ServerErrors[] = $p['ERROR_NAME'];
+   //}
+   //} else {
+   //$ServerErrors[] = 'Failed to connect to server, please try again later, or contact us.';
+   //}
    if (empty($ServerErrors)) {
     $node_content = '{
     "sql_db_host": "' . $_POST['sql_host'] . '",
     "sql_db_user": "' . $_POST['sql_user'] . '",
     "sql_db_pass": "' . $_POST['sql_pass'] . '",
     "sql_db_name": "' . $_POST['sql_name'] . '",
+    "sql_db_port": "' . $_POST['sql_port'] . '",
     "site_url": "' . $_POST['site_url'] . '",
     "purchase_code": "' . trim($_POST['purshase_code']) . '"
 }';
@@ -139,12 +140,12 @@ if (file_exists('../htaccess.txt')) {
            }
         }
         if ($query) {
-          $p2 = check_success(trim($_POST['purshase_code']));
-          if(isset($p2['status'])) {
-            if ($p2['status'] == 'SUCCESS') {
-              $can = 1;
-            }
-          }
+          //$p2 = check_success(trim($_POST['purshase_code']));
+          //if(isset($p2['status'])) {
+          //if ($p2['status'] == 'SUCCESS') {
+          $can = 1;
+          //}
+          //}
           $con1 = mysqli_connect($_POST['sql_host'], $_POST['sql_user'], $_POST['sql_pass'], $_POST['sql_name']);
            if ($can == 1) {
               $query_one = mysqli_query($con1, "UPDATE `Wo_Config` SET `value` = '" . mysqli_real_escape_string($con1, 1). "' WHERE `name` = 'is_ok'");
