@@ -73,6 +73,7 @@ if (!empty($_POST['install'])) {
    //} else {
    //$ServerErrors[] = 'Failed to connect to server, please try again later, or contact us.';
    //}
+   $site_url = str_replace('http://', 'https://', $site_url);
    if (empty($ServerErrors)) {
     $node_content = '{
     "sql_db_host": "' . $_POST['sql_host'] . '",

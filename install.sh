@@ -87,13 +87,15 @@ EOF
 	unset password
 	while [[ "${password}" == "" ]]; do
 		clear
-		printf "\n\n\n New Password MySQL: "
+		printf "\n\n SQL Username: wowonder"
+		printf "\n\n New Password MySQL: "
 		read password
 	done
 	mysql -h 127.0.0.1 -P 3307 -u root << EOF
 	FLUSH PRIVILEGES;
 	DROP USER IF EXISTS 'wowonder'@'localhost';
 	CREATE USER 'wowonder'@'localhost' IDENTIFIED BY "${password}";
+	GRANT ALL PRIVILEGES ON *.* TO 'wowonder'@'localhost' IDENTIFIED BY "${password}";
 	GRANT ALL PRIVILEGES ON *.* TO 'wowonder'@'%' IDENTIFIED BY "${password}";
 	DROP USER IF EXISTS 'root'@'localhost';
 	FLUSH PRIVILEGES;
@@ -105,6 +107,7 @@ EOF
 	clear
 	echo "Starting WoWonder...."
 	${sudo} service apache2 start > /dev/null 2>&1
+	sleep 1
 	${sudo} service mysql start > /dev/null 2>&1
 	${sudo} rm -rf *.sh *.md > /dev/null 2>&1
 	echo "Done!"
