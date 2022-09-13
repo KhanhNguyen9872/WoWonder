@@ -69,21 +69,8 @@ EOF
 	${sudo} sed -i '/ServerSignature /d' ${apache2_security} > /dev/null 2>&1
 	${sudo} sed -i '1 a ServerTokens Prod' ${apache2_security} > /dev/null 2>&1
 	${sudo} sed -i '2 a ServerSignature Off' ${apache2_security} > /dev/null 2>&1
-	${sudo} service mysql start > /dev/null 2>&1
-	${sudo} mysql_secure_installation << EOF
-
-	y
-	khanhnguyen9872
-	khanhnguyen9872
-	y
-	n
-	y
-	y
-
-EOF
-	stop_mysql
 	${sudo} sed -i 's/= 3306/= 3307/g' ${mysql_conf} > /dev/null 2>&1
-	nohup mysqld --skip-grant-tables &> /dev/null &
+        ${sudo} service mysql start > /dev/null 2>&1
 	unset password
 	while [[ "${password}" == "" ]]; do
 		clear
@@ -91,12 +78,26 @@ EOF
 		printf "\n\n New Password MySQL: "
 		read password
 	done
+        ${sudo} mysql_secure_installation << EOF
+
+        y
+        khanhnguyen9872
+        khanhnguyen9872
+        y
+        n
+        y
+        y
+
+EOF
+        mysql -u root << EOF
+        DROP USER IF EXISTS 'wowonder'@'localhost';
+        CREATE USER 'wowonder'@'localhost' IDENTIFIED BY "${password}";
+        GRANT ALL PRIVILEGES ON *.* TO 'wowonder'@'localhost' IDENTIFIED BY "${password}";
+        GRANT ALL PRIVILEGES ON *.* TO 'wowonder'@'%' IDENTIFIED BY "${password}";
+        FLUSH PRIVILEGES;
+
+EOF
 	mysql -h 127.0.0.1 -P 3307 -u root << EOF
-	FLUSH PRIVILEGES;
-	DROP USER IF EXISTS 'wowonder'@'localhost';
-	CREATE USER 'wowonder'@'localhost' IDENTIFIED BY "${password}";
-	GRANT ALL PRIVILEGES ON *.* TO 'wowonder'@'localhost' IDENTIFIED BY "${password}";
-	GRANT ALL PRIVILEGES ON *.* TO 'wowonder'@'%' IDENTIFIED BY "${password}";
 	DROP USER IF EXISTS 'root'@'localhost';
 	FLUSH PRIVILEGES;
 
