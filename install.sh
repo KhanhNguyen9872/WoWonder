@@ -103,12 +103,12 @@ EOF
 	${sudo} a2enmod rewrite > /dev/null 2>&1
 	printf "<?php\n\$dbuser='wowonder';\n\$dbpass=\"${password}\";\n\$basepath='';\n\$dbname='phpmyadmin';\n\$dbserver='localhost';\n\$dbport='3307';\n\$dbtype='mysql';\n" > ${phpmyadmin_conf}
 	clear
-	echo "Starting wowonder...."
+	echo "Starting WoWonder...."
 	${sudo} service apache2 start > /dev/null 2>&1
 	${sudo} service mysql start > /dev/null 2>&1
 	${sudo} rm -rf *.sh *.md > /dev/null 2>&1
 	echo "Done!"
 else
-       printf "\n\nNot a goorm Ubuntu!\n"
+       printf "\n\nNot a Goorm Ubuntu!\n"
 fi
 exit 0
