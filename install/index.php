@@ -73,7 +73,8 @@ if (!empty($_POST['install'])) {
    //} else {
    //$ServerErrors[] = 'Failed to connect to server, please try again later, or contact us.';
    //}
-   $site_url = str_replace('http://', 'https://', $site_url);
+   $site_url0 = $_POST['site_url'];
+   $site_url = str_replace('http://', 'https://', $site_url0);
    if (empty($ServerErrors)) {
     $node_content = '{
     "sql_db_host": "' . $_POST['sql_host'] . '",
@@ -81,7 +82,7 @@ if (!empty($_POST['install'])) {
     "sql_db_pass": "' . $_POST['sql_pass'] . '",
     "sql_db_name": "' . $_POST['sql_name'] . '",
     "sql_db_port": "' . $_POST['sql_port'] . '",
-    "site_url": "' . $_POST['site_url'] . '",
+    "site_url": "' . $site_url . '",
     "purchase_code": "' . trim($_POST['purshase_code']) . '"
 }';
       $file_content =
@@ -107,7 +108,7 @@ $sql_db_name = "'  . $_POST['sql_name'] . '";
 $sql_db_port = "'  . $_POST['sql_port'] . '";
 
 // Site URL
-$site_url = "' . $_POST['site_url'] . '"; // e.g (http://example.com)
+$site_url = "' . $site_url . '"; // e.g (http://example.com)
 
 // Purchase code
 $purchase_code = "' . trim($_POST['purshase_code']) . '"; // Your purchase code, don\'t give it to anyone.
@@ -120,6 +121,8 @@ if (file_exists('../htaccess.txt')) {
 }
     if ($config_file && $node_file) {
         $filename = '../wowonder.sql';
+        $con1 = mysqli_connect($_POST['sql_host'], $_POST['sql_user'], $_POST['sql_pass'], $_POST['sql_name'],  $_POST['sql_port']);
+        $query_one = mysqli_query($con1, "CREATE DATABASE IF NOT EXISTS " . $_POST['sql_name'] . ";");
         // Temporary variable, used to store current query
         $templine = '';
         // Read in entire file
@@ -147,7 +150,6 @@ if (file_exists('../htaccess.txt')) {
           $can = 1;
           //}
           //}
-          $con1 = mysqli_connect($_POST['sql_host'], $_POST['sql_user'], $_POST['sql_pass'], $_POST['sql_name']);
            if ($can == 1) {
               $query_one = mysqli_query($con1, "UPDATE `Wo_Config` SET `value` = '" . mysqli_real_escape_string($con1, 1). "' WHERE `name` = 'is_ok'");
            } else {
@@ -454,21 +456,24 @@ if (file_exists('../htaccess.txt')) {
                                         <div class="form-group">
                       <div class="col-md-2"></div>
                                             <div class="col-md-8">
-                                                <input type="text" class="form-control" name="sql_host" value="<?php echo (!empty($_POST['sql_host'])) ? $_POST['sql_host']: '';?>" placeholder="SQL host name">
+                                                <input type="text" class="form-control" name="sql_host" value="127.0.0.1" placeholder="SQL host name">
+                                                <span class="help-block">Default: 127.0.0.1<br>
                                             </div>
                       <div class="col-md-2"></div>
                                         </div>
                                         <div class="form-group">
                       <div class="col-md-2"></div>
                                             <div class="col-md-8">
-                                                <input type="text" class="form-control" name="sql_port" value="<?php echo (!empty($_POST['sql_port'])) ? $_POST['sql_port']: '';?>" placeholder="SQL port">
+                                                <input type="text" class="form-control" name="sql_port" value="3307" placeholder="SQL port">
+                                                <span class="help-block">Default: 3307<br>
                                             </div>
                       <div class="col-md-2"></div>
                                         </div>
                                         <div class="form-group">
                       <div class="col-md-2"></div>
                                             <div class="col-md-8">
-                                                <input type="text" class="form-control" name="sql_user" value="<?php echo (!empty($_POST['sql_user'])) ? $_POST['sql_user']: '';?>" placeholder="SQL username">
+                                                <input type="text" class="form-control" name="sql_user" value="wowonder" placeholder="SQL username">
+                                                <span class="help-block">Default: wowonder<br>
                                             </div>
                       <div class="col-md-2"></div>
                                         </div>
@@ -476,6 +481,7 @@ if (file_exists('../htaccess.txt')) {
                       <div class="col-md-2"></div>
                                             <div class="col-md-8">
                                                 <input type="text" class="form-control" name="sql_pass" value="<?php echo (!empty($_POST['sql_pass'])) ? $_POST['sql_pass']: '';?>" placeholder="SQL password">
+                                                <span class="help-block">Your SQL Password<br>
                                             </div>
                       <div class="col-md-2"></div>
                                         </div>
@@ -483,6 +489,7 @@ if (file_exists('../htaccess.txt')) {
                       <div class="col-md-2"></div>
                                             <div class="col-md-8">
                                                 <input type="text" class="form-control" name="sql_name" value="<?php echo (!empty($_POST['sql_name'])) ? $_POST['sql_name']: '';?>" placeholder="SQL database name">
+                                                <span class="help-block">Default: wowonder<br>
                                             </div>
                       <div class="col-md-2"></div>
                                         </div>
