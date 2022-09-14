@@ -88,7 +88,7 @@ $sql_db_port = "'  . $_POST['sql_port'] . '";
 // Site URL
 $site_url = "' . $site_url . '"; // e.g (http://example.com)
 
-$auto_redirect = true;
+$auto_redirect = false;
 
 // Purchase code
 $purchase_code = "' . trim($_POST['purshase_code']) . '"; // Your purchase code, don\'t give it to anyone.
