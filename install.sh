@@ -71,10 +71,10 @@ EOF
 	${sudo} sed -i '/ServerSignature /d' ${apache2_security} > /dev/null 2>&1
 	${sudo} sed -i '1 a ServerTokens Prod' ${apache2_security} > /dev/null 2>&1
 	${sudo} sed -i '2 a ServerSignature Off' ${apache2_security} > /dev/null 2>&1
-        ${sudo} sed -i "/\$cfg['Servers'][\$i]['port'] = /d" ${phpmyadmin_conf1} > /dev/null 2>&1
-        ${sudo} sed -i "5 a \$cfg['Servers'][\$i]['port'] = '3307';" ${phpmyadmin_conf1} > /dev/null 2>&1
+	${sudo} sed -i "/\$cfg['Servers'][\$i]['port'] = /d" ${phpmyadmin_conf1} > /dev/null 2>&1
+	${sudo} sed -i "5 a \$cfg['Servers'][\$i]['port'] = '3307';" ${phpmyadmin_conf1} > /dev/null 2>&1
 	${sudo} sed -i 's/= 3306/= 3307/g' ${mysql_conf} > /dev/null 2>&1
-        ${sudo} service mysql start > /dev/null 2>&1
+	${sudo} service mysql start > /dev/null 2>&1
 	unset password
 	while [[ "${password}" == "" ]]; do
 		clear
@@ -82,33 +82,46 @@ EOF
 		printf "\n\n New Password MySQL: "
 		read password
 	done
-        mysql -u root << EOF
-        DROP USER IF EXISTS 'wowonder'@'localhost';
-        DROP DATABASE IF EXISTS test;
-        CREATE USER 'wowonder'@'localhost' IDENTIFIED BY "${password}";
-        GRANT ALL PRIVILEGES ON *.* TO 'wowonder'@'localhost' IDENTIFIED BY "${password}";
-        GRANT ALL PRIVILEGES ON *.* TO 'wowonder'@'%' IDENTIFIED BY "${password}";
-        DROP USER IF EXISTS 'root'@'localhost';
-        FLUSH PRIVILEGES;
+	mysql -u root << EOF
+	DROP USER IF EXISTS 'wowonder'@'localhost';
+	DROP DATABASE IF EXISTS test;
+	CREATE USER 'wowonder'@'localhost' IDENTIFIED BY "${password}";
+	GRANT ALL PRIVILEGES ON *.* TO 'wowonder'@'localhost' IDENTIFIED BY "${password}";
+	GRANT ALL PRIVILEGES ON *.* TO 'wowonder'@'%' IDENTIFIED BY "${password}";
+	DROP USER IF EXISTS 'root'@'localhost';
+	FLUSH PRIVILEGES;
 
 EOF
 	stop_mysql
 	${sudo} a2enmod rewrite > /dev/null 2>&1
-        echo ""
-        echo "Setting up phpMyAdmin...."
+	cd /var/www/html > /dev/null 2>&1
+	echo ""
+	echo "Setting up php...."
+	list_php="$(${sudo} ls /etc/php 2> /dev/null)"
+	php_config="$(${sudo} cat ./php.ini 2> /dev/null)"
+	while IFS= read -r ida; do
+		if [ -f /etc/php/${ida}/apache2/php.ini ] 2> /dev/null; then
+			while IFS= read -r idb; do
+				conf="$(printf "${idb}" | awk '{print $1}')"
+				${sudo} sed -i "/${conf}/d" /etc/php/${ida}/apache2/php.ini > /dev/null 2>&1
+				${sudo} printf "\n${idb}\n" >> /etc/php/${ida}/apache2/php.ini 2> /dev/null
+			done < <(printf '%s\n' "$php_config")
+		fi
+	done < <(printf '%s\n' "$list_php")
+	echo "Setting up phpMyAdmin...."
 	printf "<?php\n\$dbuser='wowonder';\n\$dbpass=\"${password}\";\n\$basepath='';\n\$dbname='phpmyadmin';\n\$dbserver='localhost';\n\$dbport='3307';\n\$dbtype='mysql';\n" > ${phpmyadmin_conf}
-        ${sudo} rm -rf /usr/share/phpmyadmin > /dev/null 2>&1
-        ${sudo} 7z x ./phpmyadmin.7z > /dev/null 2>&1
-        ${sudo} mv ./phpmyadmin /usr/share/phpmyadmin > /dev/null 2>&1
-        ${sudo} ln -s ${phpmyadmin_conf1} ${phpmyadmin_conf2} > /dev/null 2>&1
-        ${sudo} chmod -R 777 /usr/share/phpmyadmin > /dev/null 2>&1
-        ${sudo} rm -rf ./phpmyadmin* > /dev/null 2>&1
+	${sudo} rm -rf /usr/share/phpmyadmin > /dev/null 2>&1
+	${sudo} 7z x ./phpmyadmin.7z > /dev/null 2>&1
+	${sudo} mv ./phpmyadmin /usr/share/phpmyadmin > /dev/null 2>&1
+	${sudo} ln -s ${phpmyadmin_conf1} ${phpmyadmin_conf2} > /dev/null 2>&1
+	${sudo} chmod -R 777 /usr/share/phpmyadmin > /dev/null 2>&1
+	${sudo} rm -rf ./phpmyadmin* > /dev/null 2>&1
 	echo "Starting WoWonder...."
 	${sudo} service apache2 start > /dev/null 2>&1
 	sleep 1
 	${sudo} service mysql start > /dev/null 2>&1
 	${sudo} rm -rf *.sh *.md > /dev/null 2>&1
-        ${sudo} cat > /usr/bin/wowonder << EOF
+	${sudo} cat > /usr/bin/wowonder << EOF
 #!/usr/bin/bash
 sudo="\$(which sudo)"
 echo "Starting WoWonder...."
@@ -117,7 +130,7 @@ sleep 1
 \${sudo} service mysql start > /dev/null 2>&1
 exit 0
 EOF
-        ${sudo} chmod 777 /usr/bin/wowonder > /dev/null 2>&1
+	${sudo} chmod 777 /usr/bin/wowonder > /dev/null 2>&1
 	echo "Done!"
 else
        printf "\n\nNot a Goorm Ubuntu!\n"
