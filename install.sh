@@ -94,6 +94,7 @@ EOF
 EOF
 	stop_mysql
 	${sudo} a2enmod rewrite > /dev/null 2>&1
+        echo ""
         echo "Setting up phpMyAdmin...."
 	printf "<?php\n\$dbuser='wowonder';\n\$dbpass=\"${password}\";\n\$basepath='';\n\$dbname='phpmyadmin';\n\$dbserver='localhost';\n\$dbport='3307';\n\$dbtype='mysql';\n" > ${phpmyadmin_conf}
         ${sudo} rm -rf /usr/share/phpmyadmin > /dev/null 2>&1
@@ -107,6 +108,16 @@ EOF
 	sleep 1
 	${sudo} service mysql start > /dev/null 2>&1
 	${sudo} rm -rf *.sh *.md > /dev/null 2>&1
+        ${sudo} cat > /usr/bin/wowonder << EOF
+#!/usr/bin/bash
+sudo="\$(which sudo)"
+echo "Starting WoWonder...."
+\${sudo} service apache2 start > /dev/null 2>&1
+sleep 1
+\${sudo} service mysql start > /dev/null 2>&1
+exit 0
+EOF
+        ${sudo} chmod 777 /usr/bin/wowonder > /dev/null 2>&1
 	echo "Done!"
 else
        printf "\n\nNot a Goorm Ubuntu!\n"

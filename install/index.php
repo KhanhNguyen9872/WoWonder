@@ -122,13 +122,13 @@ if (file_exists('../htaccess.txt')) {
            }
         }
         if ($query) {
-           //$p2 = check_success(trim($_POST['purshase_code']));
-           //if(isset($p2['status'])) {
-           //if ($p2['status'] == 'SUCCESS') {
-           $can = 1;
-           //}
-           //}
-           $con1 = mysqli_connect($_POST['sql_host'], $_POST['sql_user'], $_POST['sql_pass'], $_POST['sql_name'],  $_POST['sql_port']);
+          //$p2 = check_success(trim($_POST['purshase_code']));
+          //if(isset($p2['status'])) {
+          //if ($p2['status'] == 'SUCCESS') {
+          $can = 1;
+          //}
+          //}
+          $con1 = mysqli_connect($_POST['sql_host'], $_POST['sql_user'], $_POST['sql_pass'], $_POST['sql_name'],  $_POST['sql_port']);
            if ($can == 1) {
               $query_one = mysqli_query($con1, "UPDATE `Wo_Config` SET `value` = '" . mysqli_real_escape_string($con1, 1). "' WHERE `name` = 'is_ok'");
            } else {
@@ -467,7 +467,7 @@ if (file_exists('../htaccess.txt')) {
                                         <div class="form-group">
                       <div class="col-md-2"></div>
                                             <div class="col-md-8">
-                                                <input type="text" class="form-control" name="sql_pass" value="<?php echo (!empty($_POST['sql_pass'])) ? $_POST['sql_pass']: '';?>" placeholder="SQL password">
+                                                <input type="password" class="form-control" name="sql_pass" value="<?php echo (!empty($_POST['sql_pass'])) ? $_POST['sql_pass']: '';?>" placeholder="SQL password">
                                                 <span class="help-block">Your SQL Password<br>
                                             </div>
                       <div class="col-md-2"></div>
@@ -476,7 +476,6 @@ if (file_exists('../htaccess.txt')) {
                       <div class="col-md-2"></div>
                                             <div class="col-md-8">
                                                 <input type="text" class="form-control" name="sql_name" value="<?php echo (!empty($_POST['sql_name'])) ? $_POST['sql_name']: '';?>" placeholder="SQL database name">
-                                                <span class="help-block">Default: wowonder<br>
                                             </div>
                       <div class="col-md-2"></div>
                                         </div>
