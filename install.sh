@@ -124,7 +124,7 @@ EOF
 	${sudo} cat > /usr/bin/wowonder << EOF
 #!/bin/bash
 sudo="\$(which sudo)"
-case "${1}" in
+case "\${1}" in
     "start")
         echo "Starting WoWonder...."
         \${sudo} service apache2 start > /dev/null 2>&1
