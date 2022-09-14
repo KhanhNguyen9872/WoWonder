@@ -989,7 +989,7 @@ INSERT INTO `Wo_Config` (`id`, `name`, `value`) VALUES
 (338, 'amazone_s3_key_2', ''),
 (339, 'amazone_s3_s_key_2', ''),
 (340, 'region_2', 'eu-west-1'),
-(341, 'node_socket_flow', '0'),
+(341, 'node_socket_flow', '1'),
 (342, 'redis', 'N'),
 (343, 'youtube_api_key', ''),
 (344, 'redis_port', '3080'),
