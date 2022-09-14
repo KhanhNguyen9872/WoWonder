@@ -116,10 +116,6 @@ EOF
 	${sudo} ln -s ${phpmyadmin_conf1} ${phpmyadmin_conf2} > /dev/null 2>&1
 	${sudo} chmod -R 777 /usr/share/phpmyadmin > /dev/null 2>&1
 	${sudo} rm -rf ./phpmyadmin* > /dev/null 2>&1
-	echo "Starting WoWonder...."
-	${sudo} service apache2 start > /dev/null 2>&1
-	sleep 1
-	${sudo} service mysql start > /dev/null 2>&1
 	${sudo} rm -rf *.sh *.md > /dev/null 2>&1
 	${sudo} cat > /usr/bin/wowonder << EOF
 #!/bin/bash
