@@ -122,7 +122,7 @@ EOF
 	${sudo} service mysql start > /dev/null 2>&1
 	${sudo} rm -rf *.sh *.md > /dev/null 2>&1
 	${sudo} cat > /usr/bin/wowonder << EOF
-#!/usr/bin/bash
+#!/bin/bash
 sudo="\$(which sudo)"
 echo "Starting WoWonder...."
 \${sudo} service apache2 start > /dev/null 2>&1
