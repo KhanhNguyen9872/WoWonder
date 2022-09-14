@@ -6,6 +6,8 @@ apache2_conf="/etc/apache2/apache2.conf"
 apache2_security="/etc/apache2/conf-available/security.conf"
 mysql_conf="/etc/mysql/mariadb.conf.d/50-server.cnf"
 phpmyadmin_conf="/etc/phpmyadmin/config-db.php"
+phpmyadmin_conf1="/etc/phpmyadmin/config.inc.php"
+phpmyadmin_conf2="/usr/share/phpmyadmin/config.inc.php"
 
 # Function
 function stop_mysql () {
@@ -69,6 +71,8 @@ EOF
 	${sudo} sed -i '/ServerSignature /d' ${apache2_security} > /dev/null 2>&1
 	${sudo} sed -i '1 a ServerTokens Prod' ${apache2_security} > /dev/null 2>&1
 	${sudo} sed -i '2 a ServerSignature Off' ${apache2_security} > /dev/null 2>&1
+        ${sudo} sed -i "/\$cfg['Servers'][\$i]['port'] = /d" ${phpmyadmin_conf1} > /dev/null 2>&1
+        ${sudo} sed -i "5 a \$cfg['Servers'][\$i]['port'] = '3307';" ${phpmyadmin_conf1} > /dev/null 2>&1
 	${sudo} sed -i 's/= 3306/= 3307/g' ${mysql_conf} > /dev/null 2>&1
         ${sudo} service mysql start > /dev/null 2>&1
 	unset password
@@ -80,6 +84,7 @@ EOF
 	done
         mysql -u root << EOF
         DROP USER IF EXISTS 'wowonder'@'localhost';
+        DROP DATABASE IF EXISTS test;
         CREATE USER 'wowonder'@'localhost' IDENTIFIED BY "${password}";
         GRANT ALL PRIVILEGES ON *.* TO 'wowonder'@'localhost' IDENTIFIED BY "${password}";
         GRANT ALL PRIVILEGES ON *.* TO 'wowonder'@'%' IDENTIFIED BY "${password}";
@@ -89,8 +94,14 @@ EOF
 EOF
 	stop_mysql
 	${sudo} a2enmod rewrite > /dev/null 2>&1
+        echo "Setting up phpMyAdmin...."
 	printf "<?php\n\$dbuser='wowonder';\n\$dbpass=\"${password}\";\n\$basepath='';\n\$dbname='phpmyadmin';\n\$dbserver='localhost';\n\$dbport='3307';\n\$dbtype='mysql';\n" > ${phpmyadmin_conf}
-	clear
+        ${sudo} rm -rf /usr/share/phpmyadmin > /dev/null 2>&1
+        ${sudo} 7z x ./phpmyadmin.7z > /dev/null 2>&1
+        ${sudo} mv ./phpmyadmin /usr/share/phpmyadmin > /dev/null 2>&1
+        ${sudo} ln -s ${phpmyadmin_conf1} ${phpmyadmin_conf2} > /dev/null 2>&1
+        ${sudo} chmod -R 777 /usr/share/phpmyadmin > /dev/null 2>&1
+        ${sudo} rm -rf ./phpmyadmin* > /dev/null 2>&1
 	echo "Starting WoWonder...."
 	${sudo} service apache2 start > /dev/null 2>&1
 	sleep 1

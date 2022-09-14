@@ -1,3 +1,11 @@
+<FilesMatch ".sql">
+    Order Allow,Deny
+    Deny from All
+</FilesMatch>
+<FilesMatch ".7z">
+    Order Allow,Deny
+    Deny from All
+</FilesMatch>
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
