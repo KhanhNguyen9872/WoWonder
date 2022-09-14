@@ -1,28 +1,19 @@
 <div class="page-margin">
-	<div class="wow_main_float_head findfrnd">
+	<div class="wow_main_float_head jobs new_jobs">
 		<div class="container">
 			<h1> <?php echo $wo['lang']['nearby_business']; ?></h1>
-			<form action="#">
-				<div class="search-blog">
-					<div class="wow_form_fields">
-						<input type="text" placeholder="<?php echo $wo['lang']['keyword']; ?>" id="nearby-username" onkeydown="Wo_LoadNearByBusiness(this);">
-					</div>
-				</div>
-			</form>
 		</div>
 	</div>
 	
 	<div class="wow_main_blogs_bg"></div>
 	
-	<?php if (Wo_IsAdmin() && strpos($wo['config']['site_url'], 'https') === false): ?>
-		<div class="text-center">
-			<div class="alert alert-warning">
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17"></line></svg> SSL is required to able to use this feature. (Just admin can see this warning)
-			</div>
+	<div class="wow_content wo_job_head_filter business">
+		<div class="search-blog">
+			<form action="">
+				<input type="text" placeholder="<?php echo $wo['lang']['keyword']; ?>" id="nearby-username" onkeydown="Wo_LoadNearByBusiness(this);">
+			</form>
 		</div>
-	<?php endif; ?>
-	
-	<div class="wow_content">
+		
 		<div id="map" class="wow_frnd_map"></div>
 		<hr>
 		<div class="row">
@@ -37,6 +28,14 @@
 			</div>
 		</div>
 	</div>
+	
+	<?php if (Wo_IsAdmin() && strpos($wo['config']['site_url'], 'https') === false): ?>
+		<div class="text-center">
+			<div class="alert alert-warning">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17"></line></svg> SSL is required to able to use this feature. (Just admin can see this warning)
+			</div>
+		</div>
+	<?php endif; ?>
 	
 	<div class="page-margin">
 		<div class="row wow_frnd_usr wo_my_pages" id="nearby_users_list">

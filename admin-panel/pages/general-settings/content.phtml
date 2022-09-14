@@ -13,6 +13,7 @@
             </ol>
         </nav>
     </div>
+    <?php $getStatus = getStatus(); if (!empty($getStatus) && !empty(checkIfThereIsError($getStatus))) {?><div class="alert alert-danger"><strong>Important!</strong> There are some errors found on your system, please review <a href="<?php echo Wo_LoadAdminLinkSettings('system_status'); ?>" data-ajax="?path=system_status">System Status</a>.</div><?php }?>
     <!-- Vertical Layout -->
     <?php if ($wo['config']['website_mode'] != 'facebook') { ?>
         <div class="alert alert-warning">Note: Some features are disabled due to the website mode you used.</div>
@@ -511,7 +512,7 @@ $(function() {
             }, 2000);
         });
     });
-    $('input[type=text], input[type=number]').on('keyup', delay(function() {
+    $('input[type=text], input[type=number]').on('input', delay(function() {
             clearTimeout(setTimeOutColor);
             var thisElement = $(this);
             var configName = thisElement.attr('name');

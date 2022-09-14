@@ -43,15 +43,15 @@ DESCRIPTION
        different files. All options apply ONLY to the next input or output
        file and are reset between files.
 
-       o   To set the video bitrate of the output file to 64 kbit/s:
+       ·   To set the video bitrate of the output file to 64 kbit/s:
 
 		   ffmpeg -i input.avi -b:v 64k -bufsize 64k output.avi
 
-       o   To force the frame rate of the output file to 24 fps:
+       ·   To force the frame rate of the output file to 24 fps:
 
 		   ffmpeg -i input.avi -r 24 output.avi
 
-       o   To force the frame rate of the input file (valid for raw formats
+       ·   To force the frame rate of the input file (valid for raw formats
 	   only) to 1 fps and the frame rate of the output file to 24 fps:
 
 		   ffmpeg -r 1 -i input.m2v -r 24 output.avi
@@ -186,223 +186,17 @@ DETAILED DESCRIPTION
        work on uncompressed data.
 
 STREAM SELECTION
-       ffmpeg provides the "-map" option for manual control of stream
-       selection in each output file. Users can skip "-map" and let ffmpeg
-       perform automatic stream selection as described below. The "-vn / -an /
-       -sn / -dn" options can be used to skip inclusion of video, audio,
-       subtitle and data streams respectively, whether manually mapped or
-       automatically selected, except for those streams which are outputs of
-       complex filtergraphs.
+       By default, ffmpeg includes only one stream of each type (video, audio,
+       subtitle) present in the input files and adds them to each output file.
+       It picks the "best" of each based upon the following criteria: for
+       video, it is the stream with the highest resolution, for audio, it is
+       the stream with the most channels, for subtitles, it is the first
+       subtitle stream. In the case where several streams of the same type
+       rate equally, the stream with the lowest index is chosen.
 
-   Description
-       The sub-sections that follow describe the various rules that are
-       involved in stream selection.  The examples that follow next show how
-       these rules are applied in practice.
-
-       While every effort is made to accurately reflect the behavior of the
-       program, FFmpeg is under continuous development and the code may have
-       changed since the time of this writing.
-
-       Automatic stream selection
-
-       In the absence of any map options for a particular output file, ffmpeg
-       inspects the output format to check which type of streams can be
-       included in it, viz. video, audio and/or subtitles. For each acceptable
-       stream type, ffmpeg will pick one stream, when available, from among
-       all the inputs.
-
-       It will select that stream based upon the following criteria:
-
-       o   for video, it is the stream with the highest resolution,
-
-       o   for audio, it is the stream with the most channels,
-
-       o   for subtitles, it is the first subtitle stream found but there's a
-	   caveat.  The output format's default subtitle encoder can be either
-	   text-based or image-based, and only a subtitle stream of the same
-	   type will be chosen.
-
-       In the case where several streams of the same type rate equally, the
-       stream with the lowest index is chosen.
-
-       Data or attachment streams are not automatically selected and can only
-       be included using "-map".
-
-       Manual stream selection
-
-       When "-map" is used, only user-mapped streams are included in that
-       output file, with one possible exception for filtergraph outputs
-       described below.
-
-       Complex filtergraphs
-
-       If there are any complex filtergraph output streams with unlabeled
-       pads, they will be added to the first output file. This will lead to a
-       fatal error if the stream type is not supported by the output format.
-       In the absence of the map option, the inclusion of these streams leads
-       to the automatic stream selection of their types being skipped. If map
-       options are present, these filtergraph streams are included in addition
-       to the mapped streams.
-
-       Complex filtergraph output streams with labeled pads must be mapped
-       once and exactly once.
-
-       Stream handling
-
-       Stream handling is independent of stream selection, with an exception
-       for subtitles described below. Stream handling is set via the "-codec"
-       option addressed to streams within a specific output file. In
-       particular, codec options are applied by ffmpeg after the stream
-       selection process and thus do not influence the latter. If no "-codec"
-       option is specified for a stream type, ffmpeg will select the default
-       encoder registered by the output file muxer.
-
-       An exception exists for subtitles. If a subtitle encoder is specified
-       for an output file, the first subtitle stream found of any type, text
-       or image, will be included. ffmpeg does not validate if the specified
-       encoder can convert the selected stream or if the converted stream is
-       acceptable within the output format. This applies generally as well:
-       when the user sets an encoder manually, the stream selection process
-       cannot check if the encoded stream can be muxed into the output file.
-       If it cannot, ffmpeg will abort and all output files will fail to be
-       processed.
-
-   Examples
-       The following examples illustrate the behavior, quirks and limitations
-       of ffmpeg's stream selection methods.
-
-       They assume the following three input files.
-
-	       input file 'A.avi'
-		     stream 0: video 640x360
-		     stream 1: audio 2 channels
-
-	       input file 'B.mp4'
-		     stream 0: video 1920x1080
-		     stream 1: audio 2 channels
-		     stream 2: subtitles (text)
-		     stream 3: audio 5.1 channels
-		     stream 4: subtitles (text)
-
-	       input file 'C.mkv'
-		     stream 0: video 1280x720
-		     stream 1: audio 2 channels
-		     stream 2: subtitles (image)
-
-       Example: automatic stream selection
-
-	       ffmpeg -i A.avi -i B.mp4 out1.mkv out2.wav -map 1:a -c:a copy out3.mov
-
-       There are three output files specified, and for the first two, no
-       "-map" options are set, so ffmpeg will select streams for these two
-       files automatically.
-
-       out1.mkv is a Matroska container file and accepts video, audio and
-       subtitle streams, so ffmpeg will try to select one of each type.For
-       video, it will select "stream 0" from B.mp4, which has the highest
-       resolution among all the input video streams.For audio, it will select
-       "stream 3" from B.mp4, since it has the greatest number of channels.For
-       subtitles, it will select "stream 2" from B.mp4, which is the first
-       subtitle stream from among A.avi and B.mp4.
-
-       out2.wav accepts only audio streams, so only "stream 3" from B.mp4 is
-       selected.
-
-       For out3.mov, since a "-map" option is set, no automatic stream
-       selection will occur. The "-map 1:a" option will select all audio
-       streams from the second input B.mp4. No other streams will be included
-       in this output file.
-
-       For the first two outputs, all included streams will be transcoded. The
-       encoders chosen will be the default ones registered by each output
-       format, which may not match the codec of the selected input streams.
-
-       For the third output, codec option for audio streams has been set to
-       "copy", so no decoding-filtering-encoding operations will occur, or can
-       occur.  Packets of selected streams shall be conveyed from the input
-       file and muxed within the output file.
-
-       Example: automatic subtitles selection
-
-	       ffmpeg -i C.mkv out1.mkv -c:s dvdsub -an out2.mkv
-
-       Although out1.mkv is a Matroska container file which accepts subtitle
-       streams, only a video and audio stream shall be selected. The subtitle
-       stream of C.mkv is image-based and the default subtitle encoder of the
-       Matroska muxer is text-based, so a transcode operation for the
-       subtitles is expected to fail and hence the stream isn't selected.
-       However, in out2.mkv, a subtitle encoder is specified in the command
-       and so, the subtitle stream is selected, in addition to the video
-       stream. The presence of "-an" disables audio stream selection for
-       out2.mkv.
-
-       Example: unlabeled filtergraph outputs
-
-	       ffmpeg -i A.avi -i C.mkv -i B.mp4 -filter_complex "overlay" out1.mp4 out2.srt
-
-       A filtergraph is setup here using the "-filter_complex" option and
-       consists of a single video filter. The "overlay" filter requires
-       exactly two video inputs, but none are specified, so the first two
-       available video streams are used, those of A.avi and C.mkv. The output
-       pad of the filter has no label and so is sent to the first output file
-       out1.mp4. Due to this, automatic selection of the video stream is
-       skipped, which would have selected the stream in B.mp4. The audio
-       stream with most channels viz. "stream 3" in B.mp4, is chosen
-       automatically. No subtitle stream is chosen however, since the MP4
-       format has no default subtitle encoder registered, and the user hasn't
-       specified a subtitle encoder.
-
-       The 2nd output file, out2.srt, only accepts text-based subtitle
-       streams. So, even though the first subtitle stream available belongs to
-       C.mkv, it is image-based and hence skipped.  The selected stream,
-       "stream 2" in B.mp4, is the first text-based subtitle stream.
-
-       Example: labeled filtergraph outputs
-
-	       ffmpeg -i A.avi -i B.mp4 -i C.mkv -filter_complex "[1:v]hue=s=0[outv];overlay;aresample" \
-		      -map '[outv]' -an        out1.mp4 \
-					       out2.mkv \
-		      -map '[outv]' -map 1:a:0 out3.mkv
-
-       The above command will fail, as the output pad labelled "[outv]" has
-       been mapped twice.  None of the output files shall be processed.
-
-	       ffmpeg -i A.avi -i B.mp4 -i C.mkv -filter_complex "[1:v]hue=s=0[outv];overlay;aresample" \
-		      -an	 out1.mp4 \
-				 out2.mkv \
-		      -map 1:a:0 out3.mkv
-
-       This command above will also fail as the hue filter output has a label,
-       "[outv]", and hasn't been mapped anywhere.
-
-       The command should be modified as follows,
-
-	       ffmpeg -i A.avi -i B.mp4 -i C.mkv -filter_complex "[1:v]hue=s=0,split=2[outv1][outv2];overlay;aresample" \
-		       -map '[outv1]' -an	 out1.mp4 \
-						 out2.mkv \
-		       -map '[outv2]' -map 1:a:0 out3.mkv
-
-       The video stream from B.mp4 is sent to the hue filter, whose output is
-       cloned once using the split filter, and both outputs labelled. Then a
-       copy each is mapped to the first and third output files.
-
-       The overlay filter, requiring two video inputs, uses the first two
-       unused video streams. Those are the streams from A.avi and C.mkv. The
-       overlay output isn't labelled, so it is sent to the first output file
-       out1.mp4, regardless of the presence of the "-map" option.
-
-       The aresample filter is sent the first unused audio stream, that of
-       A.avi. Since this filter output is also unlabelled, it too is mapped to
-       the first output file. The presence of "-an" only suppresses automatic
-       or manual stream selection of audio streams, not outputs sent from
-       filtergraphs. Both these mapped streams shall be ordered before the
-       mapped stream in out1.mp4.
-
-       The video, audio and subtitle streams mapped to "out2.mkv" are entirely
-       determined by automatic stream selection.
-
-       out3.mkv consists of the cloned video output from the hue filter and
-       the first audio stream from B.mp4.
+       You can disable some of those defaults by using the "-vn/-an/-sn/-dn"
+       options. For full manual control, use the "-map" option, which disables
+       the defaults just described.
 
 OPTIONS
        All the numerical options, if not specified otherwise, accept a string
@@ -441,27 +235,20 @@ OPTIONS
 
        stream_index
 	   Matches the stream with this index. E.g. "-threads:1 4" would set
-	   the thread count for the second stream to 4. If stream_index is
-	   used as an additional stream specifier (see below), then it selects
-	   stream number stream_index from the matching streams. Stream
-	   numbering is based on the order of the streams as detected by
-	   libavformat except when a program ID is also specified. In this
-	   case it is based on the ordering of the streams in the program.
+	   the thread count for the second stream to 4.
 
-       stream_type[:additional_stream_specifier]
+       stream_type[:stream_index]
 	   stream_type is one of following: 'v' or 'V' for video, 'a' for
 	   audio, 's' for subtitle, 'd' for data, and 't' for attachments. 'v'
 	   matches all video streams, 'V' only matches video streams which are
-	   not attached pictures, video thumbnails or cover arts. If
-	   additional_stream_specifier is used, then it matches streams which
-	   both have this type and match the additional_stream_specifier.
-	   Otherwise, it matches all streams of the specified type.
+	   not attached pictures, video thumbnails or cover arts.  If
+	   stream_index is given, then it matches stream number stream_index
+	   of this type. Otherwise, it matches all streams of this type.
 
-       p:program_id[:additional_stream_specifier]
-	   Matches streams which are in the program with the id program_id. If
-	   additional_stream_specifier is used, then it matches streams which
-	   both are part of the program and match the
-	   additional_stream_specifier.
+       p:program_id[:stream_index]
+	   If stream_index is given, then it matches the stream with number
+	   stream_index in the program with the id program_id. Otherwise, it
+	   matches all streams in the program.
 
        #stream_id or i:stream_id
 	   Match the stream by stream id (e.g. PID in MPEG-TS container).
@@ -519,24 +306,11 @@ OPTIONS
 	       demuxers.
 
 	   filter=filter_name
-	       Print detailed information about the filter named filter_name.
+	       Print detailed information about the filter name filter_name.
 	       Use the -filters option to get a list of all filters.
-
-	   bsf=bitstream_filter_name
-	       Print detailed information about the bitstream filter named
-	       bitstream_filter_name.  Use the -bsfs option to get a list of
-	       all bitstream filters.
-
-	   protocol=protocol_name
-	       Print detailed information about the protocol named
-	       protocol_name.  Use the -protocols option to get a list of all
-	       protocols.
 
        -version
 	   Show version.
-
-       -buildconf
-	   Show the build configuration, one option per line.
 
        -formats
 	   Show available formats (including devices).
@@ -581,9 +355,6 @@ OPTIONS
        -layouts
 	   Show channel names and standard channel layouts.
 
-       -dispositions
-	   Show stream dispositions.
-
        -colors
 	   Show recognized color names.
 
@@ -601,28 +372,15 @@ OPTIONS
 
 		   ffmpeg -sinks pulse,server=192.168.0.4
 
-       -loglevel [flags+]loglevel | -v [flags+]loglevel
-	   Set logging level and flags used by the library.
-
-	   The optional flags prefix can consist of the following values:
-
-	   repeat
-	       Indicates that repeated log output should not be compressed to
-	       the first line and the "Last message repeated n times" line
-	       will be omitted.
-
-	   level
-	       Indicates that log output should add a "[level]" prefix to each
-	       message line. This can be used as an alternative to log
-	       coloring, e.g. when dumping the log to file.
-
-	   Flags can also be used alone by adding a '+'/'-' prefix to
-	   set/reset a single flag without affecting other flags or changing
-	   loglevel. When setting both flags and loglevel, a '+' separator is
-	   expected between the last flags value and before loglevel.
-
-	   loglevel is a string or a number containing one of the following
-	   values:
+       -loglevel [repeat+]loglevel | -v [repeat+]loglevel
+	   Set the logging level used by the library.  Adding "repeat+"
+	   indicates that repeated log output should not be compressed to the
+	   first line and the "Last message repeated n times" line will be
+	   omitted. "repeat" can also be used alone.  If "repeat" is used
+	   alone, and with no prior loglevel set, the default loglevel will be
+	   used. If multiple loglevel parameters are given, using 'repeat'
+	   will not change the loglevel.  loglevel is a string or a number
+	   containing one of the following values:
 
 	   quiet, -8
 	       Show nothing at all; be silent.
@@ -655,26 +413,19 @@ OPTIONS
 
 	   trace, 56
 
-	   For example to enable repeated log output, add the "level" prefix,
-	   and set loglevel to "verbose":
-
-		   ffmpeg -loglevel repeat+level+verbose -i input output
-
-	   Another example that enables repeated log output without affecting
-	   current state of "level" prefix flag or loglevel:
-
-		   ffmpeg [...] -loglevel +repeat
-
 	   By default the program logs to stderr. If coloring is supported by
 	   the terminal, colors are used to mark errors and warnings. Log
 	   coloring can be disabled setting the environment variable
-	   AV_LOG_FORCE_NOCOLOR, or can be forced setting the environment
-	   variable AV_LOG_FORCE_COLOR.
+	   AV_LOG_FORCE_NOCOLOR or NO_COLOR, or can be forced setting the
+	   environment variable AV_LOG_FORCE_COLOR.  The use of the
+	   environment variable NO_COLOR is deprecated and will be dropped in
+	   a future FFmpeg version.
 
        -report
-	   Dump full command line and log output to a file named
+	   Dump full command line and console output to a file named
 	   "program-YYYYMMDD-HHMMSS.log" in the current directory.  This file
-	   can be useful for bug reports.  It also implies "-loglevel debug".
+	   can be useful for bug reports.  It also implies "-loglevel
+	   verbose".
 
 	   Setting the environment variable FFREPORT to any value has the same
 	   effect. If the value is a ':'-separated key=value sequence, these
@@ -763,17 +514,51 @@ OPTIONS
 	       athlon
 	       athlonxp
 	       k8
-       -cpucount count (global)
-	   Override detection of CPU count. This option is intended for
-	   testing. Do not use it unless you know what you're doing.
+       -opencl_bench
+	   This option is used to benchmark all available OpenCL devices and
+	   print the results. This option is only available when FFmpeg has
+	   been compiled with "--enable-opencl".
 
-		   ffmpeg -cpucount 2
+	   When FFmpeg is configured with "--enable-opencl", the options for
+	   the global OpenCL context are set via -opencl_options. See the
+	   "OpenCL Options" section in the ffmpeg-utils manual for the
+	   complete list of supported options. Amongst others, these options
+	   include the ability to select a specific platform and device to run
+	   the OpenCL code on. By default, FFmpeg will run on the first device
+	   of the first platform. While the options for the global OpenCL
+	   context provide flexibility to the user in selecting the OpenCL
+	   device of their choice, most users would probably want to select
+	   the fastest OpenCL device for their system.
 
-       -max_alloc bytes
-	   Set the maximum size limit for allocating a block on the heap by
-	   ffmpeg's family of malloc functions. Exercise extreme caution when
-	   using this option. Don't use if you do not understand the full
-	   consequence of doing so.  Default is INT_MAX.
+	   This option assists the selection of the most efficient
+	   configuration by identifying the appropriate device for the user's
+	   system. The built-in benchmark is run on all the OpenCL devices and
+	   the performance is measured for each device. The devices in the
+	   results list are sorted based on their performance with the fastest
+	   device listed first. The user can subsequently invoke ffmpeg using
+	   the device deemed most appropriate via -opencl_options to obtain
+	   the best performance for the OpenCL accelerated code.
+
+	   Typical usage to use the fastest OpenCL device involve the
+	   following steps.
+
+	   Run the command:
+
+		   ffmpeg -opencl_bench
+
+	   Note down the platform ID (pidx) and device ID (didx) of the first
+	   i.e. fastest device in the list.  Select the platform and device
+	   using the command:
+
+		   ffmpeg -opencl_options platform_idx=<pidx>:device_idx=<didx> ...
+
+       -opencl_options options (global)
+	   Set OpenCL environment options. This option is only available when
+	   FFmpeg has been compiled with "--enable-opencl".
+
+	   options must be a list of key=value option pairs separated by ':'.
+	   See the ``OpenCL Options'' section in the ffmpeg-utils manual for
+	   the list of supported options.
 
    AVOptions
        These options are provided directly by the libavformat, libavdevice and
@@ -796,15 +581,7 @@ OPTIONS
 	       ffmpeg -i input.flac -id3v2_version 3 out.mp3
 
        All codec AVOptions are per-stream, and thus a stream specifier should
-       be attached to them:
-
-	       ffmpeg -i multichannel.mxf -map 0:v:0 -map 0:a:0 -map 0:a:0 -c:a:0 ac3 -b:a:0 640k -ac:a:1 2 -c:a:1 aac -b:2 128k out.mp4
-
-       In the above example, a multichannel audio stream is mapped twice for
-       output.	The first instance is encoded with codec ac3 and bitrate 640k.
-       The second instance is downmixed to 2 channels and encoded with codec
-       aac. A bitrate of 128k is specified for it using absolute index of the
-       output stream.
+       be attached to them.
 
        Note: the -nooption syntax cannot be used for boolean AVOptions, use
        -option 0/-option 1.
@@ -832,11 +609,6 @@ OPTIONS
        -stream_loop number (input)
 	   Set number of times input stream shall be looped. Loop 0 means no
 	   loop, loop -1 means infinite loop.
-
-       -recast_media (global)
-	   Allow forcing a decoder of a different media type than the one
-	   detected or designated by the demuxer. Useful for decoding media
-	   data muxed as data streams.
 
        -c[:stream_specifier] codec (input/output,per-stream)
        -codec[:stream_specifier] codec (input/output,per-stream)
@@ -872,10 +644,10 @@ OPTIONS
 
 	   -to and -t are mutually exclusive and -t has priority.
 
-       -to position (input/output)
-	   Stop writing the output or reading the input at position.  position
-	   must be a time duration specification, see the Time duration
-	   section in the ffmpeg-utils(1) manual.
+       -to position (output)
+	   Stop writing the output at position.  position must be a time
+	   duration specification, see the Time duration section in the
+	   ffmpeg-utils(1) manual.
 
 	   -to and -t are mutually exclusive and -t has priority.
 
@@ -899,26 +671,9 @@ OPTIONS
 	   position must be a time duration specification, see the Time
 	   duration section in the ffmpeg-utils(1) manual.
 
-       -sseof position (input)
+       -sseof position (input/output)
 	   Like the "-ss" option but relative to the "end of file". That is
 	   negative values are earlier in the file, 0 is at EOF.
-
-       -isync input_index (input)
-	   Assign an input as a sync source.
-
-	   This will take the difference between the start times of the target
-	   and reference inputs and offset the timestamps of the target file
-	   by that difference. The source timestamps of the two inputs should
-	   derive from the same clock source for expected results. If "copyts"
-	   is set then "start_at_zero" must also be set. If either of the
-	   inputs has no starting timestamp then no sync adjustment is made.
-
-	   Acceptable values are those that refer to a valid ffmpeg input
-	   index. If the sync reference is the target index itself or -1, then
-	   no adjustment is made to target timestamps. A sync reference may
-	   not itself be synced to any other input.
-
-	   Default value is -1.
 
        -itsoffset offset (input)
 	   Set the input time offset.
@@ -929,9 +684,6 @@ OPTIONS
 	   The offset is added to the timestamps of the input files.
 	   Specifying a positive offset means that the corresponding streams
 	   are delayed by the time duration specified in offset.
-
-       -itsscale scale (input,per-stream)
-	   Rescale input timestamps. scale should be a floating point number.
 
        -timestamp date (output)
 	   Set the recording timestamp in the container.
@@ -960,40 +712,33 @@ OPTIONS
        -disposition[:stream_specifier] value (output,per-stream)
 	   Sets the disposition for a stream.
 
-	   By default, the disposition is copied from the input stream, unless
-	   the output stream this option applies to is fed by a complex
-	   filtergraph - in that case the disposition is unset by default.
+	   This option overrides the disposition copied from the input stream.
+	   It is also possible to delete the disposition by setting it to 0.
 
-	   value is a sequence of items separated by '+' or '-'. The first
-	   item may also be prefixed with '+' or '-', in which case this
-	   option modifies the default value. Otherwise (the first item is not
-	   prefixed) this options overrides the default value. A '+' prefix
-	   adds the given disposition, '-' removes it. It is also possible to
-	   clear the disposition by setting it to 0.
+	   The following dispositions are recognized:
 
-	   If no "-disposition" options were specified for an output file,
-	   ffmpeg will automatically set the 'default' disposition on the
-	   first stream of each type, when there are multiple streams of this
-	   type in the output file and no stream of that type is already
-	   marked as default.
-
-	   The "-dispositions" option lists the known dispositions.
+	   default
+	   dub
+	   original
+	   comment
+	   lyrics
+	   karaoke
+	   forced
+	   hearing_impaired
+	   visual_impaired
+	   clean_effects
+	   captions
+	   descriptions
+	   metadata
 
 	   For example, to make the second audio stream the default stream:
 
-		   ffmpeg -i in.mkv -c copy -disposition:a:1 default out.mkv
+		   ffmpeg -i in.mkv -disposition:a:1 default out.mkv
 
 	   To make the second subtitle stream the default stream and remove
 	   the default disposition from the first subtitle stream:
 
-		   ffmpeg -i in.mkv -c copy -disposition:s:0 0 -disposition:s:1 default out.mkv
-
-	   To add an embedded cover/thumbnail:
-
-		   ffmpeg -i in.mp4 -i IMAGE -map 0 -map 1 -c copy -c:v:1 png -disposition:v:1 attached_pic out.mp4
-
-	   Not all muxers support embedded thumbnails, and those who do, only
-	   support a few formats, like JPEG or PNG.
+		   ffmpeg -i INPUT -disposition:s:0 0 -disposition:s:1 default OUTPUT
 
        -program
        [title=title:][program_num=program_num:]st=stream[:st=stream...]
@@ -1013,110 +758,6 @@ OPTIONS
 	   they do not conflict with the standard, as in:
 
 		   ffmpeg -i myfile.avi -target vcd -bf 2 /tmp/vcd.mpg
-
-	   The parameters set for each target are as follows.
-
-	   VCD
-
-		   <pal>:
-		   -f vcd -muxrate 1411200 -muxpreload 0.44 -packetsize 2324
-		   -s 352x288 -r 25
-		   -codec:v mpeg1video -g 15 -b:v 1150k -maxrate:v 1150k -minrate:v 1150k -bufsize:v 327680
-		   -ar 44100 -ac 2
-		   -codec:a mp2 -b:a 224k
-
-		   <ntsc>:
-		   -f vcd -muxrate 1411200 -muxpreload 0.44 -packetsize 2324
-		   -s 352x240 -r 30000/1001
-		   -codec:v mpeg1video -g 18 -b:v 1150k -maxrate:v 1150k -minrate:v 1150k -bufsize:v 327680
-		   -ar 44100 -ac 2
-		   -codec:a mp2 -b:a 224k
-
-		   <film>:
-		   -f vcd -muxrate 1411200 -muxpreload 0.44 -packetsize 2324
-		   -s 352x240 -r 24000/1001
-		   -codec:v mpeg1video -g 18 -b:v 1150k -maxrate:v 1150k -minrate:v 1150k -bufsize:v 327680
-		   -ar 44100 -ac 2
-		   -codec:a mp2 -b:a 224k
-
-	   SVCD
-
-		   <pal>:
-		   -f svcd -packetsize 2324
-		   -s 480x576 -pix_fmt yuv420p -r 25
-		   -codec:v mpeg2video -g 15 -b:v 2040k -maxrate:v 2516k -minrate:v 0 -bufsize:v 1835008 -scan_offset 1
-		   -ar 44100
-		   -codec:a mp2 -b:a 224k
-
-		   <ntsc>:
-		   -f svcd -packetsize 2324
-		   -s 480x480 -pix_fmt yuv420p -r 30000/1001
-		   -codec:v mpeg2video -g 18 -b:v 2040k -maxrate:v 2516k -minrate:v 0 -bufsize:v 1835008 -scan_offset 1
-		   -ar 44100
-		   -codec:a mp2 -b:a 224k
-
-		   <film>:
-		   -f svcd -packetsize 2324
-		   -s 480x480 -pix_fmt yuv420p -r 24000/1001
-		   -codec:v mpeg2video -g 18 -b:v 2040k -maxrate:v 2516k -minrate:v 0 -bufsize:v 1835008 -scan_offset 1
-		   -ar 44100
-		   -codec:a mp2 -b:a 224k
-
-	   DVD
-
-		   <pal>:
-		   -f dvd -muxrate 10080k -packetsize 2048
-		   -s 720x576 -pix_fmt yuv420p -r 25
-		   -codec:v mpeg2video -g 15 -b:v 6000k -maxrate:v 9000k -minrate:v 0 -bufsize:v 1835008
-		   -ar 48000
-		   -codec:a ac3 -b:a 448k
-
-		   <ntsc>:
-		   -f dvd -muxrate 10080k -packetsize 2048
-		   -s 720x480 -pix_fmt yuv420p -r 30000/1001
-		   -codec:v mpeg2video -g 18 -b:v 6000k -maxrate:v 9000k -minrate:v 0 -bufsize:v 1835008
-		   -ar 48000
-		   -codec:a ac3 -b:a 448k
-
-		   <film>:
-		   -f dvd -muxrate 10080k -packetsize 2048
-		   -s 720x480 -pix_fmt yuv420p -r 24000/1001
-		   -codec:v mpeg2video -g 18 -b:v 6000k -maxrate:v 9000k -minrate:v 0 -bufsize:v 1835008
-		   -ar 48000
-		   -codec:a ac3 -b:a 448k
-
-	   DV
-
-		   <pal>:
-		   -f dv
-		   -s 720x576 -pix_fmt yuv420p -r 25
-		   -ar 48000 -ac 2
-
-		   <ntsc>:
-		   -f dv
-		   -s 720x480 -pix_fmt yuv411p -r 30000/1001
-		   -ar 48000 -ac 2
-
-		   <film>:
-		   -f dv
-		   -s 720x480 -pix_fmt yuv411p -r 24000/1001
-		   -ar 48000 -ac 2
-
-	   The "dv50" target is identical to the "dv" target except that the
-	   pixel format set is "yuv422p" for all three standards.
-
-	   Any user-set value for a parameter above will override the target
-	   preset value. In that case, the output may not comply with the
-	   target standard.
-
-       -dn (input/output)
-	   As an input option, blocks all data streams of a file from being
-	   filtered or being automatically selected or mapped for any output.
-	   See "-discard" option to disable streams individually.
-
-	   As an output option, disables data recording i.e. automatic
-	   selection or mapping of any data stream. For full manual control
-	   see the "-map" option.
 
        -dframes number (output)
 	   Set the number of data frames to output. This is an obsolete alias
@@ -1153,18 +794,6 @@ OPTIONS
 	   argument is the name of the file from which a filtergraph
 	   description is to be read.
 
-       -reinit_filter[:stream_specifier] integer (input,per-stream)
-	   This boolean option determines if the filtergraph(s) to which this
-	   stream is fed gets reinitialized when input frame parameters change
-	   mid-stream. This option is enabled by default as most video and all
-	   audio filters cannot handle deviation in input frame properties.
-	   Upon reinitialization, existing filter state is lost, like e.g. the
-	   frame count "n" reference available in some filters. Any frames
-	   buffered at time of reinitialization are lost.  The properties
-	   where a change triggers reinitialization are, for video, frame
-	   resolution or pixel format; for audio, sample format, sample rate,
-	   channel count or channel layout.
-
        -filter_threads nb_threads (global)
 	   Defines how many threads are used to process a filter pipeline.
 	   Each pipeline will produce a thread pool with this many threads
@@ -1178,19 +807,13 @@ OPTIONS
 	   Print encoding progress/statistics. It is on by default, to
 	   explicitly disable it you need to specify "-nostats".
 
-       -stats_period time (global)
-	   Set period at which encoding progress/statistics are updated.
-	   Default is 0.5 seconds.
-
        -progress url (global)
 	   Send program-friendly progress information to url.
 
-	   Progress information is written periodically and at the end of the
-	   encoding process. It is made of "key=value" lines. key consists of
-	   only alphanumeric characters. The last key of a sequence of
-	   progress information is always "progress".
-
-	   The update period is set using "-stats_period".
+	   Progress information is written approximately every second and at
+	   the end of the encoding process. It is made of "key=value" lines.
+	   key consists of only alphanumeric characters. The last key of a
+	   sequence of progress information is always "progress".
 
        -stdin
 	   Enable interaction on standard input. On by default unless standard
@@ -1246,6 +869,9 @@ OPTIONS
 	   so this option can actually be used to extract extradata from any
 	   stream, not just attachments.
 
+       -noautorotate
+	   Disable automatically rotating video based on file metadata.
+
    Video Options
        -vframes number (output)
 	   Set the number of video frames to output. This is an obsolete alias
@@ -1263,14 +889,6 @@ OPTIONS
 
 	   As an output option, duplicate or drop input frames to achieve
 	   constant output frame rate fps.
-
-       -fpsmax[:stream_specifier] fps (output,per-stream)
-	   Set maximum frame rate (Hz value, fraction or abbreviation).
-
-	   Clamps output frame rate when output framerate is auto-set and is
-	   higher than this value.  Useful in batch processing or when input
-	   framerate is wrongly detected as very high.	It cannot be set
-	   together with "-r". It is ignored during streamcopy.
 
        -s[:stream_specifier] size (input/output,per-stream)
 	   Set frame size.
@@ -1298,14 +916,8 @@ OPTIONS
 	   stored at container level, but not the aspect ratio stored in
 	   encoded frames, if it exists.
 
-       -vn (input/output)
-	   As an input option, blocks all video streams of a file from being
-	   filtered or being automatically selected or mapped for any output.
-	   See "-discard" option to disable streams individually.
-
-	   As an output option, disables video recording i.e. automatic
-	   selection or mapping of any video stream. For full manual control
-	   see the "-map" option.
+       -vn (output)
+	   Disable video recording.
 
        -vcodec codec (output)
 	   Set the video codec. This is an alias for "-codec:v".
@@ -1332,19 +944,6 @@ OPTIONS
 
 	   This is an alias for "-filter:v", see the -filter option.
 
-       -autorotate
-	   Automatically rotate the video according to file metadata. Enabled
-	   by default, use -noautorotate to disable it.
-
-       -autoscale
-	   Automatically scale the video according to the resolution of first
-	   frame.  Enabled by default, use -noautoscale to disable it. When
-	   autoscale is disabled, all output frames of filter graph might not
-	   be in the same resolution and may be inadequate for some
-	   encoder/muxer. Therefore, it is not recommended to disable it
-	   unless you really know what you are doing.  Disable autoscale at
-	   your own risk.
-
    Advanced Video options
        -pix_fmt[:stream_specifier] format (input/output,per-stream)
 	   Set pixel format. Use "-pix_fmts" to show all the supported pixel
@@ -1359,6 +958,9 @@ OPTIONS
        -sws_flags flags (input/output)
 	   Set SwScaler flags.
 
+       -vdt n
+	   Discard threshold.
+
        -rc_override[:stream_specifier] override (output,per-stream)
 	   Rate control override for specific intervals, formatted as
 	   "int,int,int" list separated with slashes. Two first values are the
@@ -1369,8 +971,8 @@ OPTIONS
 	   Force interlacing support in encoder (MPEG-2 and MPEG-4 only).  Use
 	   this option if your input file is interlaced and you want to keep
 	   the interlaced format for minimum losses.  The alternative is to
-	   deinterlace the input stream by use of a filter such as "yadif" or
-	   "bwdif", but deinterlacing introduces losses.
+	   deinterlace the input stream with -deinterlace, but deinterlacing
+	   introduces losses.
 
        -psnr
 	   Calculate PSNR of compressed frames.
@@ -1411,75 +1013,49 @@ OPTIONS
 
        -force_key_frames[:stream_specifier] time[,time...] (output,per-stream)
        -force_key_frames[:stream_specifier] expr:expr (output,per-stream)
-       -force_key_frames[:stream_specifier] source (output,per-stream)
-       -force_key_frames[:stream_specifier] source_no_drop (output,per-stream)
-	   force_key_frames can take arguments of the following form:
+	   Force key frames at the specified timestamps, more precisely at the
+	   first frames after each specified time.
 
-	   time[,time...]
-	       If the argument consists of timestamps, ffmpeg will round the
-	       specified times to the nearest output timestamp as per the
-	       encoder time base and force a keyframe at the first frame
-	       having timestamp equal or greater than the computed timestamp.
-	       Note that if the encoder time base is too coarse, then the
-	       keyframes may be forced on frames with timestamps lower than
-	       the specified time.  The default encoder time base is the
-	       inverse of the output framerate but may be set otherwise via
-	       "-enc_time_base".
+	   If the argument is prefixed with "expr:", the string expr is
+	   interpreted like an expression and is evaluated for each frame. A
+	   key frame is forced in case the evaluation is non-zero.
 
-	       If one of the times is ""chapters"[delta]", it is expanded into
-	       the time of the beginning of all chapters in the file, shifted
-	       by delta, expressed as a time in seconds.  This option can be
-	       useful to ensure that a seek point is present at a chapter mark
-	       or any other designated place in the output file.
+	   If one of the times is ""chapters"[delta]", it is expanded into the
+	   time of the beginning of all chapters in the file, shifted by
+	   delta, expressed as a time in seconds.  This option can be useful
+	   to ensure that a seek point is present at a chapter mark or any
+	   other designated place in the output file.
 
-	       For example, to insert a key frame at 5 minutes, plus key
-	       frames 0.1 second before the beginning of every chapter:
+	   For example, to insert a key frame at 5 minutes, plus key frames
+	   0.1 second before the beginning of every chapter:
 
-		       -force_key_frames 0:05:00,chapters-0.1
+		   -force_key_frames 0:05:00,chapters-0.1
 
-	   expr:expr
-	       If the argument is prefixed with "expr:", the string expr is
-	       interpreted like an expression and is evaluated for each frame.
-	       A key frame is forced in case the evaluation is non-zero.
+	   The expression in expr can contain the following constants:
 
-	       The expression in expr can contain the following constants:
+	   n   the number of current processed frame, starting from 0
 
-	       n   the number of current processed frame, starting from 0
+	   n_forced
+	       the number of forced frames
 
-	       n_forced
-		   the number of forced frames
+	   prev_forced_n
+	       the number of the previous forced frame, it is "NAN" when no
+	       keyframe was forced yet
 
-	       prev_forced_n
-		   the number of the previous forced frame, it is "NAN" when
-		   no keyframe was forced yet
+	   prev_forced_t
+	       the time of the previous forced frame, it is "NAN" when no
+	       keyframe was forced yet
 
-	       prev_forced_t
-		   the time of the previous forced frame, it is "NAN" when no
-		   keyframe was forced yet
+	   t   the time of the current processed frame
 
-	       t   the time of the current processed frame
+	   For example to force a key frame every 5 seconds, you can specify:
 
-	       For example to force a key frame every 5 seconds, you can
-	       specify:
+		   -force_key_frames expr:gte(t,n_forced*5)
 
-		       -force_key_frames expr:gte(t,n_forced*5)
+	   To force a key frame 5 seconds after the time of the last forced
+	   one, starting from second 13:
 
-	       To force a key frame 5 seconds after the time of the last
-	       forced one, starting from second 13:
-
-		       -force_key_frames expr:if(isnan(prev_forced_t),gte(t,13),gte(t,prev_forced_t+5))
-
-	   source
-	       If the argument is "source", ffmpeg will force a key frame if
-	       the current frame being encoded is marked as a key frame in its
-	       source.
-
-	   source_no_drop
-	       If the argument is "source_no_drop", ffmpeg will force a key
-	       frame if the current frame being encoded is marked as a key
-	       frame in its source.  In cases where this particular source
-	       frame has to be dropped, enforce the next available frame to
-	       become a key frame instead.
+		   -force_key_frames expr:if(isnan(prev_forced_t),gte(t,13),gte(t,prev_forced_t+5))
 
 	   Note that forcing too many keyframes is very harmful for the
 	   lookahead algorithms of certain encoders: using fixed-GOP options
@@ -1500,25 +1076,8 @@ OPTIONS
 	   cuda
 	       device is the number of the CUDA device.
 
-	       The following options are recognized:
-
-	       primary_ctx
-		   If set to 1, uses the primary device context instead of
-		   creating a new one.
-
-	       Examples:
-
-	       -init_hw_device cuda:1
-		   Choose the second device on the system.
-
-	       -init_hw_device cuda:0,primary_ctx=1
-		   Choose the first device and use the primary device context.
-
 	   dxva2
 	       device is the number of the Direct3D 9 display adapter.
-
-	   d3d11va
-	       device is the number of the Direct3D 11 display adapter.
 
 	   vaapi
 	       device is either an X11 display name or a DRM render node.  If
@@ -1543,98 +1102,8 @@ OPTIONS
 
 	       If not specified, auto_any is used.  (Note that it may be
 	       easier to achieve the desired result for QSV by creating the
-	       platform-appropriate subdevice (dxva2 or d3d11va or vaapi) and
-	       then deriving a QSV device from that.)
-
-	       Alternatively, child_device_type helps to choose platform-
-	       appropriate subdevice type.  On Windows d3d11va is used as
-	       default subdevice type.
-
-	       Examples:
-
-	       -init_hw_device qsv:hw,child_device_type=d3d11va
-		   Choose the GPU subdevice with type d3d11va and create QSV
-		   device with MFX_IMPL_HARDWARE.
-
-	       -init_hw_device qsv:hw,child_device_type=dxva2
-		   Choose the GPU subdevice with type dxva2 and create QSV
-		   device with MFX_IMPL_HARDWARE.
-
-	   opencl
-	       device selects the platform and device as
-	       platform_index.device_index.
-
-	       The set of devices can also be filtered using the key-value
-	       pairs to find only devices matching particular platform or
-	       device strings.
-
-	       The strings usable as filters are:
-
-	       platform_profile
-	       platform_version
-	       platform_name
-	       platform_vendor
-	       platform_extensions
-	       device_name
-	       device_vendor
-	       driver_version
-	       device_version
-	       device_profile
-	       device_extensions
-	       device_type
-
-	       The indices and filters must together uniquely select a device.
-
-	       Examples:
-
-	       -init_hw_device opencl:0.1
-		   Choose the second device on the first platform.
-
-	       -init_hw_device opencl:,device_name=Foo9000
-		   Choose the device with a name containing the string
-		   Foo9000.
-
-	       -init_hw_device
-	       opencl:1,device_type=gpu,device_extensions=cl_khr_fp16
-		   Choose the GPU device on the second platform supporting the
-		   cl_khr_fp16 extension.
-
-	   vulkan
-	       If device is an integer, it selects the device by its index in
-	       a system-dependent list of devices.  If device is any other
-	       string, it selects the first device with a name containing that
-	       string as a substring.
-
-	       The following options are recognized:
-
-	       debug
-		   If set to 1, enables the validation layer, if installed.
-
-	       linear_images
-		   If set to 1, images allocated by the hwcontext will be
-		   linear and locally mappable.
-
-	       instance_extensions
-		   A plus separated list of additional instance extensions to
-		   enable.
-
-	       device_extensions
-		   A plus separated list of additional device extensions to
-		   enable.
-
-	       Examples:
-
-	       -init_hw_device vulkan:1
-		   Choose the second device on the system.
-
-	       -init_hw_device vulkan:RADV
-		   Choose the first device with a name containing the string
-		   RADV.
-
-	       -init_hw_device
-	       vulkan:0,instance_extensions=VK_KHR_wayland_surface+VK_KHR_xcb_surface
-		   Choose the first device and enable the Wayland and XCB
-		   instance extensions.
+	       platform-appropriate subdevice (dxva2 or vaapi) and then
+	       deriving a QSV device from that.)
 
        -init_hw_device type[=name]@source
 	   Initialise a new hardware device of type type called name, deriving
@@ -1666,15 +1135,14 @@ OPTIONS
 	   auto
 	       Automatically select the hardware acceleration method.
 
+	   vda Use Apple VDA hardware acceleration.
+
 	   vdpau
 	       Use VDPAU (Video Decode and Presentation API for Unix) hardware
 	       acceleration.
 
 	   dxva2
 	       Use DXVA2 (DirectX Video Acceleration) hardware acceleration.
-
-	   d3d11va
-	       Use D3D11VA (DirectX Video Acceleration) hardware acceleration.
 
 	   vaapi
 	       Use VAAPI (Video Acceleration API) hardware acceleration.
@@ -1708,9 +1176,8 @@ OPTIONS
 	   -init_hw_device type:hwaccel_device were called immediately before.
 
        -hwaccels
-	   List all hardware acceleration components enabled in this build of
-	   ffmpeg.  Actual runtime availability depends on the hardware and
-	   its suitable driver being installed.
+	   List all hardware acceleration methods supported in this build of
+	   ffmpeg.
 
    Audio Options
        -aframes number (output)
@@ -1734,14 +1201,8 @@ OPTIONS
 	   this option only makes sense for audio grabbing devices and raw
 	   demuxers and is mapped to the corresponding demuxer options.
 
-       -an (input/output)
-	   As an input option, blocks all audio streams of a file from being
-	   filtered or being automatically selected or mapped for any output.
-	   See "-discard" option to disable streams individually.
-
-	   As an output option, disables audio recording i.e. automatic
-	   selection or mapping of any audio stream. For full manual control
-	   see the "-map" option.
+       -an (output)
+	   Disable audio recording.
 
        -acodec codec (input/output)
 	   Set the audio codec. This is an alias for "-codec:a".
@@ -1774,14 +1235,8 @@ OPTIONS
        -scodec codec (input/output)
 	   Set the subtitle codec. This is an alias for "-codec:s".
 
-       -sn (input/output)
-	   As an input option, blocks all subtitle streams of a file from
-	   being filtered or being automatically selected or mapped for any
-	   output. See "-discard" option to disable streams individually.
-
-	   As an output option, disables subtitle recording i.e. automatic
-	   selection or mapping of any subtitle stream. For full manual
-	   control see the "-map" option.
+       -sn (output)
+	   Disable subtitle recording.
 
        -sbsf bitstream_filter
 	   Deprecated, see -bsf
@@ -2000,19 +1455,17 @@ OPTIONS
 	   a negative file index to disable any chapter copying.
 
        -benchmark (global)
-	   Show benchmarking information at the end of an encode.  Shows real,
-	   system and user time used and maximum memory consumption.  Maximum
-	   memory consumption is not supported on all systems, it will usually
+	   Show benchmarking information at the end of an encode.  Shows CPU
+	   time used and maximum memory consumption.  Maximum memory
+	   consumption is not supported on all systems, it will usually
 	   display as 0 if not supported.
 
        -benchmark_all (global)
-	   Show benchmarking information during the encode.  Shows real,
-	   system and user time used in various steps (audio/video
-	   encode/decode).
+	   Show benchmarking information during the encode.  Shows CPU time
+	   used in various steps (audio/video encode/decode).
 
        -timelimit duration (global)
-	   Exit after ffmpeg has been running for duration seconds in CPU user
-	   time.
+	   Exit after ffmpeg has been running for duration seconds.
 
        -dump (global)
 	   Dump each input packet to stderr.
@@ -2020,45 +1473,39 @@ OPTIONS
        -hex (global)
 	   When dumping packets, also dump the payload.
 
-       -readrate speed (input)
-	   Limit input read speed.
-
-	   Its value is a floating-point positive number which represents the
-	   maximum duration of media, in seconds, that should be ingested in
-	   one second of wallclock time.  Default value is zero and represents
-	   no imposed limitation on speed of ingestion.  Value 1 represents
-	   real-time speed and is equivalent to "-re".
-
-	   Mainly used to simulate a capture device or live input stream (e.g.
-	   when reading from a file).  Should not be used with a low value
-	   when input is an actual capture device or live stream as it may
-	   cause packet loss.
-
-	   It is useful for when flow speed of output packets is important,
-	   such as live streaming.
-
        -re (input)
-	   Read input at native frame rate. This is equivalent to setting
-	   "-readrate 1".
+	   Read input at native frame rate. Mainly used to simulate a grab
+	   device, or live input stream (e.g. when reading from a file).
+	   Should not be used with actual grab devices or live input streams
+	   (where it can cause packet loss).  By default ffmpeg attempts to
+	   read the input(s) as fast as possible.  This option will slow down
+	   the reading of the input(s) to the native frame rate of the
+	   input(s). It is useful for real-time output (e.g. live streaming).
 
-       -vsync parameter (global)
-       -fps_mode[:stream_specifier] parameter (output,per-stream)
-	   Set video sync method / framerate mode. vsync is applied to all
-	   output video streams but can be overridden for a stream by setting
-	   fps_mode. vsync is deprecated and will be removed in the future.
+       -loop_input
+	   Loop over the input stream. Currently it works only for image
+	   streams. This option is used for automatic FFserver testing.  This
+	   option is deprecated, use -loop 1.
 
-	   For compatibility reasons some of the values for vsync can be
-	   specified as numbers (shown in parentheses in the following table).
+       -loop_output number_of_times
+	   Repeatedly loop output for formats that support looping such as
+	   animated GIF (0 will loop the output infinitely).  This option is
+	   deprecated, use -loop.
 
-	   passthrough (0)
+       -vsync parameter
+	   Video sync method.  For compatibility reasons old values can be
+	   specified as numbers.  Newly added values will have to be specified
+	   as strings always.
+
+	   0, passthrough
 	       Each frame is passed with its timestamp from the demuxer to the
 	       muxer.
 
-	   cfr (1)
+	   1, cfr
 	       Frames will be duplicated and dropped to achieve exactly the
 	       requested constant frame rate.
 
-	   vfr (2)
+	   2, vfr
 	       Frames are passed through with their timestamp or dropped so as
 	       to prevent 2 frames from having the same timestamp.
 
@@ -2066,9 +1513,9 @@ OPTIONS
 	       As passthrough but destroys all timestamps, making the muxer
 	       generate fresh timestamps based on frame-rate.
 
-	   auto (-1)
-	       Chooses between cfr and vfr depending on muxer capabilities.
-	       This is the default method.
+	   -1, auto
+	       Chooses between 1 and 2 depending on muxer capabilities. This
+	       is the default method.
 
 	   Note that the timestamps may be further modified by the muxer,
 	   after this.	For example, in the case that the format option
@@ -2098,19 +1545,6 @@ OPTIONS
 
 	   This option has been deprecated. Use the "aresample" audio filter
 	   instead.
-
-       -adrift_threshold time
-	   Set the minimum difference between timestamps and audio data (in
-	   seconds) to trigger adding/dropping samples to make it match the
-	   timestamps. This option effectively is a threshold to select
-	   between hard (add/drop) and soft (squeeze/stretch) compensation.
-	   "-async" must be set to a positive value.
-
-       -apad parameters (output,per-stream)
-	   Pad the output audio stream(s). This is the same as applying "-af
-	   apad".  Argument is a string of filter parameters composed the same
-	   as with the "apad" filter.  "-shortest" must be set for this output
-	   for the option to take effect.
 
        -copyts
 	   Do not process input timestamps, but keep their values without
@@ -2173,24 +1607,16 @@ OPTIONS
 
 	   Default value is 0.
 
-       -bitexact (input/output)
-	   Enable bitexact mode for (de)muxer and (de/en)coder
-
        -shortest (output)
-	   Finish encoding when the shortest output stream ends.
+	   Finish encoding when the shortest input stream ends.
 
        -dts_delta_threshold
 	   Timestamp discontinuity delta threshold.
 
-       -dts_error_threshold seconds
-	   Timestamp error delta threshold. This threshold use to discard
-	   crazy/damaged timestamps and the default is 30 hours which is
-	   arbitrarily picked and quite conservative.
-
-       -muxdelay seconds (output)
+       -muxdelay seconds (input)
 	   Set the maximum demux-decode delay.
 
-       -muxpreload seconds (output)
+       -muxpreload seconds (input)
 	   Set the initial demux-decode delay.
 
        -streamid output-stream-index:new-value (output)
@@ -2263,23 +1689,6 @@ OPTIONS
 
 		   ffmpeg -i video.mkv -i image.png -filter_complex 'overlay' out.mkv
 
-	   As a special exception, you can use a bitmap subtitle stream as
-	   input: it will be converted into a video with the same size as the
-	   largest video in the file, or 720x576 if no video is present. Note
-	   that this is an experimental and temporary solution. It will be
-	   removed once libavfilter has proper support for subtitles.
-
-	   For example, to hardcode subtitles on top of a DVB-T recording
-	   stored in MPEG-TS format, delaying the subtitles by 1 second:
-
-		   ffmpeg -i input.ts -filter_complex \
-		     '[#0x2ef] setpts=PTS+1/TB [sub] ; [#0x2d0] [sub] overlay' \
-		     -sn -map '#0x2dc' output.mkv
-
-	   (0x2d0, 0x2dc and 0x2ef are the MPEG-TS PIDs of respectively the
-	   video, audio and subtitles streams; 0:0, 0:3 and 0:7 would have
-	   worked too)
-
 	   To generate 5 seconds of pure red video using lavfi "color" source:
 
 		   ffmpeg -filter_complex 'color=c=red' -t 5 out.mkv
@@ -2317,9 +1726,16 @@ OPTIONS
 	   This option sets the maximum number of queued packets when reading
 	   from the file or device. With low latency / high rate live streams,
 	   packets may be discarded if they are not read in a timely manner;
-	   setting this value can force ffmpeg to use a separate input thread
-	   and read packets as soon as they arrive. By default ffmpeg only
-	   does this if multiple inputs are specified.
+	   raising this value can avoid it.
+
+       -override_ffserver (global)
+	   Overrides the input specifications from ffserver. Using this option
+	   you can map any input stream to ffserver and control many aspects
+	   of the encoding from ffmpeg. Without this option ffmpeg will
+	   transmit to ffserver what is requested by ffserver.
+
+	   The option is intended for cases where features are needed that
+	   cannot be specified to ffserver but can be to ffmpeg.
 
        -sdp_file file (global)
 	   Print sdp information for an output stream to file.	This allows
@@ -2327,10 +1743,8 @@ OPTIONS
 	   stream. (Requires at least one of the output formats to be rtp).
 
        -discard (input)
-	   Allows discarding specific streams or frames from streams.  Any
-	   input stream can be fully discarded, using value "all" whereas
-	   selective discarding of frames from a stream occurs at the demuxer
-	   and is not supported by all demuxers.
+	   Allows discarding specific streams or frames of streams at the
+	   demuxer.  Not all demuxers support this.
 
 	   none
 	       Discard no frame.
@@ -2356,16 +1770,6 @@ OPTIONS
 	   empty_output
 	       No packets were passed to the muxer, the output is empty.
 
-	   empty_output_stream
-	       No packets were passed to the muxer in some of the output
-	       streams.
-
-       -max_error_rate (global)
-	   Set fraction of decoding frame failures across all inputs which
-	   when crossed ffmpeg will return exit code 69. Crossing this
-	   threshold does not terminate processing. Range is a floating-point
-	   number between 0 to 1. Default is 2/3.
-
        -xerror (global)
 	   Stop and exit on error
 
@@ -2379,26 +1783,21 @@ OPTIONS
 	   The default value of this option should be high enough for most
 	   uses, so only touch this option if you are sure that you need it.
 
-       -muxing_queue_data_threshold bytes (output,per-stream)
-	   This is a minimum threshold until which the muxing queue size is
-	   not taken into account. Defaults to 50 megabytes per stream, and is
-	   based on the overall size of packets passed to the muxer.
+       As a special exception, you can use a bitmap subtitle stream as input:
+       it will be converted into a video with the same size as the largest
+       video in the file, or 720x576 if no video is present. Note that this is
+       an experimental and temporary solution. It will be removed once
+       libavfilter has proper support for subtitles.
 
-       -auto_conversion_filters (global)
-	   Enable automatically inserting format conversion filters in all
-	   filter graphs, including those defined by -vf, -af, -filter_complex
-	   and -lavfi. If filter format negotiation requires a conversion, the
-	   initialization of the filters will fail.  Conversions can still be
-	   performed by inserting the relevant conversion filter (scale,
-	   aresample) in the graph.  On by default, to explicitly disable it
-	   you need to specify "-noauto_conversion_filters".
+       For example, to hardcode subtitles on top of a DVB-T recording stored
+       in MPEG-TS format, delaying the subtitles by 1 second:
 
-       -bits_per_raw_sample[:stream_specifier] value (output,per-stream)
-	   Declare the number of bits per raw sample in the given output
-	   stream to be value. Note that this option sets the information
-	   provided to the encoder/muxer, it does not change the stream to
-	   conform to this value. Setting values that do not match the stream
-	   properties may result in encoding failures or invalid output files.
+	       ffmpeg -i input.ts -filter_complex \
+		 '[#0x2ef] setpts=PTS+1/TB [sub] ; [#0x2d0] [sub] overlay' \
+		 -sn -map '#0x2dc' output.mkv
+
+       (0x2d0, 0x2dc and 0x2ef are the MPEG-TS PIDs of respectively the video,
+       audio and subtitles streams; 0:0, 0:3 and 0:7 would have worked too)
 
    Preset files
        A preset file contains a sequence of option=value pairs, one for each
@@ -2490,7 +1889,7 @@ EXAMPLES
 
        Examples:
 
-       o   You can use YUV files as input:
+       ·   You can use YUV files as input:
 
 		   ffmpeg -i /tmp/test%d.Y /tmp/out.mpg
 
@@ -2504,7 +1903,7 @@ EXAMPLES
 	   video decoders. You must specify the size of the image with the -s
 	   option if ffmpeg cannot guess it.
 
-       o   You can input from a raw YUV420P file:
+       ·   You can input from a raw YUV420P file:
 
 		   ffmpeg -i /tmp/test.yuv /tmp/out.avi
 
@@ -2512,24 +1911,24 @@ EXAMPLES
 	   composed of the Y plane followed by the U and V planes at half
 	   vertical and horizontal resolution.
 
-       o   You can output to a raw YUV420P file:
+       ·   You can output to a raw YUV420P file:
 
 		   ffmpeg -i mydivx.avi hugefile.yuv
 
-       o   You can set several input files and output files:
+       ·   You can set several input files and output files:
 
 		   ffmpeg -i /tmp/a.wav -s 640x480 -i /tmp/a.yuv /tmp/a.mpg
 
 	   Converts the audio file a.wav and the raw YUV video file a.yuv to
 	   MPEG file a.mpg.
 
-       o   You can also do audio and video conversions at the same time:
+       ·   You can also do audio and video conversions at the same time:
 
 		   ffmpeg -i /tmp/a.wav -ar 22050 /tmp/a.mp2
 
 	   Converts a.wav to MPEG audio at 22050 Hz sample rate.
 
-       o   You can encode to several formats at the same time and define a
+       ·   You can encode to several formats at the same time and define a
 	   mapping from input stream to output streams:
 
 		   ffmpeg -i /tmp/a.wav -map 0:a -b:a 64k /tmp/a.mp2 -map 0:a -b:a 128k /tmp/b.mp2
@@ -2538,7 +1937,7 @@ EXAMPLES
 	   '-map file:index' specifies which input stream is used for each
 	   output stream, in the order of the definition of output streams.
 
-       o   You can transcode decrypted VOBs:
+       ·   You can transcode decrypted VOBs:
 
 		   ffmpeg -i snatch_1.vob -f avi -c:v mpeg4 -b:v 800k -g 300 -bf 2 -c:a libmp3lame -b:a 128k snatch.avi
 
@@ -2553,7 +1952,7 @@ EXAMPLES
 
 	   NOTE: To see the supported input formats, use "ffmpeg -demuxers".
 
-       o   You can extract images from a video, or create a video from many
+       ·   You can extract images from a video, or create a video from many
 	   images:
 
 	   For extracting images from a video:
@@ -2587,25 +1986,25 @@ EXAMPLES
 
 		   ffmpeg -f image2 -pattern_type glob -framerate 12 -i 'foo-*.jpeg' -s WxH foo.avi
 
-       o   You can put many streams of the same type in the output:
+       ·   You can put many streams of the same type in the output:
 
 		   ffmpeg -i test1.avi -i test2.avi -map 1:1 -map 1:0 -map 0:1 -map 0:0 -c copy -y test12.nut
 
 	   The resulting output file test12.nut will contain the first four
 	   streams from the input files in reverse order.
 
-       o   To force CBR video output:
+       ·   To force CBR video output:
 
 		   ffmpeg -i myfile.avi -b 4000k -minrate 4000k -maxrate 4000k -bufsize 1835k out.m2v
 
-       o   The four options lmin, lmax, mblmin and mblmax use 'lambda' units,
+       ·   The four options lmin, lmax, mblmin and mblmax use 'lambda' units,
 	   but you may use the QP2LAMBDA constant to easily convert from 'q'
 	   units:
 
 		   ffmpeg -i src.ext -lmax 21*QP2LAMBDA dst.ext
 
 SEE ALSO
-       ffmpeg-all(1), ffplay(1), ffprobe(1), ffmpeg-utils(1),
+       ffmpeg-all(1), ffplay(1), ffprobe(1), ffserver(1), ffmpeg-utils(1),
        ffmpeg-scaler(1), ffmpeg-resampler(1), ffmpeg-codecs(1),
        ffmpeg-bitstream-filters(1), ffmpeg-formats(1), ffmpeg-devices(1),
        ffmpeg-protocols(1), ffmpeg-filters(1)

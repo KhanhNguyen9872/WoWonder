@@ -211,11 +211,11 @@ if ($f == 'messages') {
                         }
                     }
                     $messages = Wo_RegisterMessage(array(
-                        'from_id' => Wo_Secure($wo['user']['user_id']),
-                        'to_id' => Wo_Secure($_POST['user_id']),
-                        'text' => Wo_Secure($_POST['textSendMessage']),
-                        'media' => Wo_Secure($mediaFilename),
-                        'mediaFileName' => Wo_Secure($mediaName),
+                        'from_id' => Wo_Secure($wo['user']['user_id'],0),
+                        'to_id' => Wo_Secure($_POST['user_id'],0),
+                        'text' => Wo_Secure($_POST['textSendMessage'],1),
+                        'media' => Wo_Secure($mediaFilename,0),
+                        'mediaFileName' => Wo_Secure($mediaName,0),
                         'time' => time(),
                         'stickers' => $sticker,
                         'reply_id' => $reply_id,
@@ -253,7 +253,7 @@ if ($f == 'messages') {
                                 $wo['emailNotification']['notifier'] = $wo['user'];
                                 $wo['emailNotification']['type']     = 'sent_message';
                                 $wo['emailNotification']['url']      = $recipient['url'];
-                                $wo['emailNotification']['msg_text'] = Wo_Secure($_POST['textSendMessage']);
+                                $wo['emailNotification']['msg_text'] = Wo_Secure($_POST['textSendMessage'],1);
                                 $send_message_data                   = array(
                                     'from_email' => $wo['config']['siteEmail'],
                                     'from_name' => $wo['config']['siteName'],
@@ -307,11 +307,11 @@ if ($f == 'messages') {
                         $reply_id = Wo_Secure($_POST['reply_id']);
                     }
                     $message_id = Wo_RegisterGroupMessage(array(
-                        'from_id' => Wo_Secure($wo['user']['user_id']),
-                        'group_id' => Wo_Secure($_POST['group_id']),
-                        'text' => Wo_Secure($_POST['textSendMessage']),
-                        'media' => Wo_Secure($mediaFilename),
-                        'mediaFileName' => Wo_Secure($mediaName),
+                        'from_id' => Wo_Secure($wo['user']['user_id'],0),
+                        'group_id' => Wo_Secure($_POST['group_id'],0),
+                        'text' => Wo_Secure($_POST['textSendMessage'],1),
+                        'media' => Wo_Secure($mediaFilename,0),
+                        'mediaFileName' => Wo_Secure($mediaName,0),
                         'time' => time(),
                         'reply_id' => $reply_id
                     ));
@@ -350,7 +350,7 @@ if ($f == 'messages') {
                         if (isset($_FILES['sendMessageFile']['name'])) {
                             if ($_FILES['sendMessageFile']['size'] > $wo['config']['maxUpload']) {
                                 $invalid_file = 1;
-                            } else if (Wo_IsFileAllowed($_FILES['sendMessageFile']['name']) == false) {
+                            } else if (Wo_IsFileAllowed($_FILES['sendMessageFile']['name'], $_FILES["sendMessageFile"]["type"]) == false) {
                                 $invalid_file = 2;
                             } else {
                                 $fileInfo      = array(
@@ -383,12 +383,12 @@ if ($f == 'messages') {
                             $reply_id = Wo_Secure($_POST['reply_id']);
                         }
                         $last_id = Wo_RegisterPageMessage(array(
-                            'from_id' => Wo_Secure($wo['user']['user_id']),
-                            'page_id' => Wo_Secure($_POST['page_id']),
+                            'from_id' => Wo_Secure($wo['user']['user_id'],0),
+                            'page_id' => Wo_Secure($_POST['page_id'],0),
                             'to_id' => $to_id,
-                            'text' => Wo_Secure($_POST['textSendMessage']),
-                            'media' => Wo_Secure($mediaFilename),
-                            'mediaFileName' => Wo_Secure($mediaName),
+                            'text' => Wo_Secure($_POST['textSendMessage'],1),
+                            'media' => Wo_Secure($mediaFilename,0),
+                            'mediaFileName' => Wo_Secure($mediaName,0),
                             'time' => time(),
                             'reply_id' => $reply_id
                         ));

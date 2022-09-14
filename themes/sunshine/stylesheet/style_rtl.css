@@ -1032,7 +1032,7 @@ body .wow_dontd_posts_right {
 body .wow_weather_forecast .fivedays {float: right;}
 
 body .comment-reply .wo_commreply_combo .textarea {
-	padding-left: 60px;
+	padding-left: 120px;
     padding-right: 10px;
 }
 body .comment-reply .wo_commreply_combo .image-comment {
@@ -1275,4 +1275,13 @@ body .explore_hdr .circle_two {
 }
 bosy .insta#wo_post_stat_button .stat-item:last-child {
     margin-left: 0;margin-right: auto;
+}
+
+
+body .lang_select_modal .language_info svg {
+    right: auto;left: 0;
+}
+
+body .navbar-nav.left_part_header .search-container .head_clos_srch {
+    right: auto;left: 8px;
 }

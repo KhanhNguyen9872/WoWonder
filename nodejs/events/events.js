@@ -342,15 +342,6 @@ module.exports.groupMessage = async (ctx, io, socket, data, messageOwner, nextId
                 time_api: ((data.sent_message && data.sent_message !== undefined && data.sent_message.time && data.sent_message.time !== undefined ) ? data.sent_message.time : 0),
 
             });
-            await ctx.wo_groupchatusers.update({
-                last_seen: Math.floor(Date.now() / 1000),
-            },
-                {
-                    where: {
-                        group_id: data.group_id,
-                        user_id: ctx.userHashUserId[ctx.socketIdUserHash[client]]
-                    }
-                })
         } else {
             await io.to(client).emit('group_message', {
                 status: 200,
@@ -361,19 +352,23 @@ module.exports.groupMessage = async (ctx, io, socket, data, messageOwner, nextId
                 message_id: ((data.sent_message && data.sent_message !== undefined && data.sent_message.id && data.sent_message.id !== undefined ) ? data.sent_message.id : 0),
                 time_api: ((data.sent_message && data.sent_message !== undefined && data.sent_message.time && data.sent_message.time !== undefined ) ? data.sent_message.time : 0),
             });
-            await ctx.wo_groupchatusers.update({
-                last_seen: Math.floor(Date.now() / 1000),
-            },
-                {
-                    where: {
-                        group_id: data.group_id,
-                        user_id: ctx.userHashUserId[ctx.socketIdUserHash[client]]
-                    }
-                })
+            
 
             if (ctx.socketIdUserHash[client] && ctx.userHashUserId[ctx.socketIdUserHash[client]]) {
                 await updateMessageGroupsListInternal(ctx, io, ctx.userHashUserId[data.from_id], ctx.userHashUserId[ctx.socketIdUserHash[client]], sendable_message, data.group_id)
             }
+        }
+        let open_groups = Object.entries(ctx.userIdGroupChatOpen).filter(d => d[1] == data.group_id);
+        for (let item of open_groups) {
+            await ctx.wo_groupchatusers.update({
+                last_seen: Math.floor(Date.now() / 1000),
+            },
+            {
+                where: {
+                    group_id: data.group_id,
+                    user_id: item[0]
+                }
+            })
         }
     }
 }
@@ -395,15 +390,6 @@ module.exports.groupMessageWithMedia = async (ctx, io, socket, data, messageOwne
                 message_id: ((data.sent_message && data.sent_message !== undefined && data.sent_message.id && data.sent_message.id !== undefined ) ? data.sent_message.id : 0),
                 time_api: ((data.sent_message && data.sent_message !== undefined && data.sent_message.time && data.sent_message.time !== undefined ) ? data.sent_message.time : 0),
             });
-            await ctx.wo_groupchatusers.update({
-                last_seen: Math.floor(Date.now() / 1000),
-            },
-                {
-                    where: {
-                        group_id: data.group_id,
-                        user_id: ctx.userHashUserId[ctx.socketIdUserHash[client]]
-                    }
-                })
         } else {
             await io.to(client).emit('group_message', {
                 status: 200,
@@ -414,15 +400,18 @@ module.exports.groupMessageWithMedia = async (ctx, io, socket, data, messageOwne
                 message_id: ((data.sent_message && data.sent_message !== undefined && data.sent_message.id && data.sent_message.id !== undefined ) ? data.sent_message.id : 0),
                 time_api: ((data.sent_message && data.sent_message !== undefined && data.sent_message.time && data.sent_message.time !== undefined ) ? data.sent_message.time : 0),
             });
+        }
+        let open_groups = Object.entries(ctx.userIdGroupChatOpen).filter(d => d[1] == data.group_id);
+        for (let item of open_groups) {
             await ctx.wo_groupchatusers.update({
                 last_seen: Math.floor(Date.now() / 1000),
             },
-                {
-                    where: {
-                        group_id: data.group_id,
-                        user_id: ctx.userHashUserId[ctx.socketIdUserHash[client]]
-                    }
-                })
+            {
+                where: {
+                    group_id: data.group_id,
+                    user_id: item[0]
+                }
+            })
         }
     }
 }
@@ -447,15 +436,7 @@ module.exports.groupMessagePage = async (ctx, io, socket, data, messageOwner, ne
                 message_id: ((data.sent_message && data.sent_message !== undefined && data.sent_message.id && data.sent_message.id !== undefined ) ? data.sent_message.id : 0),
                 time_api: ((data.sent_message && data.sent_message !== undefined && data.sent_message.time && data.sent_message.time !== undefined ) ? data.sent_message.time : 0),
             });
-            await ctx.wo_groupchatusers.update({
-                last_seen: Math.floor(Date.now() / 1000),
-            },
-                {
-                    where: {
-                        group_id: data.group_id,
-                        user_id: ctx.userHashUserId[ctx.socketIdUserHash[client]]
-                    }
-                })
+            
             await updateMessageGroupsListInternal(ctx, io, ctx.userHashUserId[data.from_id], ctx.userHashUserId[data.from_id], sendable_message, data.group_id)
 
         } else {
@@ -470,18 +451,21 @@ module.exports.groupMessagePage = async (ctx, io, socket, data, messageOwner, ne
                 message_id: ((data.sent_message && data.sent_message !== undefined && data.sent_message.id && data.sent_message.id !== undefined ) ? data.sent_message.id : 0),
                 time_api: ((data.sent_message && data.sent_message !== undefined && data.sent_message.time && data.sent_message.time !== undefined ) ? data.sent_message.time : 0),
             });
-            await ctx.wo_groupchatusers.update({
-                last_seen: Math.floor(Date.now() / 1000),
-            },
-                {
-                    where: {
-                        group_id: data.group_id,
-                        user_id: ctx.userHashUserId[ctx.socketIdUserHash[client]]
-                    }
-                })
             if (ctx.socketIdUserHash[client] && ctx.userHashUserId[ctx.socketIdUserHash[client]]) {
                 await updateMessageGroupsListInternal(ctx, io, ctx.userHashUserId[data.from_id], ctx.userHashUserId[ctx.socketIdUserHash[client]], sendable_message, data.group_id)
             }
+        }
+        let open_groups = Object.entries(ctx.userIdGroupChatOpen).filter(d => d[1] == data.group_id);
+        for (let item of open_groups) {
+            await ctx.wo_groupchatusers.update({
+                last_seen: Math.floor(Date.now() / 1000),
+            },
+            {
+                where: {
+                    group_id: data.group_id,
+                    user_id: item[0]
+                }
+            })
         }
     }
 }
@@ -506,15 +490,6 @@ module.exports.groupMessagePageWithMedia = async (ctx, io, socket, data, message
                 message_id: ((data.sent_message && data.sent_message !== undefined && data.sent_message.id && data.sent_message.id !== undefined ) ? data.sent_message.id : 0),
                 time_api: ((data.sent_message && data.sent_message !== undefined && data.sent_message.time && data.sent_message.time !== undefined ) ? data.sent_message.time : 0),
             });
-            await ctx.wo_groupchatusers.update({
-                last_seen: Math.floor(Date.now() / 1000),
-            },
-                {
-                    where: {
-                        group_id: data.group_id,
-                        user_id: ctx.userHashUserId[ctx.socketIdUserHash[client]]
-                    }
-                })
         } else {
             await io.to(client).emit('group_message_page', {
                 status: 200,
@@ -527,15 +502,18 @@ module.exports.groupMessagePageWithMedia = async (ctx, io, socket, data, message
                 message_id: ((data.sent_message && data.sent_message !== undefined && data.sent_message.id && data.sent_message.id !== undefined ) ? data.sent_message.id : 0),
                 time_api: ((data.sent_message && data.sent_message !== undefined && data.sent_message.time && data.sent_message.time !== undefined ) ? data.sent_message.time : 0),
             });
+        }
+        let open_groups = Object.entries(ctx.userIdGroupChatOpen).filter(d => d[1] == data.group_id);
+        for (let item of open_groups) {
             await ctx.wo_groupchatusers.update({
                 last_seen: Math.floor(Date.now() / 1000),
             },
-                {
-                    where: {
-                        group_id: data.group_id,
-                        user_id: ctx.userHashUserId[ctx.socketIdUserHash[client]]
-                    }
-                })
+            {
+                where: {
+                    group_id: data.group_id,
+                    user_id: item[0]
+                }
+            })
         }
     }
 }

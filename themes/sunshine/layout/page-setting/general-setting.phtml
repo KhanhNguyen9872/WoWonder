@@ -25,7 +25,7 @@
 			</div>
 			<!-- Select Basic -->
 			<!-- Select Basic -->
-			<div class="sun_input col-lg-6">
+			<div class="sun_input col-lg-6 page_sub_category_c" style="<?php echo (!empty($wo['page_sub_categories'][$wo['setting']['page_category']]) ? '' : 'display: none;'); ?>">
 				<select id="page_sub_category" name="page_sub_category" class="form-control">
 					<?php
 						if (!empty($wo['page_sub_categories'][$wo['setting']['page_category']])) {
@@ -137,8 +137,10 @@ echo "var sub_categories_array = ". $js_array . ";\n";
 		var text = "";
 		if (typeof(sub_categories_array[id]) == 'undefined') {
 		    $('#page_sub_category').html('');
+		    $('.page_sub_category_c').slideUp();
 		}
 		else{
+			$('.page_sub_category_c').slideDown();
 		   	sub_categories_array[id].forEach(function(entry) {
 				text = text + "<option value='"+entry.id+"'>"+entry.lang+"</option>";
 			});

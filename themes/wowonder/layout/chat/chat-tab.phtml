@@ -1,5 +1,5 @@
 <div class="chat-wrapper chat_<?php echo $wo['chat']['recipient']['user_id'];?>" id="chat_<?php echo $wo['chat']['recipient']['user_id'];?>">
-	<div class="online-toggle-hdr pointer" onclick="javascript:$('.chat-tab-container-<?php echo $wo['chat']['recipient']['user_id'];?>').slideToggle(100);">
+	<div class="online-toggle-hdr pointer" onclick="toggleChat(this, event);" data-chat-id="<?php echo $wo['chat']['recipient']['user_id'];?>">
 		<div class="wow_chat_hdr_usr">
 			<div class="avatar">
 				<a href="<?php echo $wo['chat']['recipient']['url'];?>" data-ajax="?link1=timeline&u=<?php echo $wo['chat']['recipient']['username'];?>">
@@ -33,9 +33,9 @@
 				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="disabled"><path fill="currentColor" d="M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z" /></svg>
 			<?php } } } ?>
 			<a class="white" href="<?php echo Wo_SeoLink("index.php?link1=messages&user=" . $wo['chat']['recipient']['user_id']);?>" target="_blank" onclick="Wo_CloseChat(<?php echo $wo['chat']['recipient']['user_id'];?>);">
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" /></svg>
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style=""><path fill="currentColor" d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" /></svg>
 			</a>
-			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" onclick="Wo_CloseChat(<?php echo $wo['chat']['recipient']['user_id'];?>);"><path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg>
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="width: 24px; height: 24px;"onclick="Wo_CloseChat(<?php echo $wo['chat']['recipient']['user_id'];?>);"><path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg>
 		</div>
 	</div>
 
@@ -185,18 +185,13 @@
 					
 					<div>
 						<span class="dropup chat_optns">
-							<span class="emo-btn-<?php echo $wo['chat']['recipient']['user_id'];?> dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+							<span class="emo-btn-<?php echo $wo['chat']['recipient']['user_id'];?> dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" onclick="load_ajax_chat_emojii('<?php echo $wo['chat']['recipient']['user_id'];?>','<?php echo $wo['config']['theme_url'];?>/emoji/');">
 								<span class="btn btn-file">
 									<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"  width="24" height="24" viewBox="0 0 24 24" class="select-color"><path fill="<?php echo $wo['chat']['color']; ?>" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7,9.5C7,8.7 7.7,8 8.5,8C9.3,8 10,8.7 10,9.5C10,10.3 9.3,11 8.5,11C7.7,11 7,10.3 7,9.5M12,17.23C10.25,17.23 8.71,16.5 7.81,15.42L9.23,14C9.68,14.72 10.75,15.23 12,15.23C13.25,15.23 14.32,14.72 14.77,14L16.19,15.42C15.29,16.5 13.75,17.23 12,17.23M15.5,11C14.7,11 14,10.3 14,9.5C14,8.7 14.7,8 15.5,8C16.3,8 17,8.7 17,9.5C17,10.3 16.3,11 15.5,11Z" /></svg>
 								</span>
 							</span>
 							<ul class="emo-container dropdown-menu emo-container-<?php echo $wo['chat']['recipient']['user_id'];?>" role="menu">
-								<?php  
-									foreach ($wo['emo'] as $code => $name) {
-										$code   = $code;
-										echo  '<span onclick="Wo_AddEmoToChat(\'' . $code . '\', ' . $wo['chat']['recipient']['user_id'] . ');"><i class="pointer twa-lg twa twa-' . $name . '"></i></span>'; 
-									} 
-								?>
+								
 							</ul>
 						</span>
 						<div class="ball-pulse"><div></div><div></div><div></div></div>
@@ -211,7 +206,9 @@
 		</div>
 	</div>
 </div>
-
+<style>
+#chat_<?php echo $wo['chat']['recipient']['user_id']; ?> .close-chat a, #chat_<?php echo $wo['chat']['recipient']['user_id']; ?> .close-chat svg {color:  <?php echo $wo['chat']['color']; ?>}
+</style>
 <script type="text/javascript">
 jQuery(document).ready(function($) {
     $(".chat-colors-cont a").click(function(event) {
@@ -226,6 +223,7 @@ jQuery(document).ready(function($) {
              $(".chat_" + recipient_id).find('.outgoing .message-text, .outgoing .message-media').css('background', data['color']);
              $(".chat_" + recipient_id).find('.outgoing .message-text').css('color', '#fff');
              $(".chat_" + recipient_id).find('.select-color path').css('fill', data['color']);
+             $(".chat_" + recipient_id).find('.close-chat a, .close-chat svg').css('color', data.color);
              $(".chat_" + recipient_id).find('#color').val(data['color']);
              $(".text-sender-container .red-list").css('background', data.color);
              $(".text-sender-container .btn-file").css('background', data.color);
@@ -238,6 +236,11 @@ jQuery(document).ready(function($) {
    
 });
 
+function toggleChat(element, event) {
+	if (event.target !== element) return;
+	var chatID = $(element).attr('data-chat-id');
+	$('.chat-tab-container-' + chatID).slideToggle(100);
+}
 $(function() {
     var main_hash_id = $('.main_session').val();
     $('.emo-btn-<?php echo $wo['chat']['recipient']['user_id'];?>').click(function () {

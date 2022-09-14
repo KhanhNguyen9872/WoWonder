@@ -106,12 +106,28 @@
 	</div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/jquery-ui-timepicker-addon@1.6.3/dist/jquery-ui-timepicker-addon.min.js"></script>
 <script>
   jQuery(document).ready(function($) {
-  	$( ".date" ).datepicker({ dateFormat: 'yy-mm-dd', minDate: 'today'});
-      $( ".date1" ).datepicker({ dateFormat: 'yy-mm-dd', minDate: '+1day'});
-      $( ".time1" ).timepicker();
+		$(".date").flatpickr({
+			dateFormat: "Y-m-d",
+			altInput: true,
+			altFormat: "F j, Y",
+			minDate: "today",
+		});
+		
+		$(".time1").flatpickr({
+			enableTime: true,
+			noCalendar: true,
+			dateFormat: "H:i",
+		});
+		
+		$(".date1").flatpickr({
+			dateFormat: "Y-m-d",
+			altInput: true,
+			altFormat: "F j, Y",
+			minDate: new Date().fp_incr(1),
+		});
+		
       <?php if ($wo['config']['google_map'] == 1) { ?>
       $("#event-locat").change(function(event) {
         if ($(this).val().length >= 3) {

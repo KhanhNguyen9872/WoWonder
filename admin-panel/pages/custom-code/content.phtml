@@ -85,6 +85,14 @@ $(function() {
         beforeSend: function() {
             form_ads_settings.find('.waves-effect').text('Please wait..');
         },
+        beforeSubmit : function(arr, $form, options){
+            console.log(arr)
+            for (var i = 0; i < arr.length; i++) {
+                if (arr[i].name != "hash_id" && arr[i].name != "lang_key") {
+                    arr[i].value = btoa(arr[i].value);
+                }
+            }
+        },
         success: function(data) {
         	if (data.status == 200) {
                 $('.ads-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Your changes have been saved successfully</div>');

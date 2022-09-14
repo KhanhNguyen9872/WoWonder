@@ -24,7 +24,7 @@ if ($db->totalPages != 0) {
         exit();
     }
 }
-
+$iso = $db->where('lang_name',$lang_name)->getValue(T_LANG_ISO,'iso');
 ?>
 <div class="container-fluid">
     <div>
@@ -43,6 +43,21 @@ if ($db->totalPages != 0) {
     </div>
     <!-- Vertical Layout -->
     <div class="row">
+        <div class="col-lg-12 col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Edit Language ISO</h6>
+                    <form class="iso-settings" method="POST">
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Language ISO <small></small></label>
+                                <input type="text" id="iso" name="iso" class="form-control" value="<?php echo($iso); ?>">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
         <div class="col-lg-12 col-md-12">
             <div class="card">
                 <div class="card-body">
@@ -161,6 +176,30 @@ $('.btn-lang').on('click', function(event) {
 	});
 });
 $(function () {
+    var setTimeOutColor = setTimeout(function (){});
+    $('.iso-settings input[type=text]').on('input', delay(function() {
+        clearTimeout(setTimeOutColor);
+        var thisElement = $(this);
+        var configName = thisElement.attr('name');
+        var objData = {};
+        objData[configName] = this.value;
+        objData['lang_name'] = "<?php echo($lang_name); ?>";
+        thisElement.addClass('warning');
+        $.post(Wo_Ajax_Requests_File() + '?f=admin_setting&s=update_iso&hash=' + $('.main_session').val(), objData, function (data) {
+            if (data.status == 200) {
+                thisElement.removeClass('warning');
+                thisElement.addClass('success');
+            } else {
+                thisElement.addClass('error');
+            }
+            var setTimeOutColor = setTimeout(function () {
+                thisElement.removeClass('success');
+                thisElement.removeClass('warning');
+                thisElement.removeClass('error');
+            }, 2000);
+            //thisElement.focus();
+        });
+    }, 500));
 	//$('table').DataTable();
 	var form_lang_settings = $('form.edit-key-settings');
     form_lang_settings.ajaxForm({

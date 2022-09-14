@@ -1,72 +1,70 @@
 <div class="row">
-	<div class="col-lg-1"></div>
-	<div class="col-lg-10">
-		<div class="page-margin wow_creads_minstp wow__minstp step-two-active">
-			<div class="line">
-				<div class="line_sec"></div>
-				<div class="dot one"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg></div>
-				<div class="dot two"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg></div>
-				<div class="dot three"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg></div>
-			</div>
-			<div class="steps">
-				<div class="step step-one"><?php echo $wo['lang']['ad_media']; ?></div>
-				<div class="step step-two"><?php echo $wo['lang']['info']; ?></div>
-				<div class="step step-three"><?php echo $wo['lang']['follow']; ?></div>
-			</div>
-		</div>
+	<div class="col-md-2"></div>
+	<div class="col-md-8">
 		<div class="page-margin wow_content">	
-			<div class="add-photo wow_usr_steps">
+			<div class="page-margin wow_creads_minstp wow__minstp start_up step-two-active">
+				<div class="line">
+					<div class="line_sec"></div>
+					<div class="dot one"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M8.5,13.5L11,16.5L14.5,12L19,18H5M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19Z" /></svg></div>
+					<div class="dot two"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" /></svg></div>
+					<div class="dot three"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M6,10V7H4V10H1V12H4V15H6V12H9V10M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12Z" /></svg></div>
+				</div>
+				<div class="steps">
+					<div class="step step-one"><?php echo $wo['lang']['ad_media']; ?></div>
+					<div class="step step-two"><?php echo $wo['lang']['info']; ?></div>
+					<div class="step step-three"><?php echo $wo['lang']['follow']; ?></div>
+				</div>
+				
 				<h2><?php echo $wo['lang']['tell_us'];?></h2>
 				<h4><?php echo $wo['lang']['tell_us_des'];?></h4>
-				<form class="setting-general-form row form-horizontal" method="post">
-					<div class="col-md-2"></div>
-					<div class="col-md-8">
-						<div class="wow_form_fields">
-							<label for="first_name"><?php echo $wo['lang']['first_name']; ?></label>
-							<input id="first_name" name="first_name" type="text" class="form-control input-md" value="<?php echo $wo['user']['first_name']?>" autocomplete="off"> 
-						</div>
-						<div class="wow_form_fields">
-							<label for="last_name"><?php echo $wo['lang']['last_name']; ?></label>
-							<input id="last_name" name="last_name" type="text" class="form-control input-md" value="<?php echo $wo['user']['last_name']?>" autocomplete="off"> 
-						</div>
-						<div class="wow_form_fields">
-							<label for="country"><?php echo $wo['lang']['country']; ?></label>
-							<select id="country" name="country" class="form-control">
-								<?php 
-									foreach ($wo['countries_name'] as $country_ids => $country) { 
-									$country_id = $wo['user']['country_id'];
-									$selected_contry = ($country_ids == $country_id) ? ' selected' : '' ;
-								?>
-									<option value="<?php echo $country_ids;?>" <?php echo $selected_contry;?> ><?php echo $country;?></option>
-								<?php } ?>
-							</select>
-						</div>
-						<?php
-							$cutoff   = 1930;
-							$now      = date('Y');
-							$birthday = '';
-							if ($wo['user']['birthday'] != '0000-00-00') {
-								$birthday = explode('-', $wo['user']['birthday']);
-							}
-						?>
-						<div class="wow_form_fields">
-							<label for="usr_birthday"><?php echo $wo['lang']['birthday']; ?></label>
-							<input id="usr_birthday" name="birthday" type="text" class="form-control input-md" placeholder="<?php echo $wo['lang']['birthday']; ?>" autocomplete="off"> 
-						</div>
-						<input type="hidden" name="user_id" value="<?php echo $wo['user']['user_id'];?>">
-						<input type="hidden" name="hash_id" value="<?php echo Wo_CreateSession();?>">
+			</div>
+		
+			<div class="add-photo wow_usr_steps">
+				<form class="setting-general-form form-horizontal" method="post">
+					<div class="wow_form_fields">
+						<label for="first_name"><?php echo $wo['lang']['first_name']; ?></label>
+						<input id="first_name" name="first_name" type="text" class="form-control input-md" value="<?php echo $wo['user']['first_name']?>" autocomplete="off"> 
 					</div>
-					<div class="col-md-2"></div>
+					<div class="wow_form_fields">
+						<label for="last_name"><?php echo $wo['lang']['last_name']; ?></label>
+						<input id="last_name" name="last_name" type="text" class="form-control input-md" value="<?php echo $wo['user']['last_name']?>" autocomplete="off"> 
+					</div>
+					<div class="wow_form_fields">
+						<label for="country"><?php echo $wo['lang']['country']; ?></label>
+						<select id="country" name="country" class="form-control">
+							<?php 
+								foreach ($wo['countries_name'] as $country_ids => $country) { 
+								$country_id = $wo['user']['country_id'];
+								$selected_contry = ($country_ids == $country_id) ? ' selected' : '' ;
+							?>
+								<option value="<?php echo $country_ids;?>" <?php echo $selected_contry;?> ><?php echo $country;?></option>
+							<?php } ?>
+						</select>
+					</div>
+					<?php
+						$cutoff   = 1930;
+						$now      = date('Y');
+						$birthday = '';
+						if ($wo['user']['birthday'] != '0000-00-00') {
+							$birthday = explode('-', $wo['user']['birthday']);
+						}
+					?>
+					<div class="wow_form_fields">
+						<label for="usr_birthday"><?php echo $wo['lang']['birthday']; ?></label>
+						<input id="usr_birthday" name="birthday" type="text" class="form-control input-md" placeholder="<?php echo $wo['lang']['birthday']; ?>" autocomplete="off"> 
+					</div>
+					<input type="hidden" name="user_id" value="<?php echo $wo['user']['user_id'];?>">
+					<input type="hidden" name="hash_id" value="<?php echo Wo_CreateSession();?>">
 				</form>
 				<div class="clear"></div>
 			</div>
 			<div class="continue-button wow_usr_steps_cont">
 				<small class="skip-step" onclick="Wo_SkipStep('start_up_info');"><?php echo $wo['lang']['start_up_skip'];?></small>
-				<button class="btn con-button btn-main btn-mat btn-mat-raised" onclick="Wo_SubmitInfoForm();"><?php echo $wo['lang']['start_up_continue'];?></button>
+				<button class="btn con-button btn-main btn-mat" onclick="Wo_SubmitInfoForm();"><?php echo $wo['lang']['start_up_continue'];?> <svg viewBox="0 0 24 24"><path fill="currentColor" d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z" /></svg></button>
 			</div>
 		</div>
 	</div>
-	<div class="col-lg-1"></div>
+	<div class="col-md-2"></div>
 </div>
 
 <script type="text/javascript">

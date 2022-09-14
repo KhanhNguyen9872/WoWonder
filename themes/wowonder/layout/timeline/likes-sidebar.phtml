@@ -5,14 +5,12 @@
 		</div>
 	</div>
 	<li>
-		<div class="sidebar-likes-container">
-			<?php 
+		<div class="sidebar-likes-container list-sidebar-element"><?php 
 			foreach (Wo_GetLikes($wo['user_profile']['user_id'], 'profile', 9 , 0, array('in' => 'profile_sidebar', 'likes_data' => $wo['user_profile']['likes_data'])) as $wo['PageList']) {
-				$wo['PageList']['user_name'] = mb_substr($wo['PageList']['name'], 0, 10, "utf-8");
+				$wo['PageList']['user_name'] = $wo['PageList']['name'];
 				echo Wo_LoadPage('sidebar/sidebar-page-list');
 			}
-			?>
-		</div>
+			?></div>
 	</li>
 	<li><div class="clear"></div></li>
 </ul>

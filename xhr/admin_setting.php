@@ -265,7 +265,7 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                 $photo_file = $color->image;
                 if (file_exists($photo_file)) {
                     @unlink(trim($photo_file));
-                } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+                } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                     @Wo_DeleteFromToS3($photo_file);
                 }
             }
@@ -382,6 +382,12 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
             if (in_array($_POST['currency'], $wo['2checkout_currency'])) {
                 $saveSetting = Wo_SaveConfig('2checkout_currency', $currency);
             }
+            $request                                                              = fetchDataFromURL("https://api.exchangerate.host/latest?base=" . $currency . "&symbols=" . implode(",", array_values($wo['config']['currency_array'])));
+            $exchange                                                             = json_decode($request, true);
+            if (!empty($exchange) && $exchange['success'] == true && !empty($exchange['rates'])) {
+                Wo_SaveConfig('exchange', json_encode($exchange['rates']));
+                Wo_SaveConfig('exchange_update', (time() + (60 * 60 * 12)));
+            }
         }
         $data = array(
             'status' => 200
@@ -490,7 +496,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                         if (!empty($fund)) {
                             $amount             = $receipt->price;
                             $fund_id            = $receipt->fund_id;
-                            $notes              = "Doanted to " . mb_substr($fund->title, 0, 100, "UTF-8");
+                            //$notes              = "Doanted to " . mb_substr($fund->title, 0, 100, "UTF-8");
+                            //$notes = str_replace('{text}', mb_substr($fund->title, 0, 100, "UTF-8"), $wo['lang']['trans_doanted_to']);
+                            $notes = mb_substr($fund->title, 0, 100, "UTF-8");
                             $create_payment_log = mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ({$receipt->user_id}, 'DONATE', {$amount}, '{$notes}')");
                             $admin_com          = 0;
                             if (!empty($wo['config']['donate_percentage']) && is_numeric($wo['config']['donate_percentage']) && $wo['config']['donate_percentage'] > 0) {
@@ -612,7 +620,7 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
             $db->where('id', $id)->delete('bank_receipts');
             if (file_exists($photo_file)) {
                 @unlink(trim($photo_file));
-            } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+            } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                 @Wo_DeleteFromToS3($photo_file);
             }
             $data = array(
@@ -643,6 +651,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
             if (is_callable('fastcgi_finish_request')) {
                 fastcgi_finish_request();
             }
+            if (is_callable('litespeed_finish_request')) {
+                litespeed_finish_request();
+            }
             $user_id = Wo_Secure($_GET['user_id']);
             Wo_DeleteAllUserPosts($user_id);
         }
@@ -669,6 +680,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
             session_write_close();
             if (is_callable('fastcgi_finish_request')) {
                 fastcgi_finish_request();
+            }
+            if (is_callable('litespeed_finish_request')) {
+                litespeed_finish_request();
             }
             $user_id = Wo_Secure($_GET['user_id']);
             $blogs   = $db->where('user', $user_id)->get(T_BLOG);
@@ -702,6 +716,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
             if (is_callable('fastcgi_finish_request')) {
                 fastcgi_finish_request();
             }
+            if (is_callable('litespeed_finish_request')) {
+                litespeed_finish_request();
+            }
             $user_id = Wo_Secure($_GET['user_id']);
             $info    = $db->where('user_id', $user_id)->get(T_USER_STORY);
             if (!empty($info)) {
@@ -733,6 +750,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
             session_write_close();
             if (is_callable('fastcgi_finish_request')) {
                 fastcgi_finish_request();
+            }
+            if (is_callable('litespeed_finish_request')) {
+                litespeed_finish_request();
             }
             $my_id         = Wo_Secure($_GET['user_id']);
             $query_one     = "SELECT id FROM " . T_MESSAGES . " WHERE (`to_id` = '{$my_id}') OR (`from_id` = {$my_id})";
@@ -767,6 +787,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
             if (is_callable('fastcgi_finish_request')) {
                 fastcgi_finish_request();
             }
+            if (is_callable('litespeed_finish_request')) {
+                litespeed_finish_request();
+            }
             $my_id = Wo_Secure($_GET['user_id']);
             mysqli_query($sqlConnect, "DELETE FROM " . T_NOTIFICATION . " WHERE `recipient_id` = {$my_id} OR `notifier_id` = {$my_id}");
         }
@@ -793,6 +816,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
             session_write_close();
             if (is_callable('fastcgi_finish_request')) {
                 fastcgi_finish_request();
+            }
+            if (is_callable('litespeed_finish_request')) {
+                litespeed_finish_request();
             }
             $user_id      = Wo_Secure($_GET['user_id']);
             $update_array = array(
@@ -994,6 +1020,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                             $price             = 0;
                             $orders            = $db->where('hash_id', $request->order_hash_id)->get(T_USER_ORDERS);
                             foreach ($orders as $key => $order) {
+                                $db->where('id', $order->product_id)->update(T_PRODUCTS, array(
+                                    'units' => $db->inc($order->units)
+                                ));
                                 $total_final_price += $order->final_price;
                                 $price += $order->price;
                             }
@@ -1142,7 +1171,7 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                         $link = $gender->image;
                         if (file_exists($link)) {
                             @unlink(trim($link));
-                        } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+                        } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                             @Wo_DeleteFromToS3($link);
                         }
                         $db->where('gender_id', Wo_Secure($value))->delete(T_GENDER);
@@ -1721,6 +1750,7 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                                     'type2' => 'withdraw_approve'
                                 );
                                 Wo_RegisterNotification($notification_data_array);
+                                Wo_UpdateBalance($get_payment_info['user_id'], $get_payment_info['amount'], '-','withdrawal');
                             }
                         }
                     }
@@ -2047,14 +2077,14 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                     $link = substr($wo['pro_packages'][$_POST['type']]['image'], strpos($wo['pro_packages'][$_POST['type']]['image'], 'upload/'));
                     if (file_exists($link)) {
                         @unlink(trim($link));
-                    } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+                    } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                         @Wo_DeleteFromToS3($link);
                     }
                     $update_array['image'] = '';
                     $link           = substr($wo['pro_packages'][$_POST['type']]['night_image'], strpos($wo['pro_packages'][$_POST['type']]['night_image'], 'upload/'));
                     if (file_exists($link)) {
                         @unlink(trim($link));
-                    } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+                    } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                         @Wo_DeleteFromToS3($link);
                     }
                     $update_array['night_image'] = '';
@@ -2108,13 +2138,13 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
             $link           = substr($wo['pro_packages'][$_GET['id']]['night_image'], strpos($wo['pro_packages'][$_GET['id']]['night_image'], 'upload/'));
             if (file_exists($link)) {
                 @unlink(trim($link));
-            } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+            } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                 @Wo_DeleteFromToS3($link);
             }
             $link           = substr($wo['pro_packages'][$_GET['id']]['image'], strpos($wo['pro_packages'][$_GET['id']]['image'], 'upload/'));
             if (file_exists($link)) {
                 @unlink(trim($link));
-            } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+            } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                 @Wo_DeleteFromToS3($link);
             }
             $db->where('id',Wo_Secure($_GET['id']))->delete(T_MANAGE_PRO);
@@ -2295,6 +2325,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                 if (is_callable('fastcgi_finish_request')) {
                     fastcgi_finish_request();
                 }
+                if (is_callable('litespeed_finish_request')) {
+                    litespeed_finish_request();
+                }
                 $followed    = Wo_RegisterFollow($_POST['user_id'], $users_id);
                 $user_data   = Wo_UpdateUserDetails($_POST['user_id'], false, false, true);
                 $update_user = $db->where('user_id', $_POST['user_id'])->update(T_USERS, array(
@@ -2438,7 +2471,7 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                         $link = $gender->image;
                         if (file_exists($link)) {
                             @unlink(trim($link));
-                        } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+                        } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                             @Wo_DeleteFromToS3($link);
                         }
                         $db->where('gender_id', $lang_key)->update(T_GENDER, array(
@@ -2458,7 +2491,7 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                     $link = $gender->image;
                     if (file_exists($link)) {
                         @unlink(trim($link));
-                    } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+                    } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                         @Wo_DeleteFromToS3($link);
                     }
                     $db->where('gender_id', $lang_key)->delete(T_GENDER);
@@ -2525,7 +2558,7 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                 $link = $gender->image;
                 if (file_exists($link)) {
                     @unlink(trim($link));
-                } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+                } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                     @Wo_DeleteFromToS3($link);
                 }
                 $db->where('gender_id', Wo_Secure($_GET['key']))->delete(T_GENDER);
@@ -2545,12 +2578,53 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
             } else {
                 $lang_name = Wo_Secure($_POST['lang']);
                 $lang_name = strtolower($lang_name);
+                $first = "module.exports = function(sequelize, DataTypes) {
+                          return sequelize.define('Wo_Langs', {
+                            id: {
+                              autoIncrement: true,
+                              type: DataTypes.INTEGER,
+                              allowNull: false,
+                              primaryKey: true
+                            },
+                            lang_key: {
+                              type: DataTypes.STRING(160),
+                              allowNull: true
+                            },
+                            type: {
+                              type: DataTypes.STRING(100),
+                              allowNull: false,
+                              defaultValue: \"\"
+                            }";
+                $last = "}, {
+                            sequelize,
+                            timestamps: false,
+                            tableName: 'Wo_Langs'
+                          });
+                        };";
+                $js = '{type: DataTypes.TEXT,
+                        allowNull: true
+                       }';
+                       $tx = '';
+                foreach ($mysqli as $key => $value) {
+                    $tx .= ','.$value.': '.$js;
+                }
+                $tx .= ','.$lang_name.': '.$js;
+                file_put_contents("nodejs/models/wo_langs.js", $first.$tx.$last);
                 $query     = mysqli_query($sqlConnect, "ALTER TABLE " . T_LANGS . " ADD `$lang_name` TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL;");
                 if ($query) {
+                    $iso = '';
+                    if (!empty($_POST["iso"])) {
+                        $iso = Wo_Secure($_POST["iso"]);
+                    }
+                    
+                    $db->insert(T_LANG_ISO,array('lang_name' => $lang_name,
+                                                 'iso' => $iso));
                     $content = file_get_contents('assets/languages/extra/english.php');
                     $fp      = fopen("assets/languages/extra/$lang_name.php", "wb");
                     fwrite($fp, $content);
                     fclose($fp);
+
+
                     $english = Wo_LangsFromDB('english');
                     foreach ($english as $key => $lang) {
                         $lang  = Wo_Secure($lang);
@@ -2560,6 +2634,18 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                 }
             }
         }
+        header("Content-type: application/json");
+        echo json_encode($data);
+        exit();
+    }
+    if ($s == "update_iso" && !empty($_POST["lang_name"]) && !empty($_POST["iso"])) {
+        $lang_name = Wo_Secure($_POST["lang_name"]);
+        $iso = Wo_Secure($_POST["iso"]);
+        if (empty($db->where('lang_name',$lang_name)->getOne(T_LANG_ISO))) {
+            $db->insert(T_LANG_ISO,array('lang_name' => $lang_name));
+        }
+        $db->where('lang_name',$lang_name)->update(T_LANG_ISO,array('iso' => $iso));
+        $data["status"] = 200;
         header("Content-type: application/json");
         echo json_encode($data);
         exit();
@@ -2593,6 +2679,39 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                 $lang_name = Wo_Secure($_GET['id']);
                 $query     = mysqli_query($sqlConnect, "ALTER TABLE " . T_LANGS . " DROP COLUMN `$lang_name`");
                 if ($query) {
+                    $mysqli = Wo_LangsNamesFromDB();
+                    $first = "module.exports = function(sequelize, DataTypes) {
+                          return sequelize.define('Wo_Langs', {
+                            id: {
+                              autoIncrement: true,
+                              type: DataTypes.INTEGER,
+                              allowNull: false,
+                              primaryKey: true
+                            },
+                            lang_key: {
+                              type: DataTypes.STRING(160),
+                              allowNull: true
+                            },
+                            type: {
+                              type: DataTypes.STRING(100),
+                              allowNull: false,
+                              defaultValue: \"\"
+                            }";
+                $last = "}, {
+                            sequelize,
+                            timestamps: false,
+                            tableName: 'Wo_Langs'
+                          });
+                        };";
+                $js = '{type: DataTypes.TEXT,
+                        allowNull: true
+                       }';
+                       $tx = '';
+                foreach ($mysqli as $key => $value) {
+                    $tx .= ','.$value.': '.$js;
+                }
+                file_put_contents("nodejs/models/wo_langs.js", $first.$tx.$last);
+                    $db->where('lang_name',$lang_name)->delete(T_LANG_ISO);
                     unlink("assets/languages/extra/$lang_name.php");
                     $data['status'] = 200;
                 }
@@ -2699,6 +2818,7 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                     );
                     Wo_RegisterNotification($notification_data_array);
                     if ($send_message) {
+                        Wo_UpdateBalance($get_payment_info['user_id'], $get_payment_info['amount'], '-','withdrawal');
                         $data['status'] = 200;
                     }
                 }
@@ -2998,16 +3118,15 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
         echo json_encode($data);
         exit();
     }
-    if ($s == 'test_paypal') {
-        $PayPal               = Wo_PayPal();
-        $data['status']       = 200;
-        $data['respond_code'] = $PayPal;
-        header("Content-type: application/json");
-        echo json_encode($data);
-        exit();
-    }
     if ($s == 'ffmpeg_debug') {
         $ffmpeg_b                   = $wo['config']['ffmpeg_binary_file'];
+        if (!isfuncEnabled("shell_exec")) {
+            $data['status'] = 200;
+            $data['data']   = "The function: shell_exec is not enabled, please contact your hosting provider to enable it, it's required for FFMPEG";
+            header("Content-type: application/json");
+            echo json_encode($data);
+            exit();
+        }
         $video_output_full_path_240 = dirname(__DIR__) . "/admin-panel/videos/test_240p_converted.mp4";
         @unlink($video_output_full_path_240);
         $video_file_full_path = dirname(__DIR__) . "/admin-panel/videos/test.mp4";
@@ -3116,6 +3235,16 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                 }
             }
             if (isset($wo['config'][$key]) || $key == 'googleAnalytics_en') {
+                if ($key == 'yandex_translate') {
+                    if ($value == 1) {
+                        $saveSetting = Wo_SaveConfig('google_translate', 0);
+                    }
+                }
+                if ($key == 'google_translate') {
+                    if ($value == 1) {
+                        $saveSetting = Wo_SaveConfig('yandex_translate', 0);
+                    }
+                }
                 if ($key == 'agora_chat_video') {
                     if ($config['twilio_video_chat'] == 1) {
                         $saveSetting = Wo_SaveConfig('twilio_video_chat', 0);
@@ -3153,6 +3282,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                         if ($wo['config']['cloud_upload'] == 1) {
                             $saveSetting = Wo_SaveConfig('cloud_upload', 0);
                         }
+                        if ($wo['config']['backblaze_storage'] == 1) {
+                            $saveSetting = Wo_SaveConfig('backblaze_storage', 0);
+                        }
                     }
                 }
                 if ($key == 'amazone_s3') {
@@ -3168,6 +3300,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                         }
                         if ($wo['config']['cloud_upload'] == 1) {
                             $saveSetting = Wo_SaveConfig('cloud_upload', 0);
+                        }
+                        if ($wo['config']['backblaze_storage'] == 1) {
+                            $saveSetting = Wo_SaveConfig('backblaze_storage', 0);
                         }
                     }
                 }
@@ -3185,6 +3320,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                         if ($wo['config']['cloud_upload'] == 1) {
                             $saveSetting = Wo_SaveConfig('cloud_upload', 0);
                         }
+                        if ($wo['config']['backblaze_storage'] == 1) {
+                            $saveSetting = Wo_SaveConfig('backblaze_storage', 0);
+                        }
                     }
                 }
                 if ($key == 'cloud_upload') {
@@ -3201,6 +3339,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                         if ($wo['config']['spaces'] == 1) {
                             $saveSetting = Wo_SaveConfig('spaces', 0);
                         }
+                        if ($wo['config']['backblaze_storage'] == 1) {
+                            $saveSetting = Wo_SaveConfig('backblaze_storage', 0);
+                        }
                     }
                 }
                 if ($key == 'wasabi_storage') {
@@ -3216,6 +3357,28 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                         }
                         if ($wo['config']['spaces'] == 1) {
                             $saveSetting = Wo_SaveConfig('spaces', 0);
+                        }
+                        if ($wo['config']['backblaze_storage'] == 1) {
+                            $saveSetting = Wo_SaveConfig('backblaze_storage', 0);
+                        }
+                    }
+                }
+                if ($key == 'backblaze_storage') {
+                    if ($value == 1) {
+                        if ($wo['config']['ftp_upload'] == 1) {
+                            $saveSetting = Wo_SaveConfig('ftp_upload', 0);
+                        }
+                        if ($wo['config']['cloud_upload'] == 1) {
+                            $saveSetting = Wo_SaveConfig('cloud_upload', 0);
+                        }
+                        if ($wo['config']['amazone_s3'] == 1) {
+                            $saveSetting = Wo_SaveConfig('amazone_s3', 0);
+                        }
+                        if ($wo['config']['spaces'] == 1) {
+                            $saveSetting = Wo_SaveConfig('spaces', 0);
+                        }
+                        if ($wo['config']['wasabi_storage'] == 1) {
+                            $saveSetting = Wo_SaveConfig('wasabi_storage', 0);
                         }
                     }
                 }
@@ -3285,7 +3448,13 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                 'upload/photos/app-default-icon.png',
                 'upload/photos/index.html',
                 'upload/photos/incognito.png',
-                'upload/.htaccess'
+                'upload/.htaccess',
+                'upload/files/2022/09/EAufYfaIkYQEsYzwvZha_01_4bafb7db09656e1ecb54d195b26be5c3_file.svg',
+                'upload/files/2022/09/2MRRkhb7rDhUNuClfOfc_01_76c3c700064cfaef049d0bb983655cd4_file.svg',
+                'upload/files/2022/09/D91CP5YFfv74GVAbYtT7_01_288940ae12acf0198d590acbf11efae0_file.svg',
+                'upload/files/2022/09/cFNOXZB1XeWRSdXXEdlx_01_7d9c4adcbe750bfc8e864c69cbed3daf_file.svg',
+                'upload/files/2022/09/yKmDaNA7DpA7RkCRdoM6_01_eb391ca40102606b78fef1eb70ce3c0f_file.svg',
+                'upload/files/2022/09/iZcVfFlay3gkABhEhtVC_01_771d67d0b8ae8720f7775be3a0cfb51a_file.svg'
             );
             foreach ($array as $key => $value) {
                 $upload = Wo_UploadToS3($value, array(
@@ -3376,6 +3545,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
         if (is_callable('fastcgi_finish_request')) {
             fastcgi_finish_request();
         }
+        if (is_callable('litespeed_finish_request')) {
+            litespeed_finish_request();
+        }
         for ($i = 0; $i < $count_users; $i++) {
             $genders     = array_keys($wo['genders']);
             $random_keys = array_rand($genders, 1);
@@ -3437,6 +3609,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
         if (is_callable('fastcgi_finish_request')) {
             fastcgi_finish_request();
         }
+        if (is_callable('litespeed_finish_request')) {
+                litespeed_finish_request();
+            }
         $query = mysqli_query($sqlConnect, "SELECT user_id FROM " . T_USERS . " WHERE src = 'Fake'");
         while ($row = mysqli_fetch_assoc($query)) {
             Wo_DeleteUser($row['user_id']);
@@ -3464,6 +3639,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
             if (is_callable('fastcgi_finish_request')) {
                 fastcgi_finish_request();
             }
+            if (is_callable('litespeed_finish_request')) {
+                litespeed_finish_request();
+            }
             $delete_data = Wo_DeleteAllData($_GET['delete']);
         }
         header("Content-type: application/json");
@@ -3471,11 +3649,11 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
         exit();
     }
     if ($s == 'test_wasabi') {
-        include_once('assets/libraries/s3/vendor/autoload.php');
+        include_once('assets/libraries/s3-lib/vendor/autoload.php');
         try {
             $s3Client = S3Client::factory(array(
                 'version' => 'latest',
-                'endpoint' => 'https://s3.wasabisys.com',
+                'endpoint' => 'https://s3.'.$wo['config']['wasabi_bucket_region'].'.wasabisys.com',
                 'region' => $wo['config']['wasabi_bucket_region'],
                 'credentials' => array(
                     'key' => $wo['config']['wasabi_access_key'],
@@ -3497,7 +3675,13 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                         'upload/photos/game-icon.png',
                         'upload/photos/d-film.jpg',
                         'upload/photos/incognito.png',
-                        'upload/photos/app-default-icon.png'
+                        'upload/photos/app-default-icon.png',
+                        'upload/files/2022/09/EAufYfaIkYQEsYzwvZha_01_4bafb7db09656e1ecb54d195b26be5c3_file.svg',
+                        'upload/files/2022/09/2MRRkhb7rDhUNuClfOfc_01_76c3c700064cfaef049d0bb983655cd4_file.svg',
+                        'upload/files/2022/09/D91CP5YFfv74GVAbYtT7_01_288940ae12acf0198d590acbf11efae0_file.svg',
+                        'upload/files/2022/09/cFNOXZB1XeWRSdXXEdlx_01_7d9c4adcbe750bfc8e864c69cbed3daf_file.svg',
+                        'upload/files/2022/09/yKmDaNA7DpA7RkCRdoM6_01_eb391ca40102606b78fef1eb70ce3c0f_file.svg',
+                        'upload/files/2022/09/iZcVfFlay3gkABhEhtVC_01_771d67d0b8ae8720f7775be3a0cfb51a_file.svg'
                     );
                     foreach ($array as $key => $value) {
                         $upload = Wo_UploadToS3($value, array(
@@ -3520,7 +3704,7 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
         exit();
     }
     if ($s == 'test_s3') {
-        include_once('assets/libraries/s3/vendor/autoload.php');
+        include_once('assets/libraries/s3-lib/vendor/autoload.php');
         try {
             $s3Client = S3Client::factory(array(
                 'version' => 'latest',
@@ -3566,7 +3750,13 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                         'upload/photos/game-icon.png',
                         'upload/photos/d-film.jpg',
                         'upload/photos/incognito.png',
-                        'upload/photos/app-default-icon.png'
+                        'upload/photos/app-default-icon.png',
+                        'upload/files/2022/09/EAufYfaIkYQEsYzwvZha_01_4bafb7db09656e1ecb54d195b26be5c3_file.svg',
+                        'upload/files/2022/09/2MRRkhb7rDhUNuClfOfc_01_76c3c700064cfaef049d0bb983655cd4_file.svg',
+                        'upload/files/2022/09/D91CP5YFfv74GVAbYtT7_01_288940ae12acf0198d590acbf11efae0_file.svg',
+                        'upload/files/2022/09/cFNOXZB1XeWRSdXXEdlx_01_7d9c4adcbe750bfc8e864c69cbed3daf_file.svg',
+                        'upload/files/2022/09/yKmDaNA7DpA7RkCRdoM6_01_eb391ca40102606b78fef1eb70ce3c0f_file.svg',
+                        'upload/files/2022/09/iZcVfFlay3gkABhEhtVC_01_771d67d0b8ae8720f7775be3a0cfb51a_file.svg'
                     );
                     foreach ($array as $key => $value) {
                         $upload = Wo_UploadToS3($value, array(
@@ -3589,7 +3779,7 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
         exit();
     }
     if ($s == 'test_s3_2') {
-        include_once('assets/libraries/s3/vendor/autoload.php');
+        include_once('assets/libraries/s3-lib/vendor/autoload.php');
         try {
             $s3Client = S3Client::factory(array(
                 'version' => 'latest',
@@ -3641,31 +3831,40 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
         exit();
     }
     if ($s == 'test_spaces') {
-        include_once("assets/libraries/spaces/spaces.php");
+        include_once('assets/libraries/s3-lib/vendor/autoload.php');
+        $key        = $wo['config']['spaces_key'];
+        $secret     = $wo['config']['spaces_secret'];
+        $spaceName = $wo['config']['space_name'];
+        $region     = $wo['config']['space_region'];
+        $host = "digitaloceanspaces.com";
         try {
-            $key        = $wo['config']['spaces_key'];
-            $secret     = $wo['config']['spaces_secret'];
-            $space_name = $wo['config']['space_name'];
-            $region     = $wo['config']['space_region'];
-            $space      = new SpacesConnect($key, $secret, $space_name, $region);
-            $buckets    = $space->ListSpaces();
-            $result     = $space->PutCORS(array(
-                'AllowedHeaders' => array(
-                    'Authorization'
-                ),
-                'AllowedMethods' => array(
-                    'POST',
-                    'GET',
-                    'PUT'
-                ), // REQUIRED
-                'AllowedOrigins' => array(
-                    '*'
-                ), // REQUIRED
-                'ExposeHeaders' => array(),
-                'MaxAgeSeconds' => 3000
-            ));
+            // if(!empty($spaceName)) {
+            //   $endpoint = "https://".$spaceName.".".$region.".".$host;
+            // }
+            // else {
+              $endpoint = "https://".$region.".".$host;
+            // }
+            $s3Client = S3Client::factory(array(
+            'region' => $region,
+            'version' => 'latest',
+            'endpoint' => $endpoint,
+            'credentials' => array(
+                      'key'    => $key,
+                      'secret' => $secret,
+                  ),
+            'bucket_endpoint' => true,
+          ));
+            $buckets  = $s3Client->listBuckets();
             if (!empty($buckets)) {
-                if (!empty($space->GetSpaceName())) {
+                $exists = 0;
+                foreach ($buckets->toArray()['Buckets'] as $key => $value) {
+                    if ($value['Name'] == $wo['config']['space_name']) {
+                        $exists = 1;
+                        break;
+                    }
+                }
+                
+                if ($exists) {
                     $data['status'] = 200;
                     $array          = array(
                         'upload/photos/d-avatar.jpg',
@@ -3677,7 +3876,13 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                         'upload/photos/game-icon.png',
                         'upload/photos/d-film.jpg',
                         'upload/photos/incognito.png',
-                        'upload/photos/app-default-icon.png'
+                        'upload/photos/app-default-icon.png',
+                        'upload/files/2022/09/EAufYfaIkYQEsYzwvZha_01_4bafb7db09656e1ecb54d195b26be5c3_file.svg',
+                        'upload/files/2022/09/2MRRkhb7rDhUNuClfOfc_01_76c3c700064cfaef049d0bb983655cd4_file.svg',
+                        'upload/files/2022/09/D91CP5YFfv74GVAbYtT7_01_288940ae12acf0198d590acbf11efae0_file.svg',
+                        'upload/files/2022/09/cFNOXZB1XeWRSdXXEdlx_01_7d9c4adcbe750bfc8e864c69cbed3daf_file.svg',
+                        'upload/files/2022/09/yKmDaNA7DpA7RkCRdoM6_01_eb391ca40102606b78fef1eb70ce3c0f_file.svg',
+                        'upload/files/2022/09/iZcVfFlay3gkABhEhtVC_01_771d67d0b8ae8720f7775be3a0cfb51a_file.svg'
                     );
                     foreach ($array as $key => $value) {
                         $upload = Wo_UploadToS3($value, array(
@@ -3743,6 +3948,23 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
         echo json_encode($data);
         exit();
     }
+    if ($s == 'email_debug') {
+        $send_message_data = array(
+            'from_email' => $wo['config']['siteEmail'],
+            'from_name' => $wo['config']['siteName'],
+            'to_email' => $wo['user']['email'],
+            'to_name' => $wo['user']['name'],
+            'subject' => 'Test Message From ' . $wo['config']['siteName'],
+            'charSet' => 'utf-8',
+            'message_body' => 'If you can see this message, then your SMTP configuration is working fine.',
+            'is_html' => false,
+            'return' => 'debug',
+        );
+        $send_message      = Wo_SendMessage($send_message_data);
+        
+        header("Content-type: application/json");
+        exit();
+    }
     if ($s == 'test_message') {
         $send_message_data = array(
             'from_email' => $wo['config']['siteEmail'],
@@ -3752,14 +3974,20 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
             'subject' => 'Test Message From ' . $wo['config']['siteName'],
             'charSet' => 'utf-8',
             'message_body' => 'If you can see this message, then your SMTP configuration is working fine.',
-            'is_html' => false
+            'is_html' => false,
+            'return' => 'error',
         );
         $send_message      = Wo_SendMessage($send_message_data);
         if ($send_message === true) {
             $data['status'] = 200;
         } else {
             $data['status'] = 400;
-            $data['error']  = "Error found while sending the email, the information you provided are not correct, please test the email settings on your local device and make sure they are correct. ";
+            if (!empty($send_message)) {
+                $data['error']  = $send_message;
+            }
+            else{
+                $data['error']  = "Error found while sending the email, the information you provided are not correct, please test the email settings on your local device and make sure they are correct. ";
+            }
         }
         header("Content-type: application/json");
         echo json_encode($data);
@@ -4225,6 +4453,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                 if (is_callable('fastcgi_finish_request')) {
                     fastcgi_finish_request();
                 }
+                if (is_callable('litespeed_finish_request')) {
+                litespeed_finish_request();
+            }
                 foreach ($users as $user) {
                     $send_message_data = array(
                         'from_email' => $wo['config']['siteEmail'],
@@ -4264,7 +4495,10 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
             '3month',
             '6month',
             '9month',
-            'year'
+            'year',
+            'all',
+            'active',
+            'inactive',
         );
         if (empty($_POST['message']) || empty($_POST['subject']) || empty($_POST['send_to']) || !in_array($_POST['send_to'], $types)) {
             $send_errors = $error_icon . $wo['lang']['please_check_details'];
@@ -4295,6 +4529,13 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                             $users[] = Wo_UserData($user_id);
                         }
                     }
+                }
+                 else if ($_POST['send_to'] == 'active') {
+                    $users = Wo_GetAllUsersByType('active');
+                } else if ($_POST['send_to'] == 'inactive') {
+                    $users = Wo_GetAllUsersByType('inactive');
+                } else if ($_POST['send_to'] == 'all') {
+                    $users = Wo_GetAllUsersByType('all');
                 } else {
                     $users = Wo_GetUsersByTime($_POST['send_to']);
                 }
@@ -4314,6 +4555,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                 session_write_close();
                 if (is_callable('fastcgi_finish_request')) {
                     fastcgi_finish_request();
+                }
+                if (is_callable('litespeed_finish_request')) {
+                    litespeed_finish_request();
                 }
                 foreach ($users as $user) {
                     $send_message_data = array(
@@ -4347,18 +4591,20 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
         exit();
     }
     if ($s == 'get_users_emails' && isset($_GET['name'])) {
-        $name  = Wo_Secure($_GET['name']);
         $html  = '';
-        $users = Wo_GetUsersByName($name, false, 20);
         $data  = array(
             'status' => 404
         );
-        if (count($users) > 0) {
-            foreach ($users as $user) {
-                $html .= "<p data-user='" . $user['user_id'] . "'>" . $user['username'] . "</p>";
+        if (!empty($_GET['name'])) {
+            $name  = Wo_Secure($_GET['name']);
+            $users = Wo_GetUsersByName($name, false, 20);
+            if (count($users) > 0) {
+                foreach ($users as $user) {
+                    $html .= "<p data-user='" . $user['user_id'] . "'>" . $user['username'] . "</p>";
+                }
+                $data['status'] = 200;
+                $data['html']   = $html;
             }
-            $data['status'] = 200;
-            $data['html']   = $html;
         }
         header("Content-type: application/json");
         echo json_encode($data);
@@ -4614,22 +4860,22 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                 $sunshine_small = $explode3[0] . '_small.' . $explode2;
                 if (file_exists($wowonder_small)) {
                     @unlink(trim($wowonder_small));
-                } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+                } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                     @Wo_DeleteFromToS3($wowonder_small);
                 }
                 if (file_exists($sunshine_small)) {
                     @unlink(trim($sunshine_small));
-                } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+                } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                     @Wo_DeleteFromToS3($sunshine_small);
                 }
                 if (file_exists($reaction->wowonder_icon)) {
                     @unlink(trim($reaction->wowonder_icon));
-                } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+                } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                     @Wo_DeleteFromToS3($reaction->wowonder_icon);
                 }
                 if (file_exists($reaction->sunshine_icon)) {
                     @unlink(trim($reaction->sunshine_icon));
-                } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+                } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                     @Wo_DeleteFromToS3($reaction->sunshine_icon);
                 }
                 $db->where('lang_key', $reaction->name)->delete(T_LANGS);
@@ -4754,12 +5000,12 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                     $wowonder_small = $explode3[0] . '_small.' . $explode2;
                     if (file_exists($reaction->wowonder_icon)) {
                         @unlink(trim($reaction->wowonder_icon));
-                    } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+                    } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                         @Wo_DeleteFromToS3($reaction->wowonder_icon);
                     }
                     if (file_exists($wowonder_small)) {
                         @unlink(trim($wowonder_small));
-                    } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+                    } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                         @Wo_DeleteFromToS3($wowonder_small);
                     }
                     $update_data['wowonder_icon'] = '';
@@ -4770,12 +5016,12 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                     $sunshine_small = $explode3[0] . '_small.' . $explode2;
                     if (file_exists($sunshine_small)) {
                         @unlink(trim($sunshine_small));
-                    } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+                    } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                         @Wo_DeleteFromToS3($sunshine_small);
                     }
                     if (file_exists($reaction->sunshine_icon)) {
                         @unlink(trim($reaction->sunshine_icon));
-                    } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+                    } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                         @Wo_DeleteFromToS3($reaction->sunshine_icon);
                     }
                     $update_data['sunshine_icon'] = '';
@@ -5117,6 +5363,9 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
                     $price             = 0;
                     $orders            = $db->where('hash_id', $request->order_hash_id)->get(T_USER_ORDERS);
                     foreach ($orders as $key => $order) {
+                        $db->where('id', $order->product_id)->update(T_PRODUCTS, array(
+                            'units' => $db->inc($order->units)
+                        ));
                         $total_final_price += $order->final_price;
                         $price += $order->price;
                     }
@@ -5155,7 +5404,7 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
         } elseif (!file_exists($wo['config']['cloud_file_path'])) {
             $data['message'] = 'Google Cloud File not found on your server Please upload it to your server.';
         } else {
-            require_once 'assets/libraries/cloud/vendor/autoload.php';
+            require_once 'assets/libraries/google-lib/vendor/autoload.php';
             try {
                 $storage = new StorageClient(array(
                     'keyFilePath' => $wo['config']['cloud_file_path']
@@ -5348,6 +5597,230 @@ if ($f == 'admin_setting' AND (Wo_IsAdmin() || Wo_IsModerator())) {
             'status' => 200
         );
         header("Content-type: application/json");
+        echo json_encode($data);
+        exit();
+    }
+    if ($s == 'edit-forum') {
+        if (empty($_POST['name']) || empty($_POST['description']) || empty($_POST['section']) || empty($_POST['id']) || !is_numeric($_POST['id'])) {
+            $error = $error_icon . $wo['lang']['please_check_details'];
+        } else {
+            if (strlen($_POST['name']) < 5) {
+                $error = $error_icon . $wo['lang']['title_more_than10'];
+            }
+            if (strlen($_POST['name']) > 100) {
+                $error = $error_icon . $wo['lang']['please_check_details'];
+            }
+            if (strlen($_POST['description']) < 5) {
+                $error = $error_icon . $wo['lang']['desc_more_than32'];
+            }
+            if (strlen($_POST['description']) > 190) {
+                $error = $error_icon . $wo['lang']['please_check_details'];
+            }
+        }
+        if (empty($error)) {
+            $forum = $db->where('id',Wo_Secure($_POST['id']))->getOne(T_FORUMS);
+            if (!empty($forum)) {
+               $registration_data = array(
+                    'name' => Wo_Secure($_POST['name']),
+                    'description' => Wo_Secure($_POST['description']),
+                    'sections' => Wo_Secure($_POST['section'])
+                );
+               $db->where('id',Wo_Secure($_POST['id']))->update(T_FORUMS,$registration_data);
+               $data = array(
+                    'status' => 200
+                );
+            } else {
+                $data = array(
+                    'status' => 500,
+                    'message' => $wo['lang']['please_check_details']
+                );
+            }
+        } else {
+            $data = array(
+                'status' => 500,
+                'message' => $error
+            );
+        }
+        header("Content-type: application/json");
+        echo json_encode($data);
+        exit();
+    }
+    if ($s == 'edit-forum-section') {
+        if (empty($_POST['name']) || empty($_POST['description'])) {
+            $error = $error_icon . $wo['lang']['please_check_details'];
+        } else {
+            if (strlen($_POST['name']) < 5) {
+                $error = $error_icon . $wo['lang']['title_more_than10'];
+            }
+            if (strlen($_POST['name']) > 145) {
+                $error = $error_icon . $wo['lang']['please_check_details'];
+            }
+            if (strlen($_POST['description']) < 5) {
+                $error = $error_icon . $wo['lang']['desc_more_than32'];
+            }
+        }
+        if (empty($error)) {
+            $forum = $db->where('id',Wo_Secure($_POST['id']))->getOne(T_FORUM_SEC);
+            if (!empty($forum)) {
+                $registration_data = array(
+                    'section_name' => Wo_Secure($_POST['name']),
+                    'description' => Wo_Secure($_POST['description'])
+                );
+                $db->where('id',Wo_Secure($_POST['id']))->update(T_FORUM_SEC,$registration_data);
+                $data = array(
+                    'status' => 200
+                );
+
+            }else {
+                $data = array(
+                    'status' => 500,
+                    'message' => $wo['lang']['please_check_details']
+                );
+            }
+        } else {
+            $data = array(
+                'status' => 500,
+                'message' => $error
+            );
+        }
+        header("Content-type: application/json");
+        echo json_encode($data);
+        exit();
+    }
+    if ($s == 'insert-invitation') {
+        $data             = array(
+            'status' => 200,
+            'html' => ''
+        );
+        $wo['invitation'] = Wo_InsertAdminInvitation();
+        if ($wo['invitation'] && is_array($wo['invitation'])) {
+            $data['html']   = Wo_LoadAdminPage('manage-invitation-keys/list');
+            $data['status'] = 200;
+        }
+        header("Content-type: application/json");
+        echo json_encode($data);
+        exit();
+    }
+    if ($s == 'rm-invitation' && isset($_GET['id']) && is_numeric($_GET['id'])) {
+        $data = array(
+            'status' => 304
+        );
+        if (Wo_DeleteAdminInvitation('id', $_GET['id'])) {
+            $data['status'] = 200;
+        }
+        header("Content-type: application/json");
+        echo json_encode($data);
+        exit();
+    }
+    if ($s == 'update-sitemap') {
+        $rate = (isset($_POST['rate']) && strlen($_POST['rate']) > 0) ? $_POST['rate'] : false;
+        $data = array(
+            'status' => 304
+        );
+        if (Wo_GenirateSiteMap($rate)) {
+            $data['status'] = 200;
+        }
+        header("Content-type: application/json");
+        echo json_encode($data);
+        exit();
+    }
+    if ($s == 'rm-user-invitation' && isset($_GET['id']) && is_numeric($_GET['id'])) {
+        $data = array(
+            'status' => 304
+        );
+        if (Wo_DeleteUserInvitation('id', $_GET['id'])) {
+            $data['status'] = 200;
+        }
+        header("Content-type: application/json");
+        echo json_encode($data);
+        exit();
+    }
+    if ($s == 'test_backblaze') {
+        $server_output = BackblazeConnect(array('apiUrl' => 'https://api.backblazeb2.com',
+                                               'uri' => '/b2api/v2/b2_authorize_account',
+                                            ));
+        $data['status'] = 404;
+        if (!empty($server_output)) {
+            $result = json_decode($server_output,true);
+            if (!empty($result['authorizationToken']) && !empty($result['apiUrl']) && !empty($result['accountId'])) {
+
+                $info = BackblazeConnect(array('apiUrl' => $result['apiUrl'],
+                                               'uri' => '/b2api/v2/b2_list_buckets',
+                                               'accountId' => $result['accountId'],
+                                               'authorizationToken' => $result['authorizationToken'],
+                                        ));
+                if (!empty($info)) {
+                    $info = json_decode($info,true);
+                    if (!empty($info) && !empty($info['buckets'])) {
+                        $bucketId = '';
+                        foreach ($info['buckets'] as $key => $value) {
+                            if ($value['bucketId'] == $wo['config']['backblaze_bucket_id']) {
+                                $db->where('name', 'backblaze_bucket_name')->update(T_CONFIG, array('value' => $value['bucketName']));
+                                $bucketId = $value['bucketId'];
+                                break;
+                            }
+                        }
+
+                        if (!empty($bucketId)) {
+                            $data['status'] = 200;
+                            $array = array(
+                                'upload/photos/d-avatar.jpg',
+                                'upload/photos/f-avatar.jpg',
+                                'upload/photos/d-cover.jpg',
+                                'upload/photos/d-group.jpg',
+                                'upload/photos/d-page.jpg',
+                                'upload/photos/d-blog.jpg',
+                                'upload/photos/game-icon.png',
+                                'upload/photos/d-film.jpg',
+                                'upload/photos/app-default-icon.png',
+                                'upload/photos/incognito.png',
+                                'upload/.htaccess',
+                                'upload/files/2022/09/EAufYfaIkYQEsYzwvZha_01_4bafb7db09656e1ecb54d195b26be5c3_file.svg',
+                                'upload/files/2022/09/2MRRkhb7rDhUNuClfOfc_01_76c3c700064cfaef049d0bb983655cd4_file.svg',
+                                'upload/files/2022/09/D91CP5YFfv74GVAbYtT7_01_288940ae12acf0198d590acbf11efae0_file.svg',
+                                'upload/files/2022/09/cFNOXZB1XeWRSdXXEdlx_01_7d9c4adcbe750bfc8e864c69cbed3daf_file.svg',
+                                'upload/files/2022/09/yKmDaNA7DpA7RkCRdoM6_01_eb391ca40102606b78fef1eb70ce3c0f_file.svg',
+                                'upload/files/2022/09/iZcVfFlay3gkABhEhtVC_01_771d67d0b8ae8720f7775be3a0cfb51a_file.svg'
+                            );
+                            foreach ($array as $key => $value) {
+                                $upload = Wo_UploadToS3($value, array(
+                                    'delete' => 'no'
+                                ));
+                            }
+                        }
+                    }
+                    else{
+                        $data['status'] = 300;
+                    }
+                }
+            }
+        }
+        header("Content-type: application/json");
+        echo json_encode($data);
+        exit();
+    }
+    if ($s == 'uploadFiles') {
+        if (!empty($_GET['file']) && !empty($_GET['path'])) {
+            $file = Wo_Secure(base64_decode($_GET['path']));
+            $storage = Wo_Secure($_GET['file']);
+            $checkIfFileExistsInUpload = $db->where('filename', Wo_Secure($file))->where('storage', $storage)->getOne(T_UPLOADED_MEDIA);
+            if (empty($checkIfFileExistsInUpload)) {
+               try {
+                    $uploadToS3 = Wo_UploadToS3($file, ["delete" => "no"]);
+                    if ($uploadToS3) {
+                        $insert = $db->insert(T_UPLOADED_MEDIA, ['filename' => Wo_Secure($file), 'storage' => $storage, 'time' => time()]);
+                        $data = ['status' => 200, 'fullPath' => Wo_GetMedia(str_replace("\\", "/", $file))];
+                    } else {
+                        $data = ['status' => 400, 'message' => "Error found while uploading, please check settings."];
+                    }
+               } catch (Exception $e) {
+                   $data = ['status' => 400, 'message' => $e->getMessage()];
+               }
+            } else {
+                $data = ['status' => 400, 'message' => "File already uploaded."];
+            }
+        }
+        header('Content-Type: application/json; charset=utf-8');
         echo json_encode($data);
         exit();
     }

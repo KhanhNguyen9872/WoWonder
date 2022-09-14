@@ -303,11 +303,13 @@ if ($f == 'posts') {
                     }
                     $amazone_s3                   = $wo['config']['amazone_s3'];
                     $wasabi_storage                   = $wo['config']['wasabi_storage'];
+                    $backblaze_storage                   = $wo['config']['backblaze_storage'];
                     $ftp_upload                   = $wo['config']['ftp_upload'];
                     $spaces                       = $wo['config']['spaces'];
                     $cloud_upload                 = $wo['config']['cloud_upload'];
                     $wo['config']['amazone_s3']   = 0;
                     $wo['config']['wasabi_storage']   = 0;
+                    $wo['config']['backblaze_storage']   = 0;
                     $wo['config']['ftp_upload']   = 0;
                     $wo['config']['spaces']       = 0;
                     $wo['config']['cloud_upload'] = 0;
@@ -316,6 +318,7 @@ if ($f == 'posts') {
                 if ($wo['config']['ffmpeg_system'] == 'on') {
                     $wo['config']['amazone_s3']   = $amazone_s3;
                     $wo['config']['wasabi_storage']   = $wasabi_storage;
+                    $wo['config']['backblaze_storage']   = $backblaze_storage;
                     $wo['config']['ftp_upload']   = $ftp_upload;
                     $wo['config']['spaces']       = $spaces;
                     $wo['config']['cloud_upload'] = $cloud_upload;
@@ -566,18 +569,18 @@ if ($f == 'posts') {
                 'page_id' => Wo_Secure($page_id),
                 'group_id' => Wo_Secure($group_id),
                 'event_id' => Wo_Secure($event_id),
-                'postText' => Wo_Secure($post_text),
+                'postText' => Wo_Secure($post_text,1),
                 'recipient_id' => Wo_Secure($recipient_id),
                 'postRecord' => Wo_Secure($_POST['postRecord']),
                 'postFile' => Wo_Secure($mediaFilename, 0),
-                'postFileName' => Wo_Secure($mediaName),
+                'postFileName' => Wo_Secure($mediaName,1),
                 'postMap' => Wo_Secure($post_map),
                 'postPrivacy' => Wo_Secure($post_privacy),
-                'postLinkTitle' => Wo_Secure($url_title),
+                'postLinkTitle' => Wo_Secure($url_title,1),
                 'postLinkContent' => Wo_Secure($url_content),
                 'postLink' => Wo_Secure($url_link),
                 'postLinkImage' => Wo_Secure($import_url_image, 0),
-                'album_name' => Wo_Secure($album_name),
+                'album_name' => Wo_Secure($album_name,1),
                 'multi_image' => Wo_Secure($multi),
                 'postFeeling' => Wo_Secure($feeling),
                 'postListening' => Wo_Secure($listening),
@@ -663,6 +666,9 @@ if ($f == 'posts') {
                 session_write_close();
                 if (is_callable('fastcgi_finish_request')) {
                     fastcgi_finish_request();
+                }
+                if (is_callable('litespeed_finish_request')) {
+                    litespeed_finish_request();
                 }
                 $id = FFMPEGUpload(array(
                     'filename' => $ffmpeg_convert_video,
@@ -772,6 +778,9 @@ if ($f == 'posts') {
                 if (is_callable('fastcgi_finish_request')) {
                     fastcgi_finish_request();
                 }
+                if (is_callable('litespeed_finish_request')) {
+                    litespeed_finish_request();
+                }
                 if ($wo['config']['notify_new_post'] == 1) {
                     if (empty($wo['story']['page_id']) && empty($wo['story']['group_id']) && empty($wo['story']['event_id']) && $wo['story']['postPrivacy'] < 3) {
                         $post_id = $wo['story']['id'];
@@ -837,6 +846,9 @@ if ($f == 'posts') {
             if (is_callable('fastcgi_finish_request')) {
                 fastcgi_finish_request();
             }
+            if (is_callable('litespeed_finish_request')) {
+                litespeed_finish_request();
+            }
             $wo['story'] = $db->where('id', Wo_Secure($_POST['post_id']))->where('user_id', $wo['user']['id'])->getOne(T_POSTS);
             if ($wo['config']['notify_new_post'] == 1 && !empty($wo['story']->send_notify)) {
                 if (empty($wo['story']->page_id) && empty($wo['story']->group_id) && empty($wo['story']->event_id) && $wo['story']->postPrivacy < 3) {
@@ -868,12 +880,18 @@ if ($f == 'posts') {
     }
     if ($s == 'delete_post' && Wo_CheckMainSession($hash_id) === true) {
         if (!empty($_GET['post_id'])) {
-            $wo['story'] = $db->where('id', Wo_Secure($_GET['post_id']))->getOne(T_POSTS);
-            $post_id     = Wo_Secure($_GET['post_id']);
-            $post        = $db->where('id', $post_id)->getOne(T_POSTS);
-            if (Wo_DeletePost($_GET['post_id']) === true) {
-                if (!empty($post)) {
-                    $text          = $post->postText;
+            $wo['story'] = $db->where('id', Wo_Secure($_GET['post_id']))->ArrayBuilder()->getOne(T_POSTS);
+            $deleted = false;
+            if (!empty($wo['story']['blog_id']) && $wo['story']['blog_id'] > 0) {
+                if (Wo_DeleteMyBlog($wo['story']['blog_id'])) {
+                    $deleted = true;
+                }
+            }else if (Wo_DeletePost($_GET['post_id']) === true) {
+                $deleted = true;
+            }
+            if ($deleted == true) {
+                if (!empty($wo['story'])) {
+                    $text          = $wo['story']['postText'];
                     $hashtag_regex = '/(#\[([0-9]+)\])/i';
                     preg_match_all($hashtag_regex, $text, $matches);
                     $match_i = 0;
@@ -887,8 +905,8 @@ if ($f == 'posts') {
                         $match_i++;
                     }
                 }
-                $wo['user_profile'] = Wo_UserData($wo['story']->user_id);
-                $user_data          = Wo_UpdateUserDetails($wo['story']->user_id, true, false, true, true);
+                $wo['user_profile'] = Wo_UserData($wo['story']['user_id']);
+                $user_data          = Wo_UpdateUserDetails($wo['story']['user_id'], true, false, true, true);
                 Wo_CleanCache();
                 $data = array(
                     'status' => 200,
@@ -1488,7 +1506,7 @@ if ($f == 'posts') {
                 'user_id' => Wo_Secure($wo['user']['user_id']),
                 'page_id' => Wo_Secure($page_id),
                 'post_id' => Wo_Secure($_POST['post_id']),
-                'text' => Wo_Secure($_POST['text']),
+                'text' => Wo_Secure($_POST['text'],1),
                 'c_file' => Wo_Secure($comment_image),
                 'time' => time()
             );
@@ -1574,7 +1592,7 @@ if ($f == 'posts') {
                 'user_id' => Wo_Secure($wo['user']['user_id']),
                 'page_id' => Wo_Secure($page_id),
                 'comment_id' => Wo_Secure($_POST['comment_id']),
-                'text' => Wo_Secure($_POST['text']),
+                'text' => Wo_Secure($_POST['text'],1),
                 'c_file' => Wo_Secure($comment_image),
                 'time' => time()
             );
@@ -1613,7 +1631,7 @@ if ($f == 'posts') {
                 'status' => 304
             );
             $update_datau = array(
-                'text' => Wo_Secure($_POST['text'])
+                'text' => Wo_Secure($_POST['text'],1)
             );
             if (Wo_UpdateCommentReply($id, $update_datau)) {
                 $reply = Wo_GetCommentReply($id);

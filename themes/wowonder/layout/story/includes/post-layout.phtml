@@ -27,7 +27,9 @@ $current_post = $wo['current_post'] = $wo['story'];
         <?php if (!empty($wo['story']['fund_raise_id']) && empty($wo['story']['parent_id'])) { ?>
 			<?php if (!empty($wo['story']['fund']['fund']['image'])): ?>
 				<div class="post-file" id="fullsizeimg">
-					<img src="<?php echo $wo['story']['fund']['fund']['image']; ?>" alt="Picture">
+					<a href="<?php echo $wo['config']['site_url'].'/show_fund/'. $wo['story']['fund']['fund']['hashed_id']; ?>" data-ajax="?link1=show_fund&id=<?php echo($wo['story']['fund']['fund']['hashed_id']) ?>">
+						<img src="<?php echo $wo['story']['fund']['fund']['image']; ?>" alt="Picture" class="fund">
+					</a>
 					<div class="wow_dontd_posts">
 						<div class="wow_dontd_posts_innr">
 							<div class="wow_dontd_posts_left">
@@ -35,7 +37,9 @@ $current_post = $wo['current_post'] = $wo['story'];
 									<a href="<?php echo $wo['config']['site_url'].'/show_fund/'. $wo['story']['fund']['fund']['hashed_id']; ?>" data-ajax="?link1=show_fund&id=<?php echo($wo['story']['fund']['fund']['hashed_id']) ?>"><?php echo $wo['story']['fund']['fund']['title']; ?></a>
 								</h4>
 								<!--<h5><?php echo $wo['lang']['amount'] ?> : <?php echo $wo['config']['currency_symbol_array'][$wo['config']['currency']].$wo['story']['fund']['amount']; ?></h5>-->
-								<p><?php echo $wo['config']['currency_symbol_array'][$wo['config']['currency']].$wo['story']['fund']['fund']['raised']; ?>  <?php echo $wo['lang']['raised_of']; ?> <?php echo $wo['config']['currency_symbol_array'][$wo['config']['currency']].$wo['story']['fund']['fund']['amount']; ?></p>
+								<a href="<?php echo $wo['config']['site_url'].'/show_fund/'. $wo['story']['fund']['fund']['hashed_id']; ?>" data-ajax="?link1=show_fund&id=<?php echo($wo['story']['fund']['fund']['hashed_id']) ?>">
+									<p><?php echo $wo['config']['currency_symbol_array'][$wo['config']['currency']].$wo['story']['fund']['fund']['raised']; ?>  <?php echo $wo['lang']['raised_of']; ?> <?php echo $wo['config']['currency_symbol_array'][$wo['config']['currency']].$wo['story']['fund']['fund']['amount']; ?></p>
+								</a>
 							</div>
 							<?php if ($wo['story']['fund']['fund']['amount'] > $wo['story']['fund']['fund']['raised']) { ?>
 							<div class="wow_dontd_posts_right">
@@ -56,7 +60,9 @@ $current_post = $wo['current_post'] = $wo['story'];
 		<?php if (!empty($wo['story']['fund_id']) && empty($wo['story']['parent_id'])) { ?>
 			<?php if (!empty($wo['story']['fund_data']['image'])): ?>
 				<div class="post-file" id="fullsizeimg">
-					<img src="<?php echo $wo['story']['fund_data']['image']; ?>" alt="Picture">
+					<a href="<?php echo $wo['config']['site_url'].'/show_fund/'. $wo['story']['fund_data']['hashed_id']; ?>" data-ajax="?link1=show_fund&id=<?php echo($wo['story']['fund_data']['hashed_id']) ?>">
+						<img src="<?php echo $wo['story']['fund_data']['image']; ?>" alt="Picture" class="fund">
+					</a>
 					<div class="wow_dontd_posts">
 						<div class="wow_dontd_posts_innr">
 							<div class="wow_dontd_posts_left">
@@ -64,7 +70,9 @@ $current_post = $wo['current_post'] = $wo['story'];
 									<a href="<?php echo $wo['config']['site_url'].'/show_fund/'. $wo['story']['fund_data']['hashed_id']; ?>" data-ajax="?link1=show_fund&id=<?php echo($wo['story']['fund_data']['hashed_id']) ?>"><?php echo $wo['story']['fund_data']['title']; ?></a>
 								</h4>
 								<!--<h5><?php echo $wo['lang']['amount'] ?> : <?php echo $wo['config']['currency_symbol_array'][$wo['config']['currency']].$wo['story']['fund_data']['amount']; ?></h5>-->
-								<p><?php echo $wo['config']['currency_symbol_array'][$wo['config']['currency']].$wo['story']['fund_data']['raised']; ?>  <?php echo $wo['lang']['raised_of']; ?> <?php echo $wo['config']['currency_symbol_array'][$wo['config']['currency']].$wo['story']['fund_data']['amount']; ?></p>
+								<a href="<?php echo $wo['config']['site_url'].'/show_fund/'. $wo['story']['fund_data']['hashed_id']; ?>" data-ajax="?link1=show_fund&id=<?php echo($wo['story']['fund_data']['hashed_id']) ?>">
+									<p><?php echo $wo['config']['currency_symbol_array'][$wo['config']['currency']].$wo['story']['fund_data']['raised']; ?>  <?php echo $wo['lang']['raised_of']; ?> <?php echo $wo['config']['currency_symbol_array'][$wo['config']['currency']].$wo['story']['fund_data']['amount']; ?></p>
+								</a>
 							</div>
 							<?php if ($wo['story']['fund_data']['amount'] > $wo['story']['fund_data']['raised']) { ?>
 							<div class="wow_dontd_posts_right">
@@ -105,7 +113,7 @@ $current_post = $wo['current_post'] = $wo['story'];
       <!-- embed -->
 
         <!-- postMap -->
-        <?php if(!empty($wo['story']['postMap']) && empty($wo['story']['postVine']) && empty($wo['story']['postSoundCloud']) && empty($wo['story']['postVimeo']) && empty($wo['story']['postDailymotion']) && empty($wo['story']['postYoutube']) && empty($wo['story']['postPlaytube']) && empty($wo['story']['postDeepsound']) && empty($wo['story']['postFile']) && ($wo['config']['google_map'] == 1 || $wo['config']['yandex_map'] == 1)) { ?>
+        <?php if(!empty($wo['story']['postMap']) && empty($wo['story']['postVine']) && empty($wo['story']['postSoundCloud']) && empty($wo['story']['postVimeo']) && empty($wo['story']['postDailymotion']) && empty($wo['story']['postYoutube']) && empty($wo['story']['postPlaytube']) && empty($wo['story']['postDeepsound']) && empty($wo['story']['postFile']) && ($wo['config']['google_map'] == 1 || $wo['config']['yandex_map'] == 1) && (empty($wo['story']['photo_album']) || (!empty($wo['story']['photo_album']) && count($wo['story']['photo_album']) < 2)) && $wo['story']['multi_image'] != 1) { ?>
         <div class="post-map">
           <?php if ($wo['config']['google_map'] == 1) { ?>
           <img src="https://maps.googleapis.com/maps/api/staticmap?center=<?php echo $wo['story']['postMap'];?>&zoom=13&size=600x250&maptype=roadmap&markers=color:red%7C<?php echo $wo['story']['postMap'];?>&key=<?php echo $wo['config']['google_map_api'];?>" width="100%">
@@ -216,7 +224,7 @@ $current_post = $wo['current_post'] = $wo['story'];
         <?php } ?>
 
         <!-- Live Video -->
-        <?php if (!empty($wo['story']['stream_name']) && empty($wo['story']['agora_resource_id']) && !$wo['story']['is_still_live']) { ?>
+        <?php if (!empty($wo['story']['stream_name']) && empty($wo['story']['agora_resource_id']) && empty($wo['story']['agora_token']) && empty($wo['story']['agora_sid']) && !$wo['story']['is_still_live']) { ?>
           <div class="post-file" <?php echo $wo['story']['is_still_live'] ? 'style="/*height: 440px;*/"' : ''; ?> id="fullsizeimg">
             <?php
             $wo['media'] = array('filename' => 'https://viewer.millicast.com/v2?streamId='.$wo['config']['live_account_id'].'/'.$wo['story']['stream_name']);

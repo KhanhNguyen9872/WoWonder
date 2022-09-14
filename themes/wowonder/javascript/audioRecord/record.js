@@ -120,7 +120,8 @@ jQuery(document).ready(function ($) {
         Wo_CleanRecordNodes();
         recording_time = $("span.messages-rtime");
         recording_node = "msg";
-        _SELF.attr('data-record', '1').html('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-stop-circle main"><circle cx="12" cy="12" r="10"></circle><rect x="9" y="9" width="6" height="6"></rect></svg>');
+        color = $('.btn-file svg').css("color");
+        _SELF.attr('data-record', '1').html('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-stop-circle main"><circle cx="12" cy="12" r="10"></circle><rect x="9" y="9" width="6" height="6"></rect></svg>');
         Wo_startRecording();
       }
 
@@ -157,9 +158,10 @@ function Wo_CleanRecordNodes(color = "#cf8283") {
     $(el).html('<svg enable-background="new 0 0 512 512" height="512" viewBox="0 0 512 512" width="512" xmlns="http://www.w3.org/2000/svg"><path d="m416.616 218.033v-37.417c0-8.284-6.716-15-15-15s-15 6.716-15 15v37.417c0 72.022-58.594 130.616-130.616 130.616s-130.616-58.594-130.616-130.616v-37.417c0-8.284-6.716-15-15-15s-15 6.716-15 15v37.417c0 83.506 64.06 152.32 145.616 159.91v42.357h-56.999c-35.675 0-64.7 29.024-64.7 64.7 0 14.888 12.112 27 27 27h219.396c14.888 0 27-12.112 27-27 0-35.676-29.024-64.7-64.7-64.7h-56.997v-42.358c81.556-7.589 145.616-76.404 145.616-159.909zm-54.046 263.967h-213.14c1.525-17.735 16.448-31.7 34.571-31.7h143.997c18.124 0 33.046 13.965 34.572 31.7z"/><path d="m256 318.649c55.48 0 100.616-45.136 100.616-100.616v-117.417c0-55.48-45.136-100.616-100.616-100.616s-100.616 45.136-100.616 100.616v117.416c0 55.481 45.136 100.617 100.616 100.617zm0-288.649c33.79 0 62.099 23.862 68.997 55.616h-34.613c-8.284 0-15 6.716-15 15s6.716 15 15 15h36.232v30h-36.232c-8.284 0-15 6.716-15 15s6.716 15 15 15h36.232v30h-36.232c-8.284 0-15 6.716-15 15s6.716 15 15 15h34.016c-7.835 30.459-35.53 53.033-68.399 53.033s-60.565-22.574-68.399-53.033h32.996c8.284 0 15-6.716 15-15s-6.716-15-15-15h-35.213v-30h35.213c8.284 0 15-6.716 15-15s-6.716-15-15-15h-35.213v-30h35.213c8.284 0 15-6.716 15-15s-6.716-15-15-15h-33.594c6.897-31.754 35.206-55.616 68.996-55.616z"/></svg>').attr('data-record', '0');
     $('[data-comment-rtime="' + $(el).attr('id') + '"]').text('00:00').addClass('hidden');
   });
-
+  
   $(".record-chat-audio").each(function (index, el) {
-	  $(el).html('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"  width="24" height="24" viewBox="0 0 24 24" class="select-color"><path fill="#a84849" d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z" /></svg>').attr('data-record', '0');
+    color =  $(el).find('svg path').attr('fill');
+	  $(el).html('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"  width="24" height="24" viewBox="0 0 24 24" class="select-color"><path fill="' + color + '" d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z" /></svg>').attr('data-record', '0');
     $('[data-chat-rtime="' + $(el).attr('data-chat-tab') + '"]').text('00:00').addClass('hidden');
   });
 
@@ -238,7 +240,8 @@ function Wo_clearMRecording() {
   recording_time && recording_time.text('00:00');
   recorder && clearTimeout(wo_timeout);
   recording_time && recording_time.addClass('hidden');
-  $("#messages-record").html('<svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24"><path fill="#ff3a55" d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"></path></svg>').attr('data-record', '0');
+  color = $('.btn-file svg').css("color");
+  $("#messages-record").html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 264.02 264.02"><g> <path fill="' + color + '" d="M210.506,126.764c-4.143,0-7.5,3.358-7.5,7.5c0,17.302-8.038,34.335-22.052,46.73 c-13.11,11.596-30.349,18.247-47.297,18.247h-3.295c-16.947,0-34.186-6.65-47.296-18.247 c-14.015-12.395-22.052-29.427-22.052-46.73c0-4.142-3.357-7.5-7.5-7.5s-7.5,3.358-7.5,7.5c0,21.598,9.883,42.726,27.114,57.966 c14.314,12.662,32.764,20.413,51.381,21.773v35.017H89.675c-4.143,0-7.5,3.358-7.5,7.5c0,4.142,3.357,7.5,7.5,7.5h84.667 c4.143,0,7.5-3.358,7.5-7.5c0-4.142-3.357-7.5-7.5-7.5H139.51v-35.017c18.617-1.361,37.067-9.112,51.382-21.773 c17.232-15.241,27.114-36.369,27.114-57.966C218.006,130.122,214.648,126.764,210.506,126.764z"></path> <path fill="' + color + '" d="M130.421,184.938h3.18c30.021,0,56.357-24.364,56.357-52.14v-80.66 C189.957,24.364,163.622,0,133.6,0h-3.18c-30.022,0-56.357,24.364-56.357,52.138v80.66 C74.063,160.573,100.398,184.938,130.421,184.938z M89.063,52.138C89.063,32.701,108.776,15,130.421,15h3.18 c21.645,0,41.357,17.701,41.357,37.138v80.66c0,19.438-19.712,37.14-41.357,37.14h-3.18c-21.644,0-41.357-17.702-41.357-37.14 V52.138z"></path> </g></svg>').attr('data-record', '0');
 }
 
 function Wo_GetPRecordLink() {
@@ -406,6 +409,7 @@ function Wo_RegisterPost(dataForm) {
 }
 
 function Wo_RegisterMessage(dataForm) {
+  $('form.sendMessages').find('.send-button').html('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-loader"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>');
   if (dataForm) {
     $.ajax({
       url: Wo_Ajax_Requests_File() + "?f=messages&s=upload_record",
@@ -417,6 +421,7 @@ function Wo_RegisterMessage(dataForm) {
       contentType: false,
     }).done(function (data) {
       if (data.status == 200) {
+        $('form.sendMessages').find('.send-button').html('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>');
         Wo_stopRecording();
         Wo_clearMRecording();
         Wo_StopLocalStream();

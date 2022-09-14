@@ -61,19 +61,30 @@ $year_users = $db->where('lastseen',$year_end,'<=')->getValue(T_USERS,'COUNT(*)'
                         </div>
                         <label for="send_to">Send E-mail To</label>
                         <select class="form-control show-tick" id="send_to" name="send_to">
-                          <option value="week">Users who didn`t login for a week ----- approximately (<?php echo $week_users; ?> User)</option>
-                          <option value="month">Users who didn`t login for a month ----- approximately (<?php echo $month_users; ?> User)</option>
-                          <option value="3month">Users who didn`t login for a 3 month ----- approximately (<?php echo $month_users3; ?> User)</option>
-                          <option value="6month">Users who didn`t login for a 6 month ----- approximately (<?php echo $month_users6; ?> User)</option>
-                          <option value="9month">Users who didn`t login for a 9 month ----- approximately (<?php echo $month_users9; ?> User)</option>
-                          <option value="year">Users who didn`t login for a year ----- approximately (<?php echo $year_users; ?> User)</option>
+                            <option value="all">All users</option>
+                            <option value="active">All Active users</option>
+                            <option value="inactive">All Inactive users</option>
+                            <option value="week">Users who didn't login for a week ----- approximately (<?php echo $week_users; ?> User)</option>
+                            <option value="month">Users who didn't login for a month ----- approximately (<?php echo $month_users; ?> User)</option>
+                            <option value="3month">Users who didn't login for a 3 month ----- approximately (<?php echo $month_users3; ?> User)</option>
+                            <option value="6month">Users who didn't login for a 6 month ----- approximately (<?php echo $month_users6; ?> User)</option>
+                            <option value="9month">Users who didn't login for a 9 month ----- approximately (<?php echo $month_users9; ?> User)</option>
+                            <option value="year">Users who didn't login for a year ----- approximately (<?php echo $year_users; ?> User)</option>
                         </select>
+                        <div class="clearfix"></div>
+                        <br>
+                        <div class="form-group form-float selected_users_div" style="display:none;">
+                            <div class="form-line">
+                                <label class="form-label" id="mailing-selected-users">Selected Users</label>
+                                <input value="" data-role="tagsinput sometext" id="selected_users" name="selected_emails" readonly>
+                            </div>
+                        </div>
                         <small class="admin-info">Choose the type of users you want to send the message to.</small>
                         <div class="clearfix"></div>
                         <div class="form-group form-float">
                             <div class="form-line">
                               <label class="form-label" id="mailing-selected-users">Search Users (Optional) <span></span></label>
-                                <input type="text" class="form-control" onkeydown="Wo_SearchMailingUsers(this.value)" autocomplete="off">
+                                <input type="text" class="form-control" oninput="Wo_SearchMailingUsers(this.value)" autocomplete="off">
                                 <small class="admin-info">Send only to those users, leave it empty to send to all users.</small>
                             </div>
                         </div>
@@ -84,7 +95,7 @@ $year_users = $db->where('lastseen',$year_end,'<=')->getValue(T_USERS,'COUNT(*)'
 			            </div>
                         
                         <input type="hidden" name="hash_id" value="<?php echo Wo_CreateSession();?>">
-                        <input type="hidden" name="selected_emails" id="selected_emails">
+                        <!-- <input type="hidden" name="selected_emails" id="selected_emails"> -->
                         <button type="submit" class="btn btn-primary m-t-15 waves-effect">Send</button>
                     </form>
                 </div>
@@ -96,6 +107,23 @@ $year_users = $db->where('lastseen',$year_end,'<=')->getValue(T_USERS,'COUNT(*)'
 <script>
 var mailing_users = [];
 $(function () {
+    let users = $("#selected_users").tagsinput({
+      maxTags: 1500,
+      itemValue: 'id',
+      itemText: 'text',
+      allowDuplicates: false,
+    });
+    $("#selected_users").on('itemRemoved', function(event) {
+        var tag = event.item;
+        var items = mailing_users.filter(id => {
+            return id != tag.id;
+        });
+        setTimeout(function () {
+            mailing_users = items;
+            $("#mailing-selected-users span").text(mailing_users.length);
+        },100);
+        
+    });
    $('form.mailing-settings').ajaxForm({
       url: Wo_Ajax_Requests_File() + '?f=admin_setting&s=send_mail_to_mock_users',
       beforeSend: function () {
@@ -118,6 +146,8 @@ $(function () {
       var id = $(this).attr('data-user');
       if ($.inArray(id, mailing_users) == -1) {
          mailing_users.push(id);
+         $('.selected_users_div').slideDown();
+         $("#selected_users").tagsinput('add', { id: id, text: $(this).text() });
          $("#mailing-selected-users span").text(mailing_users.length);
          $("#selected_emails").val(mailing_users.join());
          $(this).remove();
@@ -127,7 +157,10 @@ $(function () {
 
 });
 function Wo_SearchMailingUsers(name = ''){
-   if (!name) { return false;}
+   if (!name) { 
+        $('.search-mailing-users').removeClass('hidden').html('');
+        return false;
+    }
    $.ajax({
       url: Wo_Ajax_Requests_File(),
       type: 'GET',
@@ -137,6 +170,9 @@ function Wo_SearchMailingUsers(name = ''){
    .done(function(data) {
       if (data.status == 200) {
          $('.search-mailing-users').removeClass('hidden').html(data.html);     
+      }
+      else{
+        $('.search-mailing-users').removeClass('hidden').html('');  
       }
    })
    .fail(function() {

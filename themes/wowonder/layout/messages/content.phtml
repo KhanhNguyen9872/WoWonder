@@ -21,7 +21,7 @@ if (!empty($_GET['user']) && empty($_GET['page'])) {
                         <input type="text" name="query" id="query" onkeyup="Wo_GetMessagesUsers(this.value);" class="form-control" placeholder="<?php echo $wo['lang']['search'];?>" autocomplete="off">
                     </div>
 					<div class="btn_contr">
-					<button type="button" class="btn btn-main" title="<?php echo $wo['lang']['mark_all_as_read'] ?>" onclick="MarkAsReadAll();">
+					<button type="button" class="btn btn-main" title="<?php echo $wo['lang']['mark_all_as_read'] ?>" onclick="MarkAsReadAll(this);">
 						<svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24"><path fill="currentColor" d="M14,10H2V12H14V10M14,6H2V8H14V6M2,16H10V14H2V16M21.5,11.5L23,13L16,20L11.5,15.5L13,14L16,17L21.5,11.5Z"></path></svg>
 					</button>
 					<button type="button" class="btn btn-main" onclick="Wo_CreateGChat(event)">
@@ -154,18 +154,13 @@ if (!empty($_GET['user']) && empty($_GET['page'])) {
 								<div class="text-right charsLeft-message"><span id="charsLeft"></span></div>
 								<span class="message-option-btns">
 									<div class="dropup">
-										<a href="#" class="emo-message dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" >
+										<a href="#" class="emo-message dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" onclick="load_ajax_message_emojii('<?php echo $wo['config']['theme_url'];?>/emoji/');">
 											<span class="btn btn-file">
 												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256,512c-68.38,0-132.667-26.629-181.02-74.98C26.629,388.667,0,324.38,0,256 S26.629,123.333,74.98,74.98C123.333,26.629,187.62,0,256,0s132.667,26.629,181.02,74.98C485.371,123.333,512,187.62,512,256 c0,50.53-14.998,99.674-43.374,142.116c-6.138,9.182-18.559,11.65-27.742,5.51c-9.182-6.139-11.649-18.56-5.51-27.742 C459.335,340.044,472,298.589,472,256c0-119.103-96.897-216-216-216S40,136.897,40,256s96.897,216,216,216 c39.505,0,78.144-10.756,111.737-31.106c9.447-5.724,21.745-2.705,27.469,6.744c5.723,9.447,2.703,21.745-6.744,27.469 C348.617,499.242,302.813,512,256,512z M351,313c0-11.046-8.954-20-20-20s-20,8.954-20,20c0,30.327-24.673,55-55,55 s-55-24.673-55-55c0-11.046-8.954-20-20-20s-20,8.954-20,20c0,52.383,42.617,95,95,95S351,365.383,351,313z M395,201 c0-27.57-22.43-50-50-50s-50,22.43-50,50c0,11.046,8.954,20,20,20s20-8.954,20-20c0-5.514,4.486-10,10-10s10,4.486,10,10 c0,11.046,8.954,20,20,20S395,212.046,395,201z M218,201c0-27.57-22.43-50-50-50s-50,22.43-50,50c0,11.046,8.954,20,20,20 s20-8.954,20-20c0-5.514,4.486-10,10-10s10,4.486,10,10c0,11.046,8.954,20,20,20S218,212.046,218,201z"/></svg>
 											</span>
 										</a>
 										<div class="emo-message-container dropdown-menu mobileemojisnd dropdown-menu-right" role="menu" style="width: 100px">
-											<?php  
-												foreach ($wo['emo'] as $code => $name) {
-												$code   = $code;
-												echo  '<span style="float: left" onclick="Wo_AddEmoToMessageInput(\'' . $code . '\');"><i class="pointer twa-lg twa twa-' . $name . '"></i></span>'; 
-												} 
-											?>
+
 										</div>
 									</div>
 
@@ -360,10 +355,23 @@ data: {
 },
 cache: false 
 });
-function MarkAsReadAll() {
+function MarkAsReadAll(self) {
+	$(self).html('<svg width="25px" height="25px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid"><rect x="0" y="0" width="25" height="25" fill="none" class="bk"></rect><circle cx="50" cy="50" r="40" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round"><animate attributeName="stroke-dashoffset" dur="1.5s" repeatCount="indefinite" from="0" to="502"></animate><animate attributeName="stroke-dasharray" dur="1.5s" repeatCount="indefinite" values="150.6 100.4;1 250;150.6 100.4"></animate></circle></svg>');
 	$.post(Wo_Ajax_Requests_File() + '?f=mark_as_read', function(data, textStatus, xhr) {
-		Wo_UpdateUsers();
-		Wo_intervalUpdates();
+		if (data.status == 200) {
+			$('.messages-notification-container').find('.new-update-alert').hide();
+	        $('.messages-notification-container').find('.sixteen-font-size').removeClass('unread-update');
+	        $('.messages-notification-container').find('.new-update-alert').text(0);
+	        $('.messages-notification-container').find('.new-update-alert').attr('data_messsages_count', 0);
+			Wo_UpdateUsers();
+			Wo_intervalUpdates();
+			setTimeout(function () {
+				$(self).html('<svg width="25px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve"> <circle style="fill:currentColor" cx="25" cy="25" r="25"/> <polyline style="fill:none;stroke:<?php echo $wo['config']['btn_background_color'];?>;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" points=" 38,15 22,33 12,25 "/> </svg>');
+				setTimeout(function () {
+					$(self).html('<svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24"><path fill="currentColor" d="M14,10H2V12H14V10M14,6H2V8H14V6M2,16H10V14H2V16M21.5,11.5L23,13L16,20L11.5,15.5L13,14L16,17L21.5,11.5Z"></path></svg>');
+				},1000);
+			},1000);
+		}
 	});
 }
 $(document).on('click','.mobileopenlist',function(){
@@ -903,15 +911,15 @@ function messageTyping(){
     
     var last_message = $("#messages-recipient-" + data.sender_id).find('p').html();
     if ( data.sender_id === +user_id && data.is_typing == 200) {
-      $('.message-contnaier:last').find('.message-typing').html('<div class="incoming pull-left" id="typing"><div class="message-typing message-details"><div class="message-user-image pull-left"><img src="' + data.img + '" alt="Profile Picture"></div><svg width="30" height="40" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg" fill="currentColor"> <circle cx="15" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.8s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="60" cy="15" r="9" fill-opacity="0.3"> <animate attributeName="r" from="9" to="9" begin="0s" dur="0.8s" values="9;15;9" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="0.5" to="0.5" begin="0s" dur="0.8s" values=".5;1;.5" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="105" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.8s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> </svg></div></div>').fadeIn(300);
+      $('.message-contnaier:last').find('.message-typing').html('<div class="incoming pull-left" id="typing"><div class="message-typing message-details"><div class="message-user-image pull-left"><img src="' + data.img + '" alt="Profile Picture"></div><svg width="35" height="35" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg" fill="#999"> <circle cx="15" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.5s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.5s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="60" cy="15" r="9" fill-opacity="0.3"> <animate attributeName="r" from="9" to="9" begin="0s" dur="0.5s" values="9;15;9" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="0.5" to="0.5" begin="0s" dur="0.5s" values=".5;1;.5" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="105" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.5s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.5s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> </svg></div></div>').fadeIn(300);
       if ($("#messages-recipient-" + data.sender_id).find('svg').length == 0 ) {
-      	 $("#messages-recipient-" + data.sender_id).find('p').html('<svg width="25" height="20" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg" fill="currentColor"> <circle cx="15" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.8s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="60" cy="15" r="9" fill-opacity="0.3"> <animate attributeName="r" from="9" to="9" begin="0s" dur="0.8s" values="9;15;9" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="0.5" to="0.5" begin="0s" dur="0.8s" values=".5;1;.5" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="105" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.8s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> </svg>'); 
+      	 $("#messages-recipient-" + data.sender_id).find('p').html('<svg width="35" height="35" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg" fill="#999"> <circle cx="15" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.5s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.5s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="60" cy="15" r="9" fill-opacity="0.3"> <animate attributeName="r" from="9" to="9" begin="0s" dur="0.5s" values="9;15;9" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="0.5" to="0.5" begin="0s" dur="0.5s" values=".5;1;.5" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="105" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.5s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.5s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> </svg>'); 
       }
     } else if (data.is_typing == 300) {
     	$("#messages-recipient-" + data.sender_id).find('p').html($("#messages-recipient-" + data.sender_id).attr("data-content"));
     } else {
     	if ($("#messages-recipient-" + data.sender_id).find('svg').length == 0 ) {
-    	  $("#messages-recipient-" + data.sender_id).find('p').html('<svg width="25" height="20" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg" fill="currentColor"> <circle cx="15" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.8s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="60" cy="15" r="9" fill-opacity="0.3"> <animate attributeName="r" from="9" to="9" begin="0s" dur="0.8s" values="9;15;9" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="0.5" to="0.5" begin="0s" dur="0.8s" values=".5;1;.5" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="105" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.8s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> </svg>'); 
+    	  $("#messages-recipient-" + data.sender_id).find('p').html('<svg width="35" height="35" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg" fill="#999"> <circle cx="15" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.5s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.5s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="60" cy="15" r="9" fill-opacity="0.3"> <animate attributeName="r" from="9" to="9" begin="0s" dur="0.5s" values="9;15;9" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="0.5" to="0.5" begin="0s" dur="0.5s" values=".5;1;.5" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="105" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.5s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.5s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> </svg>'); 
     	}
        for (let a of $('.message-contnaier')) {
          $(a).find('.message-typing').empty()
@@ -1298,7 +1306,7 @@ function Wo_getNewMessages() {
         $("#messages-recipient-" + data.sender).attr("data-content", data.message);
         if(data.status == 200) {
           if(!$(".messages-container").find(".no-messages").length){
-            if(+user_id === +data.sender || (data.self && (+data.id === +user_id))){
+            if(+user_id === +data.sender || ((+data.id === +user_id))){
               $('.message-contnaier:last').find('.message-typing').empty()
               $(".messages-container").append(data.html);
               setTimeout(function(){
@@ -1390,7 +1398,7 @@ function Wo_getNewMessages() {
 	      	}
 	      }
     if ( data.is_typing == 200) {
-      $('.message-contnaier:last').find('.message-typing').html('<div class="incoming pull-left" id="typing"><div class="message-typing message-details"><div class="message-user-image pull-left"><img src="' + data.img + '" alt="Profile Picture"></div><svg width="30" height="40" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg" fill="currentColor"> <circle cx="15" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.8s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="60" cy="15" r="9" fill-opacity="0.3"> <animate attributeName="r" from="9" to="9" begin="0s" dur="0.8s" values="9;15;9" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="0.5" to="0.5" begin="0s" dur="0.8s" values=".5;1;.5" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="105" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.8s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> </svg></div></div>').fadeIn(300);
+      $('.message-contnaier:last').find('.message-typing').html('<div class="incoming pull-left" id="typing"><div class="message-typing message-details"><div class="message-user-image pull-left"><img src="' + data.img + '" alt="Profile Picture"></div><svg width="35" height="35" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg" fill="#999"> <circle cx="15" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.5s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.5s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="60" cy="15" r="9" fill-opacity="0.3"> <animate attributeName="r" from="9" to="9" begin="0s" dur="0.5s" values="9;15;9" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="0.5" to="0.5" begin="0s" dur="0.5s" values=".5;1;.5" calcMode="linear" repeatCount="indefinite"></animate> </circle> <circle cx="105" cy="15" r="15"> <animate attributeName="r" from="15" to="15" begin="0s" dur="0.5s" values="15;9;15" calcMode="linear" repeatCount="indefinite"></animate> <animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.5s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"></animate> </circle> </svg></div></div>').fadeIn(300);
       setTimeout(function(){
               	$(".messages-container").animate({
                 scrollTop: $('.messages-container')[0].scrollHeight

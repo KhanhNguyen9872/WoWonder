@@ -118,10 +118,39 @@
                         </div>
                         <div class="clearfix"></div>
                         <hr>
+                        <div class="float-left">
+                            <label for="yandex_translate" class="main-label">Yandex Translation API</label>
+                            <br><small class="admin-info">Translate post text.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="yandex_translate" value="0" />
+                            <input type="checkbox" name="yandex_translate" id="chck-yandex_translate" value="1" <?php echo ($wo['config']['yandex_translate'] == 1) ? 'checked': '';?>>
+                            <label for="chck-yandex_translate" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
                         <div class="form-group form-float">
                             <div class="form-line">
-                                <label class="form-label">Yandex Translation API</label>
+                                <label class="form-label">Yandex Translation API Key</label>
                                 <input type="text" id="yandex_translation_api" name="yandex_translation_api" class="form-control" value="<?php echo $wo['config']['yandex_translation_api']?>">
+                                <small class="admin-info">This key is required for post translation.</small>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="google_translate" class="main-label">Google Translation API</label>
+                            <br><small class="admin-info">Translate post text.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="google_translate" value="0" />
+                            <input type="checkbox" name="google_translate" id="chck-google_translate" value="1" <?php echo ($wo['config']['google_translate'] == 1) ? 'checked': '';?>>
+                            <label for="chck-google_translate" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Google Translation API Key</label>
+                                <input type="text" id="google_translation_api" name="google_translation_api" class="form-control" value="<?php echo $wo['config']['google_translation_api']?>">
                                 <small class="admin-info">This key is required for post translation.</small>
                             </div>
                         </div>
@@ -243,7 +272,7 @@ $(function() {
             }, 2000);
         });
     });
-    $('input[type=text], input[type=number], textarea').on('keyup', delay(function() {
+    $('input[type=text], input[type=number], textarea').on('input', delay(function() {
             clearTimeout(setTimeOutColor);
             var thisElement = $(this);
             var configName = thisElement.attr('name');

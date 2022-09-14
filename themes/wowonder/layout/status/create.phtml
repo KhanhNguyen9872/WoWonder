@@ -27,13 +27,14 @@
 					</div>
 					<div class="wow_form_fields">
 						<label><?php echo $wo['lang']['media'];?></label>
-						<div class="wow_fcov_image wow_stroy_media">
+						<div class="wow_fcov_image wow_stroy_media" data-block="thumdrop-zone">
 							<div id="wow_fcov_img_holder">
 								<img src="<?php echo $wo['config']['theme_url'];?>/img/ad_pattern.png">
 							</div>
 							<div class="upload_ad_image" onclick="document.getElementById('user-storymedia').click(); return false">
 								<div class="upload_ad_image_content">
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M8.5,13.5L11,16.5L14.5,12L19,18H5M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19Z"></path></svg> <?php echo $wo['lang']['select']; ?> <?php echo $wo['lang']['photos']; ?> &amp; <?php echo $wo['lang']['videos']; ?>
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M8.5,13.5L11,16.5L14.5,12L19,18H5M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19Z"></path></svg> 
+									<?php echo $wo['lang']['drop_img_videos_here'] ?> <?php echo $wo['lang']['or']; ?> <?php echo $wo['lang']['browse_to_upload']; ?>
 								</div>
 							</div>
 							<span class="wow_stroy_media_count hidden" id="user-story-total">
@@ -58,12 +59,12 @@
 						</div>
 					</div>
 					<div class="create-status-alert hidden">
-						<div class="alert alert-danger"><?php echo $wo['lang']['max_number_status'] ?></div>
+						<div class="alert alert-danger"><?php echo $wo['lang']['max_number_status_6'] ?></div>
 					</div>
 					<div class="text-center">
 						<button class="btn btn-main btn-mat btn-mat-raised add_wow_loader" type="submit"><?php echo $wo['lang']['create']; ?></button>
 					</div>
-					<input type="file" name="statusMedia[]" class="hidden" id="user-storymedia">
+					<input type="file" name="statusMedia[]" class="hidden" id="user-storymedia" multiple>
 					<input type="file" name="cover" class="hidden" id="user-storymedia-2">
 				</form>
 			</div>
@@ -75,6 +76,47 @@
 </div>
 
 <script>
+	jQuery(document).ready(function($) {
+    var thumb_drop_block = $("[data-block='thumdrop-zone']");
+
+    if (typeof(window.FileReader) == 'undefined') {
+      thumb_drop_block.find('.thumbnail-rendderer div').text('Drag drop is not supported in your browser!');
+    }
+    else{
+      thumb_drop_block[0].ondragover = function() {
+          thumb_drop_block.addClass('hover');
+          return false;
+      };
+          
+      thumb_drop_block[0].ondragleave = function() {
+          thumb_drop_block.removeClass('hover');
+          return false;
+      };
+
+      thumb_drop_block[0].ondrop = function(event) {
+          event.preventDefault();
+          thumb_drop_block.removeClass('hover');
+          var file = event.dataTransfer.files;
+          if (file.length > 6) {
+          	$(".create-status-alert").removeClass('hidden');
+          	return false;
+          }
+          if (file.length == 1) {
+          	var ext = getExtension(file[0].name);
+				    switch (ext.toLowerCase()) {
+					    case 'm4v':
+					    case 'avi':
+					    case 'mpg':
+					    case 'mp4':
+					    $('#custom_thumbnail').slideDown();
+				    }
+          }
+          $("#user-storymedia").prop('files', file);
+          $("#user-story-total input").val(file.length + ' file(s) selected');
+          $("#user-story-total").removeClass('hidden').slideDown(200);
+      };
+    }
+  });
 	function getExtension(filename) {
 	  var parts = filename.split('.');
 	  return parts[parts.length - 1];
@@ -82,7 +124,7 @@
    jQuery(document).ready(function($) {
       $("#user-storymedia").change(function () {
         var numFiles = this.files.length;
-        if (numFiles > 20) {
+        if (numFiles > 6) {
          $("#user-storymedia").val('');
          $(".create-status-alert").removeClass('hidden');
         }
@@ -102,7 +144,7 @@
       });
       $("#user-storymedia-2").change(function () {
         var numFiles = this.files.length;
-        if (numFiles > 20) {
+        if (numFiles > 6) {
          $("#user-storymedia-2").val('');
          $(".create-status-alert").removeClass('hidden');
         }

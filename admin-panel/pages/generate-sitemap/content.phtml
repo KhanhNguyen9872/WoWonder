@@ -19,6 +19,7 @@
             <div class="card">
                 <div class="card-body">
                     <h6 class="card-title">Update SiteMap</h6>
+                    <div class="alert alert-info"><a href="<?php echo $wo['config']['site_url'] ?>/sitemap.xml" target="_blank"><?php echo $wo['config']['site_url'] ?>/sitemap.xml</a></div>
                     <div class="sitemap-settings-alert"></div>
                     <form class="sitemap-settings" method="POST">
                         <label for="order_posts_by">Updating*</label>
@@ -50,7 +51,7 @@
 $(function() {
     var form_sitemap_settings = $('form.sitemap-settings');
     form_sitemap_settings.ajaxForm({
-        url: Wo_Ajax_Requests_File() + "?f=admincp&s=update-sitemap",
+        url: Wo_Ajax_Requests_File() + "?f=admin_setting&s=update-sitemap",
         beforeSend: function() {
             form_sitemap_settings.find('.waves-effect').text('Please wait..');
         },

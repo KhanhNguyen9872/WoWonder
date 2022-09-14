@@ -38,6 +38,7 @@ if ($f == 'update_data') {
             $wo['incall']['in_call_user'] = Wo_UserData($check_calles['from_id']);
             $data['calls']                = 200;
             $data['is_call']              = 1;
+            $data['call_id']              = $wo['incall']['id'];
             $data['calls_html']           = Wo_LoadPage('modals/in_call');
         }
         $data['audio_calls']   = 0;
@@ -48,6 +49,7 @@ if ($f == 'update_data') {
             $wo['incall']['in_call_user'] = Wo_UserData($check_calles['from_id']);
             $data['audio_calls']          = 200;
             $data['is_audio_call']        = 1;
+            $data['call_id']              = $wo['incall']['id'];
             $data['audio_calls_html']     = Wo_LoadPage('modals/in_audio_call');
         }
         $data['followRequests']      = Wo_CountFollowRequests();
@@ -89,17 +91,22 @@ if ($f == 'update_data') {
     }
     $send_messages_to_phones = Wo_MessagesPushNotifier();
 
+    $payment_data           = $db->objectBuilder()->where('user_id',$wo['user']['user_id'])->where('method_name', 'coinpayments')->orderBy('id','DESC')->getOne(T_PENDING_PAYMENTS);
+    $coinpayments_txn_id = '';
+    if (!empty($payment_data)) {
+        $coinpayments_txn_id = $payment_data->payment_data;
+    }
 
-    if (!empty($wo['user']['coinpayments_txn_id'])) {
+    if (!empty($coinpayments_txn_id)) {
         $result = coinpayments_api_call(array('key' => $wo['config']['coinpayments_public_key'],
                                               'version' => '1',
                                               'format' => 'json',
                                               'cmd' => 'get_tx_info',
                                               'full' => '1',
-                                              'txid' => $wo['user']['coinpayments_txn_id']));
+                                              'txid' => $coinpayments_txn_id));
         if (!empty($result) && $result['status'] == 200) {
             if ($result['data']['status'] == -1) {
-                $db->where('user_id',$wo['user']['user_id'])->update(T_USERS,array('coinpayments_txn_id' => ''));
+                $db->where('user_id', $wo['user']['user_id'])->where('payment_data', $coinpayments_txn_id)->delete(T_PENDING_PAYMENTS);
                 $notification_data_array = array(
                     'recipient_id' => $wo['user']['user_id'],
                     'type' => 'admin_notification',
@@ -111,8 +118,8 @@ if ($f == 'update_data') {
             }
             elseif ($result['data']['status'] == 100) {
                 $amount   = $result['data']['checkout']['amountf'];
-                $db->where('user_id',$wo['user']['user_id'])->update(T_USERS,array('wallet' => $db->inc($amount),
-                                                                                   'coinpayments_txn_id' => ''));
+                $db->where('user_id', $wo['user']['user_id'])->where('payment_data', $coinpayments_txn_id)->delete(T_PENDING_PAYMENTS);
+                $db->where('user_id',$wo['user']['user_id'])->update(T_USERS,array('wallet' => $db->inc($amount)));
 
                 $create_payment_log = mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ('" . $wo['user']['user_id'] . "', 'WALLET', '" . $amount . "', 'coinpayments')");
                 $_SESSION['replenished_amount'] = $amount;

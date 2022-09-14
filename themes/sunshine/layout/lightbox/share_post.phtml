@@ -338,7 +338,7 @@
             <span class="time">
                <a  style="color:#9197a3" class="ajax-time" href="<?php echo $wo['story']['url'];?>" title="<?php echo date('c',$wo['story']['time']); ?>" target="_blank"><?php echo Wo_Time_Elapsed_String($wo['story']['time']); ?></a>
             </span>
-            <?php if (strlen($wo['story']['postText']) >= 2): ?>
+            <?php if (strlen($wo['story']['postText']) >= 2 && ($wo['config']['google_translate'] == 1 || $wo['config']['yandex_translate'] == 1)): ?>
                 <span onclick="Wo_Translate($(this).attr('id'),$(this).attr('data-language'))" title="<?php echo $wo['lang']['translate'];?>" class="pointer time" id="<?php echo $wo['story']['id']; ?>" data-language="<?php echo DetermineUserLang(); ?>" data-trans-btn="<?php echo $wo['story']['id']; ?>">
                   - <?php echo $wo['lang']['translate'];?>
                 </span> 

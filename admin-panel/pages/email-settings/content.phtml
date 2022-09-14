@@ -84,8 +84,6 @@
                     </form>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-6 col-md-6">
             <div class="card">
                 <div class="card-body">
                     <h6 class="card-title">SMS Settings</h6>
@@ -189,6 +187,25 @@
                 </div>
             </div>
         </div>
+        <div class="col-lg-6 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Debug Email Deliverability</h6>
+                    <div class="alert alert-info">This feature will test the Email Deliverability and make sure the system is working fine.</div>
+                    <form class="debug-settings" method="POST">
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Debug Log</label>
+                                <textarea name="debug_email" id="debug_email" class="form-control" cols="30" rows="5" style="height: 700px !important;" disabled>Click on Debug Email Deliverability to show test results.</textarea>
+                            </div>
+                        </div>
+                        <input type="hidden" name="hash_id" value="<?php echo Wo_CreateSession();?>">
+                        <div class="debug-settings-alert"></div>
+                        <button type="submit" class="btn btn-success m-t-15 waves-effect">Debug Email Deliverability</button>
+                    </form>
+                </div>
+            </div>
+        </div>
         <div class="clearfix"></div>
     </div>
     <!-- #END# Vertical Layout -->
@@ -228,6 +245,22 @@ function Wo_TestSMSMessage() {
     });
 }
 $(function() {
+    var debug_settings = $('form.debug-settings');
+    debug_settings.ajaxForm({
+        url: Wo_Ajax_Requests_File() + '?f=admin_setting&s=email_debug',
+        beforeSend: function() {
+            debug_settings.find('.waves-effect').text("Please wait..");
+        },
+        success: function(data) {
+            debug_settings.find('.waves-effect').text('Debug');
+            $('#debug_email').val(data);
+        },
+        error: function(data) {
+            debug_settings.find('.waves-effect').text('Debug');
+            $('#debug_email').val(data.responseText);
+        }
+    });
+
     $('.switcher input[type=checkbox]').click(function () {
         setToTrue = 0;
         if ($(this).is(":checked") === true) {
@@ -265,7 +298,7 @@ $(function() {
             }, 2000);
         });
     });
-    $('input[type=text], input[type=number], input[type=password]').on('keyup', delay(function() {
+    $('input[type=text], input[type=number], input[type=password]').on('input', delay(function() {
             clearTimeout(setTimeOutColor);
             var thisElement = $(this);
             var configName = thisElement.attr('name');

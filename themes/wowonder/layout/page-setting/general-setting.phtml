@@ -28,7 +28,7 @@
 					</select>
 				</div>
 			</div>
-			<div class="col-md-5">
+			<div class="col-md-5 page_sub_category_c" style="<?php echo (!empty($wo['page_sub_categories'][$wo['setting']['page_category']]) ? '' : 'display: none;'); ?>">
 				<div class="wow_form_fields">
 					<label for="page_sub_category"><?php echo $wo['lang']['sub_category']; ?></label>
 					<select name="page_sub_category" id="page_sub_category">
@@ -87,17 +87,16 @@
 		<div class="wow_form_fields mb-0">
 			<label for="users_post"><?php echo $wo['lang']['users_can_post'] ?></label>
 		</div>
-		<div>
-			<label class="radio-inline" for="users_post-0">
+		
+		<div class="form-group">
+			<div class="col-md-12 round-check">
 				<input type="radio" name="users_post" id="users_post-0" value="1" <?php echo $selected_post_yes; ?> >
-				<?php echo $wo['lang']['enable']; ?>
-			</label>
-		</div>
-		<div>
-			<label class="radio-inline" for="users_post-1">
+				<label for="users_post-0"><?php echo $wo['lang']['enable']; ?></label>
+			</div>
+			<div class="col-md-12 round-check">
 				<input type="radio" name="users_post" id="users_post-1" value="0" <?php echo $selected_post_no; ?>>
-				<?php echo $wo['lang']['disable']; ?>
-			</label>
+				<label for="users_post-1"><?php echo $wo['lang']['disable']; ?></label>
+			</div>
 		</div>
 
 		<?php if (Wo_IsAdmin() || Wo_IsModerator()) { ?>
@@ -108,18 +107,17 @@
 			<div class="wow_form_fields mb-0">
 				<label for="verified"><?php echo $wo['lang']['verification'] ?></label>
 			</div>
-			<div>
-				<label class="radio-inline" for="verified-0">
+			<div class="form-group">
+				<div class="col-md-12 round-check">
 					<input type="radio" name="verified" id="verified-0" value="verified" <?php echo $selected_verified_yes; ?> >
-					<?php echo $wo['lang']['verified']; ?>
-				</label>
-			</div>
-			<div>
-				<label class="radio-inline" for="verified-1">
+					<label for="verified-0"><?php echo $wo['lang']['verified']; ?></label>
+				</div>
+				<div class="col-md-12 round-check">
 					<input type="radio" name="verified" id="verified-1" value="notVerified" <?php echo $selected_verified_no; ?>>
-					<?php echo $wo['lang']['not_verified']; ?>
-				</label>
+					<label for="verified-1"><?php echo $wo['lang']['not_verified']; ?></label>
+				</div>
 			</div>
+		
 		<?php } else { ?>
 			<div class="wow_form_fields">
 				<label><?php echo $wo['lang']['verification'];?></label>  
@@ -146,8 +144,10 @@ echo "var sub_categories_array = ". $js_array . ";\n";
 		var text = "";
 		if (typeof(sub_categories_array[id]) == 'undefined') {
 		    $('#page_sub_category').html('');
+		    $('.page_sub_category_c').slideUp();
 		}
 		else{
+			$('.page_sub_category_c').slideDown();
 		   	sub_categories_array[id].forEach(function(entry) {
 				text = text + "<option value='"+entry.id+"'>"+entry.lang+"</option>";
 			});

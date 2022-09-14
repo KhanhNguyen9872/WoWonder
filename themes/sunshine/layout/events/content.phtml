@@ -167,7 +167,7 @@
 			<li class="list-group-item text-muted widget-heading" contenteditable="false">
 				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-info" style="background:#047cac;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="8"></line></svg> <?php echo $wo['lang']['info']; ?>			
 			</li>
-			<li class="list-group-item user-desc-field"><?php echo $wo['event']['description']?></li>
+			<li class="list-group-item user-desc-field wo_event_desc"><?php echo $wo['event']['description']?></li>
 			<li class="list-group-item">
 				<a href="<?php echo $wo['event']['url']; ?>?type=going">
 					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="feather" viewBox="0 0 24 24"><path fill="currentColor" d="M16,13C15.71,13 15.38,13 15.03,13.05C16.19,13.89 17,15 17,16.5V19H23V16.5C23,14.17 18.33,13 16,13M8,13C5.67,13 1,14.17 1,16.5V19H15V16.5C15,14.17 10.33,13 8,13M8,11A3,3 0 0,0 11,8A3,3 0 0,0 8,5A3,3 0 0,0 5,8A3,3 0 0,0 8,11M16,11A3,3 0 0,0 19,8A3,3 0 0,0 16,5A3,3 0 0,0 13,8A3,3 0 0,0 16,11Z" /></svg> <?php echo $wo['event']['going']; ?> <?php echo $wo['lang']['going_people']; ?>
@@ -219,6 +219,25 @@
 </div>
 <!-- JS Pages functions -->
 <script>
+ReadMoreEventText(".wo_event_desc");
+
+function ReadMoreEventText(selector) {
+  let text = "<?php echo($wo['lang']['read_more_text']); ?>";
+  if (typeof selector == 'object') {
+	selector = $(selector).attr('class');
+  }
+  for (var i = 0; i < $(selector).length; i++) {
+	var t = $(selector)[i];
+	if (!$(t).hasClass('ReadMoreAdded') && $(t).text().trim().length > 0 && $(t).height() > 190) {
+	  var c = new Date().getUTCMilliseconds() + (Math.floor(Math.random() * 9999)) + 100 + "_" + i;
+	  $(t).addClass(c);
+	  $(t).addClass('ReadMoreAdded');
+	  $(t).css({ maxHeight: "165px" })
+	  $(t).after('<a href="javascript:void(0)" onclick="ShowReadMoreText(\'.'+c+'\',this)">'+text+'</a>');
+	}
+  }
+};
+
 const second = 1000,
       minute = second * 60,
       hour = minute * 60,

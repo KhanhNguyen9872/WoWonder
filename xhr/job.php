@@ -31,7 +31,7 @@ if ($f == 'job' && $wo['config']['job_system'] == 1) {
             if (empty($data['error'])) {
                 $insert_array = array();
                 if (!empty($_POST['job_title'])) {
-                    $insert_array['title'] = Wo_Secure($_POST['job_title']);
+                    $insert_array['title'] = Wo_Secure($_POST['job_title'],1);
                 }
                 if (!empty($_POST['location'])) {
                     $insert_array['location'] = Wo_Secure($_POST['location']);
@@ -65,10 +65,10 @@ if ($f == 'job' && $wo['config']['job_system'] == 1) {
                 if (!empty($_POST['question_one'])) {
                     if (!empty($_POST['question_one_type']) && in_array($_POST['question_one_type'], $question_type)) {
                         if ($_POST['question_one_type'] != 'multiple_choice_question') {
-                            $insert_array['question_one']      = Wo_Secure($_POST['question_one']);
+                            $insert_array['question_one']      = Wo_Secure($_POST['question_one'],1);
                             $insert_array['question_one_type'] = Wo_Secure($_POST['question_one_type']);
                         } elseif ($_POST['question_one_type'] == 'multiple_choice_question' && !empty($_POST['question_one_answers'])) {
-                            $insert_array['question_one']         = Wo_Secure($_POST['question_one']);
+                            $insert_array['question_one']         = Wo_Secure($_POST['question_one'],1);
                             $insert_array['question_one_type']    = Wo_Secure($_POST['question_one_type']);
                             $answers                              = explode(',', $_POST['question_one_answers']);
                             $answers                              = (object) $answers;
@@ -79,10 +79,10 @@ if ($f == 'job' && $wo['config']['job_system'] == 1) {
                 if (!empty($_POST['question_two'])) {
                     if (!empty($_POST['question_two_type']) && in_array($_POST['question_two_type'], $question_type)) {
                         if ($_POST['question_two_type'] != 'multiple_choice_question') {
-                            $insert_array['question_two']      = Wo_Secure($_POST['question_two']);
+                            $insert_array['question_two']      = Wo_Secure($_POST['question_two'],1);
                             $insert_array['question_two_type'] = Wo_Secure($_POST['question_two_type']);
                         } elseif ($_POST['question_two_type'] == 'multiple_choice_question' && !empty($_POST['question_two_answers'])) {
-                            $insert_array['question_two']         = Wo_Secure($_POST['question_two']);
+                            $insert_array['question_two']         = Wo_Secure($_POST['question_two'],1);
                             $insert_array['question_two_type']    = Wo_Secure($_POST['question_two_type']);
                             $answers                              = explode(',', $_POST['question_two_answers']);
                             $answers                              = (object) $answers;
@@ -93,10 +93,10 @@ if ($f == 'job' && $wo['config']['job_system'] == 1) {
                 if (!empty($_POST['question_three'])) {
                     if (!empty($_POST['question_three_type']) && in_array($_POST['question_three_type'], $question_type)) {
                         if ($_POST['question_three_type'] != 'multiple_choice_question') {
-                            $insert_array['question_three']      = Wo_Secure($_POST['question_three']);
+                            $insert_array['question_three']      = Wo_Secure($_POST['question_three'],1);
                             $insert_array['question_three_type'] = Wo_Secure($_POST['question_three_type']);
                         } elseif ($_POST['question_three_type'] == 'multiple_choice_question' && !empty($_POST['question_three_answers'])) {
-                            $insert_array['question_three']         = Wo_Secure($_POST['question_three']);
+                            $insert_array['question_three']         = Wo_Secure($_POST['question_three'],1);
                             $insert_array['question_three_type']    = Wo_Secure($_POST['question_three_type']);
                             $answers                                = explode(',', $_POST['question_three_answers']);
                             $answers                                = (object) $answers;
@@ -105,7 +105,7 @@ if ($f == 'job' && $wo['config']['job_system'] == 1) {
                     }
                 }
                 if (!empty($_POST['description'])) {
-                    $insert_array['description'] = Wo_Secure($_POST['description']);
+                    $insert_array['description'] = Wo_Secure($_POST['description'],1);
                 }
                 $insert_array['image'] = '';
                 if ($_POST['image_type'] == 'cover') {
@@ -309,7 +309,7 @@ if ($f == 'job' && $wo['config']['job_system'] == 1) {
         if (!empty($job) && (((!empty($job['page']) && $job['page']['is_page_onwer']) || empty($job['page'])) || $job['user_id'] == $wo['user']['id'] || Wo_IsAdmin() || Wo_IsModerator())) {
             $insert_array = array();
             if (!empty($_POST['job_title'])) {
-                $insert_array['title'] = Wo_Secure($_POST['job_title']);
+                $insert_array['title'] = Wo_Secure($_POST['job_title'],1);
             }
             if (!empty($_POST['location'])) {
                 $insert_array['location'] = Wo_Secure($_POST['location']);
@@ -330,7 +330,7 @@ if ($f == 'job' && $wo['config']['job_system'] == 1) {
                 $insert_array['category'] = Wo_Secure($_POST['category']);
             }
             if (!empty($_POST['description'])) {
-                $insert_array['description'] = Wo_Secure($_POST['description']);
+                $insert_array['description'] = Wo_Secure($_POST['description'],1);
             }
             $db->where('id', $job['id'])->update(T_JOB, $insert_array);
             $data['status'] = 200;

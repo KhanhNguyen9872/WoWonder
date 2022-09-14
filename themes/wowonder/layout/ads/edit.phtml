@@ -47,6 +47,31 @@
 					</div>
 				<?php } ?>
 				<div class="wow_form_fields">
+					<label for="appears"><?php echo $wo['lang']['appears']; ?></label>
+					<select name="appears" id="appears">			
+						<option value="entire" <?php echo ($wo['ad-data']['appears'] == 'entire')   ? 'selected' : '';?>><?php echo $wo['lang']['entire_site']; ?> (<?php echo $wo['lang']['format_image']; ?>)</option>
+						<option value="post" <?php echo ($wo['ad-data']['appears'] == 'post')   ? 'selected' : '';?>><?php echo $wo['lang']['post']; ?> (<?php echo $wo['lang']['format_image']; ?>)</option>
+						<option value="sidebar" <?php echo ($wo['ad-data']['appears'] == 'sidebar')   ? 'selected' : '';?>><?php echo $wo['lang']['sidebar']; ?> (<?php echo $wo['lang']['format_image']; ?>)</option>
+
+						<?php if ($wo['config']['job_system'] == 1) { ?>
+						<option value="jobs" <?php echo ($wo['ad-data']['appears'] == 'jobs')   ? 'selected' : '';?>><?php echo $wo['lang']['jobs']; ?> (<?php echo $wo['lang']['format_image']; ?>)</option>
+						<?php } ?>
+						
+						<?php if ($wo['config']['forum'] != 0) { ?>
+						<option value="forum" <?php echo ($wo['ad-data']['appears'] == 'forum')   ? 'selected' : '';?>><?php echo $wo['lang']['forum']; ?> (<?php echo $wo['lang']['format_image']; ?>)</option>
+						<?php } ?>
+						<?php if ($wo['config']['movies'] != 0) { ?>
+						<option value="movies" <?php echo ($wo['ad-data']['appears'] == 'movies')   ? 'selected' : '';?>><?php echo $wo['lang']['movies']; ?> (<?php echo $wo['lang']['format_image']; ?>)</option>
+						<?php } ?>
+						<?php if ($wo['config']['offer_system'] != 0) { ?>
+						<option value="offer" <?php echo ($wo['ad-data']['appears'] == 'offer')   ? 'selected' : '';?>><?php echo $wo['lang']['offer']; ?> (<?php echo $wo['lang']['format_image']; ?>)</option>
+						<?php } ?>
+						<?php if ($wo['config']['funding_system'] != 0) { ?>
+						<option value="funding" <?php echo ($wo['ad-data']['appears'] == 'funding')   ? 'selected' : '';?>><?php echo $wo['lang']['funding']; ?> (<?php echo $wo['lang']['format_image']; ?>)</option>
+						<?php } ?>
+					</select>
+				</div>
+				<div class="wow_form_fields">
 					<label for="ads-location"><?php echo $wo['lang']['location']; ?></label>
 					<input id="ads-location" name="location" type="text" value="<?php echo $wo['ad-data']['location']; ?>">
 				</div>

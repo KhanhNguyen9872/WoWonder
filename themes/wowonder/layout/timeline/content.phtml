@@ -84,18 +84,19 @@ if ($wo['loggedin'] && $IsOwnerUser) {
                     <img id="updateImage-<?php echo $wo['user_profile']['user_id']?>" class="pointer <?php if ($wo['have_stories'] == true && $wo['story_seen_class'] != 'seen_story' && $wo['loggedin'] == true) { ?><?php echo($wo['story_seen_class']); ?> see_all_stories<?php } ?>" alt="<?php echo $wo['user_profile']['name']?> Profile Picture" src="<?php echo $wo['user_profile']['avatar']?>" <?php if ($wo['have_stories'] == true && $wo['story_seen_class'] != 'seen_story' && $wo['loggedin'] == true) { ?> data_story_user_id="<?php echo $wo['user_profile']['user_id']?>"  data_story_type="user" <?php } else{ ?> onclick="Wo_OpenProfilePicture('<?php echo $wo['user_profile']['avatar_org']?>');" <?php } ?> />
 
                     <?php if($IsOwner === true) { ?>
-						<form action="#" method="post" class="profile-avatar-changer">
-							<div class="input-group">
-								<span class="input-group-btn profile_avatar">
-									<span class="btn btn-upload-image btn-file">
-										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="feather"><path fill="currentColor" d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" /></svg>
-										<input type="file" name="avatar" accept="image/x-png, image/jpeg" onchange="Wo_UpdateProfileAvatar();">
-									</span>
-									<?php if ($wo['user_profile']['avatar_org'] != $wo['userDefaultAvatar'] && $wo['user_profile']['avatar_org'] != $wo['userDefaultFAvatar']) {?>
+						<form action="#" method="post" class="profile-avatar-changer wo_profile_pic_hover">
+							<div class="profile_avatar">
+								<span class="btn btn-upload-image btn-file">
+									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="feather"><path fill="currentColor" d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" /></svg>
+									<input type="file" name="avatar" accept="image/x-png, image/jpeg" onchange="Wo_UpdateProfileAvatar();">
+								</span>
+								<?php if ($wo['user_profile']['avatar_org'] != $wo['userDefaultAvatar'] && $wo['user_profile']['avatar_org'] != $wo['userDefaultFAvatar']) {?>
 									<span class="btn btn-upload-image btn-file" onclick="OpenCropModal()">
 										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="feather"><path fill="currentColor" d="M7,17V1H5V5H1V7H5V17A2,2 0 0,0 7,19H17V23H19V19H23V17M17,15H19V7C19,5.89 18.1,5 17,5H9V7H17V15Z" /></svg>
 									</span>
 								<?php } ?>
+								<span class="btn btn-upload-image btn-file" <?php if ($wo['have_stories'] == true && $wo['story_seen_class'] != 'seen_story' && $wo['loggedin'] == true) { ?> data_story_user_id="<?php echo $wo['user_profile']['user_id']?>" data_story_type="user" <?php } else{ ?> onclick="Wo_OpenProfilePicture('<?php echo $wo['user_profile']['avatar_org']?>');" <?php } ?>>
+									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="feather"><path fill="currentColor" d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" /></svg>
 								</span>
 							</div>
 							<input type="hidden" name="user_id" id="user-id" value="<?php echo $wo['user_profile']['user_id'];?>">
@@ -155,7 +156,7 @@ if ($wo['loggedin'] && $IsOwnerUser) {
 								</a>
 							</span>
 							<?php if ($wo['config']['website_mode'] == 'linkedin') { ?>
-								<div class="dropup btn-glossy wo_job_open_gloss_btn">
+								<div class="dropdown btn-glossy wo_job_open_gloss_btn">
 									<button class="btn btn-default dropdown-toggle" type="button" id="opento-dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-briefcase"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> <?php echo $wo['lang']['open_to']; ?>
 									</button>
@@ -187,28 +188,43 @@ if ($wo['loggedin'] && $IsOwnerUser) {
 							<?php } ?>
 						<?php } else { ?>
 						<?php if($wo['loggedin'] == true) { ?>
-						<div class="dropup btn-glossy">
+						<div class="dropdown btn-glossy">
 							<button class="btn btn-default wo_user_folw_empty_btns dropdown-toggle" type="button" id="user-dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-vertical"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
 							</button>
-							<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="user-dropdownMenu">
+							<ul class="dropdown-menu dropdown-menu-right detail" aria-labelledby="user-dropdownMenu">
 								<?php if($IsOwnerUser === false && $wo['loggedin'] == true) { ?>
 									<li>
 										<a class="menu-item" href="<?php echo $wo['marker'] . 'block_user=block'?>">
-											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M10 4A4 4 0 0 0 6 8A4 4 0 0 0 10 12A4 4 0 0 0 14 8A4 4 0 0 0 10 4M17.5 13C15 13 13 15 13 17.5C13 20 15 22 17.5 22C20 22 22 20 22 17.5C22 15 20 13 17.5 13M10 14C5.58 14 2 15.79 2 18V20H11.5A6.5 6.5 0 0 1 11 17.5A6.5 6.5 0 0 1 11.95 14.14C11.32 14.06 10.68 14 10 14M17.5 14.5C19.16 14.5 20.5 15.84 20.5 17.5C20.5 18.06 20.35 18.58 20.08 19L16 14.92C16.42 14.65 16.94 14.5 17.5 14.5M14.92 16L19 20.08C18.58 20.35 18.06 20.5 17.5 20.5C15.84 20.5 14.5 19.16 14.5 17.5C14.5 16.94 14.65 16.42 14.92 16Z" /></svg> <?php echo $wo['lang']['block_user'];?>
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M10 4A4 4 0 0 0 6 8A4 4 0 0 0 10 12A4 4 0 0 0 14 8A4 4 0 0 0 10 4M17.5 13C15 13 13 15 13 17.5C13 20 15 22 17.5 22C20 22 22 20 22 17.5C22 15 20 13 17.5 13M10 14C5.58 14 2 15.79 2 18V20H11.5A6.5 6.5 0 0 1 11 17.5A6.5 6.5 0 0 1 11.95 14.14C11.32 14.06 10.68 14 10 14M17.5 14.5C19.16 14.5 20.5 15.84 20.5 17.5C20.5 18.06 20.35 18.58 20.08 19L16 14.92C16.42 14.65 16.94 14.5 17.5 14.5M14.92 16L19 20.08C18.58 20.35 18.06 20.5 17.5 20.5C15.84 20.5 14.5 19.16 14.5 17.5C14.5 16.94 14.65 16.42 14.92 16Z" /></svg>
+											&nbsp;&nbsp;&nbsp;
+											<div>
+												<b><?php echo $wo['lang']['block_user'];?></b>
+												<p><?php echo $wo['lang']['block_user_tx'];?></p>
+											</div>
 										</a>
 									</li>
 								<?php } ?>
 								<?php if($IsOwnerUser === false && $wo['loggedin'] == true && !$wo['user_profile']['is_reported_user']) { ?>
 									<li>
 										<a class="menu-item" href="javascript:void(0)" onclick="Wo_OpenReportBox()">
-											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M13 14H11V9H13M13 18H11V16H13M1 21H23L12 2L1 21Z" /></svg> <?php echo $wo['lang']['report_user_text'];?>
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M13 14H11V9H13M13 18H11V16H13M1 21H23L12 2L1 21Z" /></svg>
+											&nbsp;&nbsp;&nbsp;
+											<div>
+												<b><?php echo $wo['lang']['report_user_text'];?></b>
+												<p><?php echo $wo['lang']['report_user_text_tx'];?></p>
+											</div>
 										</a>
 									</li>
 								<?php }elseif ($IsOwnerUser === false && $wo['loggedin'] == true && $wo['user_profile']['is_reported_user']) { ?>
 									<li>
 										<a class="menu-item" href="javascript:void(0)" onclick="Wo_UnreportReportUser()">
-											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M13 14H11V9H13M13 18H11V16H13M1 21H23L12 2L1 21Z" /></svg> <?php echo $wo['lang']['unreport'];?>
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M13 14H11V9H13M13 18H11V16H13M1 21H23L12 2L1 21Z" /></svg>
+											&nbsp;&nbsp;&nbsp;
+											<div>
+												<b><?php echo $wo['lang']['unreport'];?></b>
+												<p><?php echo $wo['lang']['unreport_tx'];?></p>
+											</div>
 										</a>
 									</li>
 								<?php } ?>
@@ -216,7 +232,12 @@ if ($wo['loggedin'] && $IsOwnerUser) {
                                     <?php //if( !Wo_IsPoked( $wo['user_profile']['user_id'] , $wo['user']['user_id'] ) ) { ?>
 									<li id="pokebutton" onclick="Wo_RegisterPoke(<?php echo $wo['user_profile']['user_id'];?>,<?php echo $wo['user']['user_id'];?>)">
 										<a class="menu-item">
-											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M21,9A1,1 0 0,1 22,10A1,1 0 0,1 21,11H16.53L16.4,12.21L14.2,17.15C14,17.65 13.47,18 12.86,18H8.5C7.7,18 7,17.27 7,16.5V10C7,9.61 7.16,9.26 7.43,9L11.63,4.1L12.4,4.84C12.6,5.03 12.72,5.29 12.72,5.58L12.69,5.8L11,9H21M2,18V10H5V18H2Z" /></svg> <?php echo $wo['lang']['poke_user'];?>
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M21,9A1,1 0 0,1 22,10A1,1 0 0,1 21,11H16.53L16.4,12.21L14.2,17.15C14,17.65 13.47,18 12.86,18H8.5C7.7,18 7,17.27 7,16.5V10C7,9.61 7.16,9.26 7.43,9L11.63,4.1L12.4,4.84C12.6,5.03 12.72,5.29 12.72,5.58L12.69,5.8L11,9H21M2,18V10H5V18H2Z" /></svg>
+											&nbsp;&nbsp;&nbsp;
+											<div>
+												<b><?php echo $wo['lang']['poke_user'];?></b>
+												<p><?php echo $wo['lang']['poke_user_tx'];?></p>
+											</div>
 										</a>
 									</li>
                                     <?php //} ?>
@@ -224,14 +245,24 @@ if ($wo['loggedin'] && $IsOwnerUser) {
 								<?php if($IsOwnerUser === false && $wo['loggedin'] == true && !Wo_IsFamilyMemberExists($wo['user']['id'],$wo['user_profile']['id'],false) && $wo['config']['website_mode'] != 'instagram') { ?>
 									<li id="open_add_to_family_modal">
 										<a class="menu-item" onclick="$('#add_to_family').modal('show');">
-											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16 4C16 2.9 16.9 2 18 2S20 2.9 20 4 19.1 6 18 6 16 5.1 16 4M20 22V16H22.5L20 8.4C19.7 7.6 19 7 18.1 7H18C17.1 7 16.4 7.6 16.1 8.4L15.2 11C16.3 11.6 17 12.7 17 14.1V22.1H20M12.5 11.5C13.3 11.5 14 10.8 14 10S13.3 8.5 12.5 8.5 11 9.2 11 10 11.7 11.5 12.5 11.5M5.5 6C6.6 6 7.5 5.1 7.5 4S6.6 2 5.5 2 3.5 2.9 3.5 4 4.4 6 5.5 6M7.5 22V15H9V9C9 7.9 8.1 7 7 7H4C2.9 7 2 7.9 2 9V15H3.5V22H7.5M14 22V18H15V14C15 13.2 14.3 12.5 13.5 12.5H11.5C10.7 12.5 10 13.2 10 14V18H11V22H14Z" /></svg> <?php echo $wo['lang']['add_to_family'];?>
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16 4C16 2.9 16.9 2 18 2S20 2.9 20 4 19.1 6 18 6 16 5.1 16 4M20 22V16H22.5L20 8.4C19.7 7.6 19 7 18.1 7H18C17.1 7 16.4 7.6 16.1 8.4L15.2 11C16.3 11.6 17 12.7 17 14.1V22.1H20M12.5 11.5C13.3 11.5 14 10.8 14 10S13.3 8.5 12.5 8.5 11 9.2 11 10 11.7 11.5 12.5 11.5M5.5 6C6.6 6 7.5 5.1 7.5 4S6.6 2 5.5 2 3.5 2.9 3.5 4 4.4 6 5.5 6M7.5 22V15H9V9C9 7.9 8.1 7 7 7H4C2.9 7 2 7.9 2 9V15H3.5V22H7.5M14 22V18H15V14C15 13.2 14.3 12.5 13.5 12.5H11.5C10.7 12.5 10 13.2 10 14V18H11V22H14Z" /></svg>
+											&nbsp;&nbsp;&nbsp;
+											<div>
+												<b><?php echo $wo['lang']['add_to_family'];?></b>
+												<p><?php echo $wo['lang']['add_to_family_tx'];?></p>
+											</div>
 										</a>
 									</li>
 								<?php } ?>
 								<?php if($wo['loggedin'] == true && $IsOwner) { ?>
 									<li id="open_add_to_family_modal">
 										<a class="menu-item" href="<?php echo Wo_SeoLink('index.php?link1=setting&user=' . $wo['user_profile']['username'] . '&page=general-setting') ?>">
-											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M21.7,13.35L20.7,14.35L18.65,12.3L19.65,11.3C19.86,11.09 20.21,11.09 20.42,11.3L21.7,12.58C21.91,12.79 21.91,13.14 21.7,13.35M12,18.94L18.06,12.88L20.11,14.93L14.06,21H12V18.94M12,14C7.58,14 4,15.79 4,18V20H10V18.11L14,14.11C13.34,14.03 12.67,14 12,14M12,4A4,4 0 0,0 8,8A4,4 0 0,0 12,12A4,4 0 0,0 16,8A4,4 0 0,0 12,4Z" /></svg> <?php echo $wo['lang']['edit'];?>
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M21.7,13.35L20.7,14.35L18.65,12.3L19.65,11.3C19.86,11.09 20.21,11.09 20.42,11.3L21.7,12.58C21.91,12.79 21.91,13.14 21.7,13.35M12,18.94L18.06,12.88L20.11,14.93L14.06,21H12V18.94M12,14C7.58,14 4,15.79 4,18V20H10V18.11L14,14.11C13.34,14.03 12.67,14 12,14M12,4A4,4 0 0,0 8,8A4,4 0 0,0 12,12A4,4 0 0,0 16,8A4,4 0 0,0 12,4Z" /></svg>
+											&nbsp;&nbsp;&nbsp;
+											<div>
+												<b><?php echo $wo['lang']['edit'];?></b>
+												<p><?php echo $wo['lang']['edit_tx'];?></p>
+											</div>
 										</a>
 									</li>
 								<?php } ?>
@@ -314,6 +345,12 @@ if ($wo['loggedin'] && $IsOwnerUser) {
 		<?php } ?>
 	</div>
     <?php if ($wo['user_profile']['banned'] != 1) { ?>
+		
+		<!-- Profile Percentage System -->
+        <?php if ($IsOwnerUser === true && array_sum($wo['pr_complition']) < 100): ?>
+            <?php echo Wo_LoadPage('timeline/profile-completion'); ?>
+        <?php endif; ?>
+		
     <div class="col-md-8">
 		<?php
             if (isset($_GET['type'])) {
@@ -1008,12 +1045,6 @@ if ($wo['loggedin'] && $IsOwnerUser) {
             <?php } ?>
         <?php } ?>
 
-
-        <!-- Profile Percentage System -->
-        <?php if ($IsOwnerUser === true && array_sum($wo['pr_complition']) < 100): ?>
-            <?php echo Wo_LoadPage('timeline/profile-completion'); ?>
-        <?php endif; ?>
-
         <ul class="page-margin wow_content negg_padd list-unstyled event-options-list right_user_info wo_prof_side_info_padd mt-0">
             <div class="wo_page_hdng">
 				<div class="wo_page_hdng_innr">
@@ -1229,6 +1260,8 @@ if ($wo['loggedin'] && $IsOwnerUser) {
             	echo Wo_LoadPage('timeline/groups-sidebar');
             }
             if ($wo['config']['store_system'] == 'on') { ?>
+            	<?php $all_products = Wo_GetProducts(array('user_id' => $wo['user_profile']['user_id'] , 'limit' => 6)); ?>
+            	<?php if (!empty($all_products)) { ?>
             	<ul class="page-margin wow_content negg_padd list-unstyled event-options-list" id="sidebar-pages-list-container">
 					<div class="wo_page_hdng" style="margin-bottom: 5px;">
 						<div class="wo_page_hdng_innr">
@@ -1238,7 +1271,7 @@ if ($wo['loggedin'] && $IsOwnerUser) {
 					<li>
 						<div class="activities-wrapper sidebar-product-slider">
 							<?php
-							foreach (Wo_GetProducts(array('user_id' => $wo['user_profile']['user_id'] , 'limit' => 6)) as $wo['product']) {
+							foreach ($all_products as $wo['product']) {
 								$wo['product']['name'] = mb_substr($wo['product']['name'], 0, 10, "utf-8");
 								echo Wo_LoadPage('timeline/sidebar-product-list');
 							}
@@ -1247,6 +1280,7 @@ if ($wo['loggedin'] && $IsOwnerUser) {
 					</li>
 					<li><div class="clear"></div></li>
 				</ul>
+				<?php } ?>
             <?php } ?>
         <?php
             $sidebar_ad = Wo_GetAd('sidebar', false);

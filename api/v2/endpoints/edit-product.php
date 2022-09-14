@@ -164,7 +164,7 @@ if (empty($error_code)) {
                             if (!empty($product) && $wo['user']['id'] == $product['user_id']) {
                                 $deleted = Wo_DeleteProductImage($value);
                                 if ($deleted) {
-                                    if (($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1)) {
+                                    if (($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1 || $wo['config']['backblaze_storage'] == 1)) {
                                         Wo_DeleteFromToS3($image['image']);
                                         Wo_DeleteFromToS3($small_image);
                                     }

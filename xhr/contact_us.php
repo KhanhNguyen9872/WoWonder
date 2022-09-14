@@ -29,10 +29,10 @@ if ($f == 'contact_us') {
         $errors[] = $error_icon . $wo['lang']['email_invalid_characters'];
     }
     if (empty($errors)) {
-        $first_name        = Wo_Secure($_POST['first_name']);
-        $last_name         = Wo_Secure($_POST['last_name']);
+        $first_name        = Wo_Secure($_POST['first_name'],1);
+        $last_name         = Wo_Secure($_POST['last_name'],1);
         $email             = Wo_Secure($_POST['email']);
-        $message           = Wo_Secure($_POST['message']);
+        $message           = Wo_Secure($_POST['message'],1);
         $name              = $first_name . ' ' . $last_name;
         $send_message_data = array(
             'from_email' => $wo['config']['siteEmail'],

@@ -51,7 +51,6 @@ $pages = array(
     'manage-themes',
     'manage-site-design',
     'manage-announcements',
-    'mailing-list',
     'mass-notifications',
     'ban-users',
     'generate-sitemap',
@@ -117,15 +116,17 @@ $pages = array(
     'manage-reviews',
     'website_mode',
     'user_reports',
+    'edit-forum',
+    'edit-section',
+    'cronjob_settings',
+    'system_status',
+    "upload-to-storage"
 );
 $wo['mod_pages'] = array('dashboard', 'post-settings', 'manage-stickers', 'manage-gifts', 'manage-users', 'online-users', 'manage-stories', 'manage-pages', 'manage-groups', 'manage-posts', 'manage-articles', 'manage-events', 'manage-forum-threads', 'manage-forum-messages', 'manage-movies', 'manage-games', 'add-new-game', 'manage-user-ads', 'manage-reports', 'manage-third-psites', 'edit-movie','bank-receipts','job-categories','manage-jobs');
 
+
 if (!empty($_GET['page'])) {
     $page = Wo_Secure($_GET['page'], 0);
-}
-if ($page == 'dashboard') {
-   Wo_GetOfflineTyping();
-   //Wo_DelexpiredEnvents();
 }
 $wo['decode_android_v']  = $wo['config']['footer_background'];
 $wo['decode_android_value']  = base64_decode('I2FhYQ==');
@@ -188,43 +189,7 @@ if (empty($page_loaded)) {
     header("Location: " . Wo_SeoLink('index.php?link1=admin-cp'));
     exit();
 }
-if ($wo['config']['live_video'] == 1) {
 
-    if ($wo['config']['live_video_save'] == 0) {
-        try {
-            $posts = $db->where('live_time','0','!=')->where('live_time',time() - 11,'<=')->get(T_POSTS);
-            foreach ($posts as $key => $post) {
-                if ($wo['config']['agora_live_video'] == 1 && !empty($wo['config']['agora_app_id']) && !empty($wo['config']['agora_customer_id']) && !empty($wo['config']['agora_customer_certificate']) && $wo['config']['live_video_save'] == 1) {
-                    StopCloudRecording(array('resourceId' => $post->agora_resource_id,
-                                             'sid' => $post->agora_sid,
-                                             'cname' => $post->stream_name,
-                                             'post_id' => $post->post_id,
-                                             'uid' => explode('_', $post->stream_name)[2]));
-                }
-                Wo_DeletePost(Wo_Secure($post->id));
-                // $db->where('post_id',$post->id)->delete(T_POSTS);
-                // $db->where('parent_id',$post->id)->delete(T_POSTS);
-            }
-        } catch (Exception $e) {
-
-        }
-
-    }
-    else{
-        if ($wo['config']['agora_live_video'] == 1 && $wo['config']['amazone_s3_2'] != 1) {
-            try {
-            $posts = $db->where('live_time','0','!=')->where('live_time',time() - 11,'<=')->get(T_POSTS);
-            foreach ($posts as $key => $post) {
-                Wo_DeletePost(Wo_Secure($post->id));
-                // $db->where('post_id',$post->id)->delete(T_POSTS);
-                // $db->where('parent_id',$post->id)->delete(T_POSTS);
-            }
-        } catch (Exception $e) {
-
-        }
-        }
-    }
-}
 $notify_count = $db->where('recipient_id',0)->where('admin',1)->where('seen',0)->getValue(T_NOTIFICATION,'COUNT(*)');
 $notifications = $db->where('recipient_id',0)->where('admin',1)->where('seen',0)->orderBy('id','DESC')->get(T_NOTIFICATION);
 $old_notifications = $db->where('recipient_id',0)->where('admin',1)->where('seen',0,'!=')->orderBy('id','DESC')->get(T_NOTIFICATION,5);
@@ -279,17 +244,17 @@ if (!empty($_COOKIE['mode']) && $_COOKIE['mode'] == 'night') {
 <script src="<?php echo Wo_LoadAdminLink('assets/js/admin.js'); ?>"></script>
 <link rel="stylesheet" href="<?php echo(Wo_LoadAdminLink('vendors/select2/css/select2.min.css')) ?>" type="text/css">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css">
-<?php if ($page == 'create-article' || $page == 'edit-article' || $page == 'manage-announcements' || $page == 'newsletters') { ?>
+<?php //if ($page == 'create-article' || $page == 'edit-article' || $page == 'manage-announcements' || $page == 'newsletters') { ?>
 <script src="<?php echo Wo_LoadAdminLink('vendors/tinymce/js/tinymce/tinymce.min.js'); ?>"></script>
 <script src="<?php echo Wo_LoadAdminLink('vendors/bootstrap-tagsinput/src/bootstrap-tagsinput.js'); ?>"></script>
 <link href="<?php echo Wo_LoadAdminLink('vendors/bootstrap-tagsinput/src/bootstrap-tagsinput.css'); ?>" rel="stylesheet" />
-<?php } ?>
-<?php if ($page == 'custom-code') { ?>
+<?php //} ?>
+<?php //if ($page == 'custom-code') { ?>
 <script src="<?php echo Wo_LoadAdminLink('vendors/codemirror-5.30.0/lib/codemirror.js'); ?>"></script>
 <script src="<?php echo Wo_LoadAdminLink('vendors/codemirror-5.30.0/mode/css/css.js'); ?>"></script>
 <script src="<?php echo Wo_LoadAdminLink('vendors/codemirror-5.30.0/mode/javascript/javascript.js'); ?>"></script>
 <link rel="stylesheet" href="<?php echo Wo_LoadAdminLink('vendors/codemirror-5.30.0/lib/codemirror.css'); ?>">
-<?php } ?>
+<?php //} ?>
 
 
     <!--[if lt IE 9]>
@@ -530,7 +495,7 @@ if (!empty($_COOKIE['mode']) && $_COOKIE['mode'] == 'night') {
                                                             $text = 'You have a new refund requests awaiting your approval';
                                                         }
                                                         elseif ($notify->type == 'with') {
-                                                            $page_ = 'payment-requests';
+                                                            $page_ = 'payment-reqeuests';
                                                             $text = 'You have a new withdrawal requests awaiting your approval';
                                                         }
                                                         elseif ($notify->type == 'report') {
@@ -658,8 +623,8 @@ if (!empty($_COOKIE['mode']) && $_COOKIE['mode'] == 'night') {
                     </li>
                     <?php } ?>
 
-                    <?php if ($is_admin || ($is_moderoter && ($wo['user']['permission']['post-settings'] == 1 || $wo['user']['permission']['manage-colored-posts'] == 1 || $wo['user']['permission']['manage-reactions'] == 1 || $wo['user']['permission']['live'] == 1 || $wo['user']['permission']['general-settings'] == 1 || $wo['user']['permission']['site-settings'] == 1 || $wo['user']['permission']['amazon-settings'] == 1 || $wo['user']['permission']['email-settings'] == 1 || $wo['user']['permission']['video-settings'] == 1 || $wo['user']['permission']['social-login'] == 1 || $wo['user']['permission']['node'] == 1))) { ?>
-                    <li <?php echo ($page == 'general-settings' || $page == 'post-settings' || $page == 'site-settings' || $page == 'email-settings' || $page == 'social-login' || $page == 'site-features' || $page == 'amazon-settings' ||  $page == 'video-settings' || $page == 'manage-currencies' || $page == 'manage-colored-posts' || $page == 'live' || $page == 'node' || $page == 'manage-reactions' || $page == 'ffmpeg') ? 'class="open"' : ''; ?>>
+                    <?php if ($is_admin || ($is_moderoter && ($wo['user']['permission']['post-settings'] == 1 || $wo['user']['permission']['manage-colored-posts'] == 1 || $wo['user']['permission']['manage-reactions'] == 1 || $wo['user']['permission']['live'] == 1 || $wo['user']['permission']['general-settings'] == 1 || $wo['user']['permission']['site-settings'] == 1 || $wo['user']['permission']['amazon-settings'] == 1 || $wo['user']['permission']['email-settings'] == 1 || $wo['user']['permission']['video-settings'] == 1 || $wo['user']['permission']['social-login'] == 1 || $wo['user']['permission']['node'] == 1 || $wo['user']['permission']['cronjob_settings'] == 1))) { ?>
+                    <li <?php echo ($page == 'general-settings' || $page == 'post-settings' || $page == 'site-settings' || $page == 'email-settings' || $page == 'social-login' || $page == 'site-features' || $page == 'amazon-settings' ||  $page == 'video-settings' || $page == 'manage-currencies' || $page == 'manage-colored-posts' || $page == 'live' || $page == 'node' || $page == 'manage-reactions' || $page == 'ffmpeg' || $page == 'cronjob_settings') ? 'class="open"' : ''; ?>>
                         <a href="#">
                             <span class="nav-link-icon">
                                 <i class="material-icons">settings</i>
@@ -705,6 +670,11 @@ if (!empty($_COOKIE['mode']) && $_COOKIE['mode'] == 'night') {
                             <?php if ($is_admin || ($is_moderoter && $wo['user']['permission']['node'] == 1)) { ?>
                             <li>
                                 <a <?php echo ($page == 'node') ? 'class="active"' : ''; ?> href="<?php echo Wo_LoadAdminLinkSettings('node'); ?>" data-ajax="?path=node">NodeJS Settings</a>
+                            </li>
+                            <?php } ?>
+                            <?php if ($is_admin || ($is_moderoter && $wo['user']['permission']['cronjob_settings'] == 1)) { ?>
+                            <li>
+                                <a <?php echo ($page == 'cronjob_settings') ? 'class="active"' : ''; ?> href="<?php echo Wo_LoadAdminLinkSettings('cronjob_settings'); ?>" data-ajax="?path=cronjob_settings">CronJob Settings</a>
                             </li>
                             <?php } ?>
 
@@ -1275,8 +1245,8 @@ if (!empty($_COOKIE['mode']) && $_COOKIE['mode'] == 'night') {
                         </ul>
                     </li>
                     <?php } ?>
-                    <?php if ($is_admin || ($is_moderoter && ($wo['user']['permission']['manage-announcements'] == 1 || $wo['user']['permission']['mailing-list'] == 1 || $wo['user']['permission']['mass-notifications'] == 1 || $wo['user']['permission']['ban-users'] == 1 || $wo['user']['permission']['generate-sitemap'] == 1 || $wo['user']['permission']['manage-invitation-keys'] == 1 || $wo['user']['permission']['backups'] == 1 || $wo['user']['permission']['auto-delete'] == 1 || $wo['user']['permission']['auto-friend'] == 1 || $wo['user']['permission']['fake-users'] == 1 || $wo['user']['permission']['auto-like'] == 1 || $wo['user']['permission']['auto-join'] == 1 || $wo['user']['permission']['send_email'] == 1 || $wo['user']['permission']['manage-invitation'] == 1))) { ?>
-                    <li <?php echo ($page == 'manage-announcements' || $page == 'mailing-list' || $page == 'mass-notifications' || $page == 'ban-users' || $page == 'generate-sitemap' || $page == 'manage-invitation-keys' || $page == 'backups' || $page == 'auto-delete' || $page == 'auto-friend' || $page == 'fake-users' || $page == 'auto-like' || $page == 'auto-join' || $page == 'send_email' || $page == 'manage-invitation') ? 'class="open"' : ''; ?>>
+                    <?php if ($is_admin || ($is_moderoter && ($wo['user']['permission']['manage-announcements'] == 1 || $wo['user']['permission']['mass-notifications'] == 1 || $wo['user']['permission']['ban-users'] == 1 || $wo['user']['permission']['generate-sitemap'] == 1 || $wo['user']['permission']['manage-invitation-keys'] == 1 || $wo['user']['permission']['backups'] == 1 || $wo['user']['permission']['auto-delete'] == 1 || $wo['user']['permission']['auto-friend'] == 1 || $wo['user']['permission']['fake-users'] == 1 || $wo['user']['permission']['auto-like'] == 1 || $wo['user']['permission']['auto-join'] == 1 || $wo['user']['permission']['send_email'] == 1 || $wo['user']['permission']['manage-invitation'] == 1))) { ?>
+                    <li <?php echo ($page == 'manage-announcements' || $page == 'mass-notifications' || $page == 'ban-users' || $page == 'generate-sitemap' || $page == 'manage-invitation-keys' || $page == 'backups' || $page == 'auto-delete' || $page == 'auto-friend' || $page == 'fake-users' || $page == 'auto-like' || $page == 'auto-join' || $page == 'send_email' || $page == 'manage-invitation') ? 'class="open"' : ''; ?>>
                         <a href="#">
                             <span class="nav-link-icon">
                                 <i class="material-icons">build</i>
@@ -1327,11 +1297,6 @@ if (!empty($_COOKIE['mode']) && $_COOKIE['mode'] == 'night') {
                             <?php if ($is_admin || ($is_moderoter && $wo['user']['permission']['fake-users'] == 1)) { ?>
                             <li>
                                 <a <?php echo ($page == 'fake-users') ? 'class="active"' : ''; ?> href="<?php echo Wo_LoadAdminLinkSettings('fake-users'); ?>" data-ajax="?path=fake-users">Fake User Generator</a>
-                            </li>
-                            <?php } ?>
-                            <?php if ($is_admin || ($is_moderoter && $wo['user']['permission']['mailing-list'] == 1)) { ?>
-                            <li>
-                                <a <?php echo ($page == 'mailing-list') ? 'class="active"' : ''; ?> href="<?php echo Wo_LoadAdminLinkSettings('mailing-list'); ?>" data-ajax="?path=mailing-list">Maling List</a>
                             </li>
                             <?php } ?>
                             <?php if ($is_admin || ($is_moderoter && $wo['user']['permission']['mass-notifications'] == 1)) { ?>
@@ -1439,7 +1404,7 @@ if (!empty($_COOKIE['mode']) && $_COOKIE['mode'] == 'night') {
                     </li>
                     <?php } ?>
                     <?php if ($is_admin || ($is_moderoter && ($wo['user']['permission']['manage-updates'] == 1))) { ?>
-                    <li <?php echo ($page == 'manage-updates') ? 'class="active"' : ''; ?>>
+                   <!--  <li <?php echo ($page == 'manage-updates') ? 'class="active"' : ''; ?>>
                         <a href="#">
                             <span class="nav-link-icon">
                                 <i class="material-icons">cloud_download</i>
@@ -1453,8 +1418,16 @@ if (!empty($_COOKIE['mode']) && $_COOKIE['mode'] == 'night') {
                             </li>
                             <?php } ?>
                         </ul>
-                    </li>
+                    </li> -->
                     <?php } ?>
+                    <li>
+                        <a <?php echo ($page == 'system_status') ? 'class="active"' : ''; ?> href="<?php echo Wo_LoadAdminLinkSettings('system_status'); ?>" data-ajax="?path=system_status">
+                            <span class="nav-link-icon">
+                                <i class="material-icons">info</i>
+                            </span>
+                            <span>System Status</span>
+                        </a>
+                    </li>
                     <?php if ($is_admin || ($is_moderoter && ($wo['user']['permission']['changelog'] == 1))) { ?>
                     <li>
                         <a <?php echo ($page == 'changelog') ? 'class="active"' : ''; ?> href="<?php echo Wo_LoadAdminLinkSettings('changelog'); ?>" data-ajax="?path=changelog">

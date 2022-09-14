@@ -8,3 +8,8 @@ Disallow: /updates
 Disallow: /install
 Disallow: /admincp
 Disallow: /admin-panel
+Disallow: /ajax_loading.php
+Disallow: /api.php
+Disallow: /xml
+Disallow: /system_status.php
+Disallow: /nodejs

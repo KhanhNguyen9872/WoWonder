@@ -4,7 +4,7 @@ NAME
        ffprobe - ffprobe media prober
 
 SYNOPSIS
-       ffprobe [options] input_url
+       ffprobe [options] [input_url]
 
 DESCRIPTION
        ffprobe gathers information from multimedia streams and prints it in
@@ -17,9 +17,6 @@ DESCRIPTION
        If a url is specified in input, ffprobe will try to open and probe the
        url content. If the url cannot be opened or recognized as a multimedia
        file, a positive exit code is returned.
-
-       If no output is specified as output with o ffprobe will write to
-       stdout.
 
        ffprobe may be employed both as a standalone application or in
        combination with a textual filter, which may perform more sophisticated
@@ -78,27 +75,20 @@ OPTIONS
 
        stream_index
 	   Matches the stream with this index. E.g. "-threads:1 4" would set
-	   the thread count for the second stream to 4. If stream_index is
-	   used as an additional stream specifier (see below), then it selects
-	   stream number stream_index from the matching streams. Stream
-	   numbering is based on the order of the streams as detected by
-	   libavformat except when a program ID is also specified. In this
-	   case it is based on the ordering of the streams in the program.
+	   the thread count for the second stream to 4.
 
-       stream_type[:additional_stream_specifier]
+       stream_type[:stream_index]
 	   stream_type is one of following: 'v' or 'V' for video, 'a' for
 	   audio, 's' for subtitle, 'd' for data, and 't' for attachments. 'v'
 	   matches all video streams, 'V' only matches video streams which are
-	   not attached pictures, video thumbnails or cover arts. If
-	   additional_stream_specifier is used, then it matches streams which
-	   both have this type and match the additional_stream_specifier.
-	   Otherwise, it matches all streams of the specified type.
+	   not attached pictures, video thumbnails or cover arts.  If
+	   stream_index is given, then it matches stream number stream_index
+	   of this type. Otherwise, it matches all streams of this type.
 
-       p:program_id[:additional_stream_specifier]
-	   Matches streams which are in the program with the id program_id. If
-	   additional_stream_specifier is used, then it matches streams which
-	   both are part of the program and match the
-	   additional_stream_specifier.
+       p:program_id[:stream_index]
+	   If stream_index is given, then it matches the stream with number
+	   stream_index in the program with the id program_id. Otherwise, it
+	   matches all streams in the program.
 
        #stream_id or i:stream_id
 	   Match the stream by stream id (e.g. PID in MPEG-TS container).
@@ -156,24 +146,11 @@ OPTIONS
 	       demuxers.
 
 	   filter=filter_name
-	       Print detailed information about the filter named filter_name.
+	       Print detailed information about the filter name filter_name.
 	       Use the -filters option to get a list of all filters.
-
-	   bsf=bitstream_filter_name
-	       Print detailed information about the bitstream filter named
-	       bitstream_filter_name.  Use the -bsfs option to get a list of
-	       all bitstream filters.
-
-	   protocol=protocol_name
-	       Print detailed information about the protocol named
-	       protocol_name.  Use the -protocols option to get a list of all
-	       protocols.
 
        -version
 	   Show version.
-
-       -buildconf
-	   Show the build configuration, one option per line.
 
        -formats
 	   Show available formats (including devices).
@@ -218,9 +195,6 @@ OPTIONS
        -layouts
 	   Show channel names and standard channel layouts.
 
-       -dispositions
-	   Show stream dispositions.
-
        -colors
 	   Show recognized color names.
 
@@ -238,28 +212,15 @@ OPTIONS
 
 		   ffmpeg -sinks pulse,server=192.168.0.4
 
-       -loglevel [flags+]loglevel | -v [flags+]loglevel
-	   Set logging level and flags used by the library.
-
-	   The optional flags prefix can consist of the following values:
-
-	   repeat
-	       Indicates that repeated log output should not be compressed to
-	       the first line and the "Last message repeated n times" line
-	       will be omitted.
-
-	   level
-	       Indicates that log output should add a "[level]" prefix to each
-	       message line. This can be used as an alternative to log
-	       coloring, e.g. when dumping the log to file.
-
-	   Flags can also be used alone by adding a '+'/'-' prefix to
-	   set/reset a single flag without affecting other flags or changing
-	   loglevel. When setting both flags and loglevel, a '+' separator is
-	   expected between the last flags value and before loglevel.
-
-	   loglevel is a string or a number containing one of the following
-	   values:
+       -loglevel [repeat+]loglevel | -v [repeat+]loglevel
+	   Set the logging level used by the library.  Adding "repeat+"
+	   indicates that repeated log output should not be compressed to the
+	   first line and the "Last message repeated n times" line will be
+	   omitted. "repeat" can also be used alone.  If "repeat" is used
+	   alone, and with no prior loglevel set, the default loglevel will be
+	   used. If multiple loglevel parameters are given, using 'repeat'
+	   will not change the loglevel.  loglevel is a string or a number
+	   containing one of the following values:
 
 	   quiet, -8
 	       Show nothing at all; be silent.
@@ -292,26 +253,19 @@ OPTIONS
 
 	   trace, 56
 
-	   For example to enable repeated log output, add the "level" prefix,
-	   and set loglevel to "verbose":
-
-		   ffmpeg -loglevel repeat+level+verbose -i input output
-
-	   Another example that enables repeated log output without affecting
-	   current state of "level" prefix flag or loglevel:
-
-		   ffmpeg [...] -loglevel +repeat
-
 	   By default the program logs to stderr. If coloring is supported by
 	   the terminal, colors are used to mark errors and warnings. Log
 	   coloring can be disabled setting the environment variable
-	   AV_LOG_FORCE_NOCOLOR, or can be forced setting the environment
-	   variable AV_LOG_FORCE_COLOR.
+	   AV_LOG_FORCE_NOCOLOR or NO_COLOR, or can be forced setting the
+	   environment variable AV_LOG_FORCE_COLOR.  The use of the
+	   environment variable NO_COLOR is deprecated and will be dropped in
+	   a future FFmpeg version.
 
        -report
-	   Dump full command line and log output to a file named
+	   Dump full command line and console output to a file named
 	   "program-YYYYMMDD-HHMMSS.log" in the current directory.  This file
-	   can be useful for bug reports.  It also implies "-loglevel debug".
+	   can be useful for bug reports.  It also implies "-loglevel
+	   verbose".
 
 	   Setting the environment variable FFREPORT to any value has the same
 	   effect. If the value is a ':'-separated key=value sequence, these
@@ -400,17 +354,51 @@ OPTIONS
 	       athlon
 	       athlonxp
 	       k8
-       -cpucount count (global)
-	   Override detection of CPU count. This option is intended for
-	   testing. Do not use it unless you know what you're doing.
+       -opencl_bench
+	   This option is used to benchmark all available OpenCL devices and
+	   print the results. This option is only available when FFmpeg has
+	   been compiled with "--enable-opencl".
 
-		   ffmpeg -cpucount 2
+	   When FFmpeg is configured with "--enable-opencl", the options for
+	   the global OpenCL context are set via -opencl_options. See the
+	   "OpenCL Options" section in the ffmpeg-utils manual for the
+	   complete list of supported options. Amongst others, these options
+	   include the ability to select a specific platform and device to run
+	   the OpenCL code on. By default, FFmpeg will run on the first device
+	   of the first platform. While the options for the global OpenCL
+	   context provide flexibility to the user in selecting the OpenCL
+	   device of their choice, most users would probably want to select
+	   the fastest OpenCL device for their system.
 
-       -max_alloc bytes
-	   Set the maximum size limit for allocating a block on the heap by
-	   ffmpeg's family of malloc functions. Exercise extreme caution when
-	   using this option. Don't use if you do not understand the full
-	   consequence of doing so.  Default is INT_MAX.
+	   This option assists the selection of the most efficient
+	   configuration by identifying the appropriate device for the user's
+	   system. The built-in benchmark is run on all the OpenCL devices and
+	   the performance is measured for each device. The devices in the
+	   results list are sorted based on their performance with the fastest
+	   device listed first. The user can subsequently invoke ffmpeg using
+	   the device deemed most appropriate via -opencl_options to obtain
+	   the best performance for the OpenCL accelerated code.
+
+	   Typical usage to use the fastest OpenCL device involve the
+	   following steps.
+
+	   Run the command:
+
+		   ffmpeg -opencl_bench
+
+	   Note down the platform ID (pidx) and device ID (didx) of the first
+	   i.e. fastest device in the list.  Select the platform and device
+	   using the command:
+
+		   ffmpeg -opencl_options platform_idx=<pidx>:device_idx=<didx> ...
+
+       -opencl_options options (global)
+	   Set OpenCL environment options. This option is only available when
+	   FFmpeg has been compiled with "--enable-opencl".
+
+	   options must be a list of key=value option pairs separated by ':'.
+	   See the ``OpenCL Options'' section in the ffmpeg-utils manual for
+	   the list of supported options.
 
    AVOptions
        These options are provided directly by the libavformat, libavdevice and
@@ -433,15 +421,7 @@ OPTIONS
 	       ffmpeg -i input.flac -id3v2_version 3 out.mp3
 
        All codec AVOptions are per-stream, and thus a stream specifier should
-       be attached to them:
-
-	       ffmpeg -i multichannel.mxf -map 0:v:0 -map 0:a:0 -map 0:a:0 -c:a:0 ac3 -b:a:0 640k -ac:a:1 2 -c:a:1 aac -b:2 128k out.mp4
-
-       In the above example, a multichannel audio stream is mapped twice for
-       output.	The first instance is encoded with codec ac3 and bitrate 640k.
-       The second instance is downmixed to 2 channels and encoded with codec
-       aac. A bitrate of 128k is specified for it using absolute index of the
-       output stream.
+       be attached to them.
 
        Note: the -nooption syntax cannot be used for boolean AVOptions, use
        -option 0/-option 1.
@@ -664,21 +644,21 @@ OPTIONS
 
 	   A few examples follow.
 
-	   o   Seek to time 10, read packets until 20 seconds after the found
+	   ·   Seek to time 10, read packets until 20 seconds after the found
 	       seek point, then seek to position "01:30" (1 minute and thirty
 	       seconds) and read packets until position "01:45".
 
 		       10%+20,01:30%01:45
 
-	   o   Read only 42 packets after seeking to position "01:23":
+	   ·   Read only 42 packets after seeking to position "01:23":
 
 		       01:23%+#42
 
-	   o   Read only the first 20 seconds from the start:
+	   ·   Read only the first 20 seconds from the start:
 
 		       %+20
 
-	   o   Read from the start until position "02:30":
+	   ·   Read from the start until position "02:30":
 
 		       %02:30
 
@@ -711,22 +691,12 @@ OPTIONS
 	   Pixel format information for each format is printed within a
 	   section with name "PIXEL_FORMAT".
 
-       -show_optional_fields value
-	   Some writers viz. JSON and XML, omit the printing of fields with
-	   invalid or non-applicable values, while other writers always print
-	   them. This option enables one to control this behaviour.  Valid
-	   values are "always"/1, "never"/0 and "auto"/"-1".  Default is auto.
-
        -bitexact
 	   Force bitexact output, useful to produce output which is not
 	   dependent on the specific build.
 
        -i input_url
 	   Read input_url.
-
-       -o output_url
-	   Write output to output_url. If not specified, the output is sent to
-	   stdout.
 
 WRITERS
        A writer defines the output format adopted by ffprobe, and will be used
@@ -799,7 +769,7 @@ WRITERS
        The "csv" writer is equivalent to "compact", but supports different
        defaults.
 
-       Each section is printed on a single line.  If no option is specified,
+       Each section is printed on a single line.  If no option is specifid,
        the output has the form:
 
 	       section|key1=val1| ... |keyN=valN
@@ -875,19 +845,19 @@ WRITERS
 
        The following conventions are adopted:
 
-       o   all key and values are UTF-8
+       ·   all key and values are UTF-8
 
-       o   . is the subgroup separator
+       ·   . is the subgroup separator
 
-       o   newline, \t, \f, \b and the following characters are escaped
+       ·   newline, \t, \f, \b and the following characters are escaped
 
-       o   \ is the escape character
+       ·   \ is the escape character
 
-       o   # is the comment indicator
+       ·   # is the comment indicator
 
-       o   = is the key/value separator
+       ·   = is the key/value separator
 
-       o   : is not used but usually parsed as key/value separator
+       ·   : is not used but usually parsed as key/value separator
 
        This writer accepts options as a list of key=value pairs, separated by
        :.
@@ -936,28 +906,28 @@ WRITERS
 	   Default value is 0.	This is required for generating an XML file
 	   which can be validated through an XSD file.
 
-       xsd_strict, x
+       xsd_compliant, x
 	   If set to 1 perform more checks for ensuring that the output is XSD
 	   compliant. Default value is 0.  This option automatically sets
 	   fully_qualified to 1.
 
        For more information about the XML format, see
-       <https://www.w3.org/XML/>.
+       <http://www.w3.org/XML/>.
 
 TIMECODE
        ffprobe supports Timecode extraction:
 
-       o   MPEG1/2 timecode is extracted from the GOP, and is available in the
+       ·   MPEG1/2 timecode is extracted from the GOP, and is available in the
 	   video stream details (-show_streams, see timecode).
 
-       o   MOV timecode is extracted from tmcd track, so is available in the
+       ·   MOV timecode is extracted from tmcd track, so is available in the
 	   tmcd stream metadata (-show_streams, see TAG:timecode).
 
-       o   DV, GXF and AVI timecodes are available in format metadata
+       ·   DV, GXF and AVI timecodes are available in format metadata
 	   (-show_format, see TAG:timecode).
 
 SEE ALSO
-       ffprobe-all(1), ffmpeg(1), ffplay(1), ffmpeg-utils(1),
+       ffprobe-all(1), ffmpeg(1), ffplay(1), ffserver(1), ffmpeg-utils(1),
        ffmpeg-scaler(1), ffmpeg-resampler(1), ffmpeg-codecs(1),
        ffmpeg-bitstream-filters(1), ffmpeg-formats(1), ffmpeg-devices(1),
        ffmpeg-protocols(1), ffmpeg-filters(1)

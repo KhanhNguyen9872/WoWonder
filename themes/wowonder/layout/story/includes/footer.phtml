@@ -76,10 +76,10 @@
 	<?php if ($wo['story']['comments_status'] == 1) { ?>
 		<div class="stats post-actions  <?php echo Wo_RightToLeft('pull-right');?>">
 			<?php if (!empty($wo['story']['postFile']) && strpos($wo['story']['postFile'], '_video') !== false): ?>
-				<div class="btn btn-default stat-item post-wonders-status">
+				<div class="btn btn-default stat-item post-wonders-status cursor">
 					<?php if ($wo['config']['website_mode'] == 'instagram') { ?>
 					<?php } else { ?>
-						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+						<svg enable-background="new 0 0 512.042 512.042" height="512" viewBox="0 0 512.042 512.042" width="512" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="m256.021 361.021c24.813 0 45-20.187 45-45s-20.187-45-45-45-45 20.187-45 45 20.187 45 45 45zm0-60c8.271 0 15 6.729 15 15s-6.729 15-15 15-15-6.729-15-15 6.729-15 15-15z"/><path d="m79.563 388.274c58.128 41.049 119.146 62.747 176.458 62.747s118.33-21.698 176.459-62.747c43.48-30.706 69.985-61.166 71.093-62.448l8.47-9.805-8.47-9.805c-1.107-1.282-27.612-31.742-71.093-62.448-58.129-41.05-119.147-62.747-176.459-62.747s-118.33 21.698-176.458 62.747c-43.48 30.706-69.986 61.166-71.093 62.448l-8.47 9.805 8.469 9.805c1.107 1.282 27.613 31.742 71.094 62.448zm334.99-120.438c26.294 18.496 46.206 37.197 57.065 48.185-10.859 10.989-30.771 29.689-57.065 48.185-13.323 9.371-29.346 19.388-47.398 28.365 15.041-21.769 23.866-48.146 23.866-76.55s-8.825-54.781-23.866-76.55c18.052 8.977 34.075 18.994 47.398 28.365zm-158.532-56.815c57.847 0 105 47.059 105 105 0 57.852-47.063 105-105 105-57.847 0-105-47.059-105-105 0-57.897 47.103-105 105-105zm-111.11 28.416c-15.056 21.776-23.89 48.166-23.89 76.584 0 28.404 8.825 54.781 23.866 76.55-18.052-8.977-34.075-18.993-47.398-28.365-26.292-18.494-46.203-37.193-57.061-48.179 10.354-10.46 28.956-27.925 53.592-45.64 14.916-10.726 32.043-21.542 50.891-30.95z"/><path d="m241.021 61.021h30v75h-30z"/><path d="m327.48 106.022h67.082v29.999h-67.082z" transform="matrix(.447 -.894 .894 .447 91.323 389.806)"/><path d="m421.021 166.021h75v30h-75z" transform="matrix(.6 -.8 .8 .6 38.591 439.225)"/><path d="m136.021 87.48h30v67.082h-30z" transform="matrix(.894 -.447 .447 .894 -38.179 80.315)"/><path d="m38.521 143.521h30v75h-30z" transform="matrix(.8 -.6 .6 .8 -97.909 68.317)"/></svg>
 					<?php } ?>
 
 
@@ -94,7 +94,7 @@
 			<div class="btn btn-default stat-item" title="<?php echo $wo['lang']['comments'];?>" onclick="Wo_ShowComments(<?php echo $wo['story']['id'] ?>);">
 				<?php if ($wo['config']['website_mode'] == 'instagram') { ?>
 				<?php } else { ?>
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-circle"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+					<svg height="682pt" viewBox="-21 -47 682.66669 682" width="682pt" xmlns="http://www.w3.org/2000/svg" class="feather feather-message-circle" fill="currentColor"><path d="m552.011719-1.332031h-464.023438c-48.515625 0-87.988281 39.464843-87.988281 87.988281v283.972656c0 48.414063 39.300781 87.816406 87.675781 87.988282v128.863281l185.191407-128.863281h279.144531c48.515625 0 87.988281-39.472657 87.988281-87.988282v-283.972656c0-48.523438-39.472656-87.988281-87.988281-87.988281zm50.488281 371.960937c0 27.835938-22.648438 50.488282-50.488281 50.488282h-290.910157l-135.925781 94.585937v-94.585937h-37.1875c-27.839843 0-50.488281-22.652344-50.488281-50.488282v-283.972656c0-27.84375 22.648438-50.488281 50.488281-50.488281h464.023438c27.839843 0 50.488281 22.644531 50.488281 50.488281zm0 0"></path><path d="m171.292969 131.171875h297.414062v37.5h-297.414062zm0 0"></path><path d="m171.292969 211.171875h297.414062v37.5h-297.414062zm0 0"></path><path d="m171.292969 291.171875h297.414062v37.5h-297.414062zm0 0"></path></svg>
 				<?php } ?>
 
 				<span id="comments">
@@ -309,12 +309,3 @@
    }
 
 </script>
-<style type="text/css">
-   .chat-box-stickers-cont img{
-          width: 50%;
-    height: 80px;
-    display: inline;
-    cursor: pointer;
-    float: left;
-   }
-</style>

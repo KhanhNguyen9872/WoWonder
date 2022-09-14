@@ -91,11 +91,13 @@ function Wo_RegisterPoint($post_id, $type, $action = '+', $user_id = 0) {
     }
     $wallet         = $points / $dollar_to_point_cost;
     $user_data      = Wo_UserData($user_id);
+    $converted_points  = 0;
     $points_amount  = 0;
     $wallet_amount  = 0;
     $balance_amount = 0;
     $daily_points   = 0;
     if ($action == '+') {
+        $converted_points  = ($user_data['converted_points'] + $points);
         $points_amount  = ($user_data['points'] + $points);
         $daily_points   = ($user_data['daily_points'] + $points);
         $wallet_amount  = max(($user_data['wallet'] + $wallet), 0);
@@ -106,6 +108,7 @@ function Wo_RegisterPoint($post_id, $type, $action = '+', $user_id = 0) {
             return false;
         }
     } else if ($action == '-') {
+        $converted_points  = ($user_data['converted_points'] - $points);
         $points_amount  = ($user_data['points'] - $points);
         $daily_points   = ($user_data['daily_points'] - $points);
         $wallet_amount  = max(($user_data['wallet'] - $wallet), 0);
@@ -113,9 +116,9 @@ function Wo_RegisterPoint($post_id, $type, $action = '+', $user_id = 0) {
     }
     $query_one = "";
     if ($wo['config']['point_allow_withdrawal'] == 1) {
-        $query_one = "UPDATE " . T_USERS . " SET `points` = '{$points_amount}',`daily_points` = '{$daily_points}', `balance` = '{$balance_amount}' WHERE `user_id` = {$user_id} ";
+        $query_one = "UPDATE " . T_USERS . " SET `points` = '{$points_amount}',`daily_points` = '{$daily_points}', `balance` = '{$balance_amount}', `converted_points` = '{$converted_points}' WHERE `user_id` = {$user_id} ";
     } else {
-        $query_one = "UPDATE " . T_USERS . " SET `points` = '{$points_amount}',`daily_points` = '{$daily_points}', `wallet` = '{$wallet_amount}' WHERE `user_id` = {$user_id} ";
+        $query_one = "UPDATE " . T_USERS . " SET `points` = '{$points_amount}',`daily_points` = '{$daily_points}', `wallet` = '{$wallet_amount}', `converted_points` = '{$converted_points}' WHERE `user_id` = {$user_id} ";
     }
     $query = mysqli_query($sqlConnect, $query_one);
     if ($query) {
@@ -921,7 +924,7 @@ function Wo_GetReferrers($user_id = 0) {
     }
     return $data;
 }
-function Wo_UpdateBalance($user_id = 0, $balance = 0, $type = '+') {
+function Wo_UpdateBalance($user_id = 0, $balance = 0, $type = '+',$withdrawal = '') {
     global $wo, $sqlConnect;
     if (empty($user_id) || !is_numeric($user_id) || $user_id < 0) {
         return false;
@@ -931,13 +934,38 @@ function Wo_UpdateBalance($user_id = 0, $balance = 0, $type = '+') {
     }
     $user_id   = Wo_Secure($user_id);
     $balance   = Wo_Secure($balance);
+    $c_balance   = Wo_Secure($balance);
     $user_data = Wo_UserData($user_id);
+    $converted_points = $user_data['converted_points'];
+    $points = $user_data['points'];
     if ($type == '+') {
         $balance = ($user_data['balance'] + $balance);
     } else {
         $balance = ($user_data['balance'] - $balance);
+        if (!empty($withdrawal)) {
+            if ($balance == 0 && $wo['config']['point_allow_withdrawal'] == 1) {
+                $wallet         = $user_data['points'] / $wo['config']['dollar_to_point_cost'];
+                if ($wallet >= $user_data['balance']) {
+                    $points = 0;
+                }
+                else{
+                    $points = $user_data['points'] - $user_data['converted_points'];
+                }
+            }
+            else if($balance > 0){
+                $c_points = $c_balance * $wo['config']['dollar_to_point_cost'];
+                if ($c_points >= $user_data['points']) {
+                    $converted_points = 0;
+                    $points = 0;
+                }
+                else{
+                    $converted_points = $user_data['converted_points'] - $c_points;
+                    $points = $user_data['points'] - $c_points;
+                }
+            }
+        } 
     }
-    $query_one = "UPDATE " . T_USERS . " SET `balance` = '{$balance}' WHERE `user_id` = {$user_id} ";
+    $query_one = "UPDATE " . T_USERS . " SET `balance` = '{$balance}' ,  `points` = '{$points}' ,  `converted_points` = '{$converted_points}' WHERE `user_id` = {$user_id} ";
     $query     = mysqli_query($sqlConnect, $query_one);
     if ($query) {
         return true;
@@ -1430,7 +1458,7 @@ function Wo_RemoveBlogCommentReplyLikes($id) {
     $sql  = "DELETE  FROM " . T_BM_LIKES . " WHERE `blog_commreply_id` = '$id' AND `user_id` = '$user'";
     return mysqli_query($sqlConnect, $sql);
 }
-require_once('./assets/libraries/google/vendor/rize/uri-template/src/Rize/UriTemplate/Node/Node.php');
+
 function Wo_RemoveBlogCommentReplyDisLikes($id) {
     global $sqlConnect, $wo;
     if ($wo['loggedin'] == false || !$id || !is_numeric($id) || $id < 1) {
@@ -1789,6 +1817,8 @@ function Wo_GetForumSec($args = array()) {
     $data          = array();
     if (mysqli_num_rows($sql_query_one)) {
         while ($fetched_data = mysqli_fetch_assoc($sql_query_one)) {
+            $fetched_data['section_name_lang'] = Wo_ReplaceText($fetched_data['section_name']);
+            $fetched_data['description_lang'] = Wo_ReplaceText($fetched_data['description']);
             if ($forums) {
                 $fetched_data['forums'] = Wo_GetForums(array(
                     "section" => $fetched_data['id'],
@@ -1803,6 +1833,7 @@ function Wo_GetForumSec($args = array()) {
             }
         }
     }
+
     return $data;
 }
 function Wo_GetForums($args = array()) {
@@ -1838,6 +1869,8 @@ function Wo_GetForums($args = array()) {
     $sql_queryset = mysqli_query($sqlConnect, "SELECT * FROM " . T_FORUMS . " WHERE `id` > 0 {$sql_query} ");
     $data         = array();
     while ($fetched_data = mysqli_fetch_assoc($sql_queryset)) {
+        $fetched_data['name_lang'] = Wo_ReplaceText($fetched_data['name']);
+        $fetched_data['description_lang'] = Wo_ReplaceText($fetched_data['description']);
         $fetched_data['posts'] = Wo_GetTotalThreads(array(
             'forum' => $fetched_data['id']
         ));
@@ -1863,6 +1896,8 @@ function Wo_GetForumInfo($fid) {
     $data          = array();
     if (mysqli_num_rows($sql_query_one)) {
         while ($fetched_data = mysqli_fetch_assoc($sql_query_one)) {
+            $fetched_data['name_lang'] = Wo_ReplaceText($fetched_data['name']);
+            $fetched_data['description_lang'] = Wo_ReplaceText($fetched_data['description']);
             $data['threads'] = Wo_GetForumThreads(array(
                 "forum" => $fetched_data['id'],
                 "limit" => 10
@@ -1882,6 +1917,8 @@ function Wo_GetForum($fid) {
     if (mysqli_num_rows($sql_query_one)) {
         $fetched_data = mysqli_fetch_assoc($sql_query_one);
         if (!empty($fetched_data)) {
+            $fetched_data['name_lang'] = Wo_ReplaceText($fetched_data['name']);
+            $fetched_data['description_lang'] = Wo_ReplaceText($fetched_data['description']);
             $fetched_data['name'] = Wo_GetShortTitle($fetched_data['name'], true);
         }
         return $fetched_data;
@@ -3677,7 +3714,7 @@ function Wo_GetMovies($args = array()) {
         while ($fetched_data = mysqli_fetch_assoc($query)) {
             $fetched_data['cover']  = Wo_GetMedia($fetched_data['cover']);
             $fetched_data['source'] = Wo_GetMedia($fetched_data['source']);
-            $fetched_data['url']    = Wo_SeoLink("index.php?link1=watch-film&film-id=" . $fetched_data['id']);
+            $fetched_data['url']    = Wo_SeoLink("index.php?link1=watch-film&film-id=" . $fetched_data['id']) . '_' . Wo_SlugPost($fetched_data['name']);
             $data[]                 = $fetched_data;
         }
     }
@@ -3696,7 +3733,7 @@ function Wo_GetRecommendedFilms() {
         while ($fetched_data = mysqli_fetch_assoc($query)) {
             $fetched_data['cover']  = Wo_GetMedia($fetched_data['cover']);
             $fetched_data['source'] = Wo_GetMedia($fetched_data['source']);
-            $fetched_data['url']    = Wo_SeoLink("index.php?link1=watch-film&film-id=" . $fetched_data['id']);
+            $fetched_data['url']    = Wo_SeoLink("index.php?link1=watch-film&film-id=" . $fetched_data['id']) . '_' . Wo_SlugPost($fetched_data['name']);
             $data[]                 = $fetched_data;
         }
     }
@@ -3715,7 +3752,7 @@ function Wo_GetNewFilms() {
         while ($fetched_data = mysqli_fetch_assoc($query)) {
             $fetched_data['cover']  = Wo_GetMedia($fetched_data['cover']);
             $fetched_data['source'] = Wo_GetMedia($fetched_data['source']);
-            $fetched_data['url']    = Wo_SeoLink("index.php?link1=watch-film&film-id=" . $fetched_data['id']);
+            $fetched_data['url']    = Wo_SeoLink("index.php?link1=watch-film&film-id=" . $fetched_data['id']) . '_' . Wo_SlugPost($fetched_data['name']);
             $data[]                 = $fetched_data;
         }
     }
@@ -3735,7 +3772,7 @@ function Wo_GetMtwFilms($limit = 26) {
         while ($fetched_data = mysqli_fetch_assoc($query)) {
             $fetched_data['cover']  = Wo_GetMedia($fetched_data['cover']);
             $fetched_data['source'] = Wo_GetMedia($fetched_data['source']);
-            $fetched_data['url']    = Wo_SeoLink("index.php?link1=watch-film&film-id=" . $fetched_data['id']);
+            $fetched_data['url']    = Wo_SeoLink("index.php?link1=watch-film&film-id=" . $fetched_data['id']) . '_' . Wo_SlugPost($fetched_data['name']);
             $data[]                 = $fetched_data;
         }
     }
@@ -3759,7 +3796,7 @@ function Wo_SearchFilms($key) {
     $query = mysqli_query($sqlConnect, $sql);
     if (mysqli_num_rows($query)) {
         while ($fetched_data = mysqli_fetch_assoc($query)) {
-            $fetched_data['url']   = Wo_SeoLink("index.php?link1=watch-film&film-id=" . $fetched_data['id']);
+            $fetched_data['url']   = Wo_SeoLink("index.php?link1=watch-film&film-id=" . $fetched_data['id']) . '_' . Wo_SlugPost($fetched_data['name']);
             $fetched_data['name']  = Wo_GetShortTitle($fetched_data['name']);
             $fetched_data['cover'] = Wo_GetMedia($fetched_data['cover']);
             $data[]                = $fetched_data;
@@ -4434,6 +4471,41 @@ function Wo_GetMytransactions($args = array()) {
     $query = mysqli_query($sqlConnect, $sql);
     if (mysqli_num_rows($query)) {
         while ($fetched_data = mysqli_fetch_assoc($query)) {
+            if ($fetched_data['kind'] == 'RECEIVED') {
+                $fetched_data['notes'] = str_replace('{text}', $fetched_data['notes'], $wo['lang']['trans_successfully_received_from']);
+            }
+            if ($fetched_data['kind'] == 'SENT') {
+                $fetched_data['notes'] = str_replace('{text}', $fetched_data['notes'], $wo['lang']['trans_money_sent_to']);
+            }
+            if ($fetched_data['kind'] == 'DONATE') {
+                $fetched_data['notes'] = str_replace('{text}', $fetched_data['notes'], $wo['lang']['trans_doanted_to']);
+            }
+            if ($fetched_data['kind'] == 'PRO') {
+                $note = json_decode($fetched_data['notes'],true);
+                if (!empty($note)) {
+                    $fetched_data['notes'] = $note;
+                    if (in_array($fetched_data['notes']['pro_type'], array_keys($wo['pro_packages']))) {
+
+                        $pro_name = $wo["pro_packages"][$fetched_data['notes']['pro_type']]['name'];
+                        $fetched_data['notes'] = str_replace('{text}', $pro_name . $wo['lang'][$fetched_data['notes']['method_type']], $wo['lang']['trans_upgrade_to_pro']);
+
+                    }
+                    else{
+                        $fetched_data['notes'] = str_replace('{text}', $wo['lang'][$fetched_data['notes']['method_type']], $wo['lang']['trans_upgrade_to_pro']);
+                    }
+                }
+                else{
+                    $fetched_data['notes'] = $wo['lang']['upgrade_to_pro'];
+                }
+
+                    
+            }
+            if ($fetched_data['kind'] == 'PURCHASE') {
+                $fetched_data['notes'] = $wo['lang']['product_purchase'];
+            }
+            if ($fetched_data['kind'] == 'SALE') {
+                $fetched_data['notes'] = $wo['lang']['product_sale'];
+            }
             $data[] = $fetched_data;
         }
     }
@@ -4870,7 +4942,7 @@ function Wo_DeleteStatus($id) {
             if (file_exists($path)) {
                 @unlink($path);
                 @unlink(trim($media_2));
-            } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+            } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                 @Wo_DeleteFromToS3($path);
                 @Wo_DeleteFromToS3($media_2);
             }
@@ -6118,11 +6190,11 @@ function Wo_UserRelationship($user = false) {
             $relation = $wo['relationship'][1];
         }
         if ($fetched_data['relationship'] == 2) {
-            $relation = $wo['lang']['relation_with'] . ' @' . $with_data['name'];
+            $relation = $wo['lang']['relation_with'] . ' <a href="'.$with_data['url'].'" data-ajax="?link1=timeline&u='.$with_data['username'].'">@' . $with_data['name'].'</a>';
         } else if ($fetched_data['relationship'] == 3) {
-            $relation = $wo['lang']['married_to'] . ' @' . $with_data['name'];
+            $relation = $wo['lang']['married_to'] . ' <a href="'.$with_data['url'].'" data-ajax="?link1=timeline&u='.$with_data['username'].'">@' . $with_data['name'].'</a>';
         } else if ($fetched_data['relationship'] == 4) {
-            $relation = $wo['lang']['engaged_to'] . ' @' . $with_data['name'];
+            $relation = $wo['lang']['engaged_to'] . ' <a href="'.$with_data['url'].'" data-ajax="?link1=timeline&u='.$with_data['username'].'">@' . $with_data['name'].'</a>';
         }
     } else if (array_key_exists($user_data['relationship_id'], $wo['relationship'])) {
         $relation = $wo['relationship'][$user_data['relationship_id']];
@@ -6334,7 +6406,7 @@ function Wo_CountStories($user_id = 0) {
     return $fetched_data['count'];
 }
 function Wo_GetFriendsStatus($data_array = array('limit' => 8, 'user_id' => 0, 'offset' => 0)) {
-    global $wo, $sqlConnect;
+    global $wo, $sqlConnect,$db;
     if ($wo['loggedin'] == false) {
         return false;
     }
@@ -6356,13 +6428,20 @@ function Wo_GetFriendsStatus($data_array = array('limit' => 8, 'user_id' => 0, '
     $query     = "SELECT DISTINCT user_id,title,description,posted,expire,thumbnail,(SELECT MAX(us.id) FROM " . T_USER_STORY . " us WHERE us.user_id = " . T_USER_STORY . ".user_id) AS id  FROM " . T_USER_STORY . " WHERE (user_id IN (SELECT following_id FROM " . T_FOLLOWERS . " WHERE follower_id = '$user_id') OR user_id = $user_id) AND user_id IN (SELECT user_id FROM " . T_USERS . " WHERE active = '1') $offset_query $group_by ORDER BY id DESC LIMIT " . $data_array['limit'];
     $query_run = mysqli_query($sqlConnect, $query);
     while ($fetched_data = mysqli_fetch_assoc($query_run)) {
+
+        $not_seen = $db->where("(user_id = ".$fetched_data['user_id']." AND id NOT IN (SELECT story_id FROM ".T_STORY_SEEN." WHERE user_id = ".$wo['user']['id']."))")->getValue(T_USER_STORY,'COUNT(*)');
+        $fetched_data['have_not_seen'] = 0;
+        if ($not_seen > 0 && $fetched_data['user_id'] != $wo['user']['id']) {
+            $fetched_data['have_not_seen'] = 1;
+        }
         $story_images              = Wo_GetStoryMedia($fetched_data['id'], 'image');
         $fetched_data['user_data'] = Wo_UserData($fetched_data['user_id']);
-        if (empty($fetched_data['thumbnail'])) {
+        $last_story = $db->where('user_id',$fetched_data['user_id'])->ArrayBuilder()->orderBy('id','DESC')->getOne(T_USER_STORY);
+        if (empty($last_story['thumbnail'])) {
             $fetched_data['thumb']['filename'] = $fetched_data['user_data']['avatar_org'];
         } else {
             $fetched_data['thumb']             = array();
-            $fetched_data['thumb']['filename'] = $fetched_data['thumbnail'];
+            $fetched_data['thumb']['filename'] = $last_story['thumbnail'];
         }
         $fetched_data['thumb']['filename'] = Wo_GetMedia($fetched_data['thumb']['filename']);
         $fetched_data['videos']            = Wo_GetStoryMedia($fetched_data['id'], 'video');
@@ -8215,7 +8294,7 @@ function FFMPEGUpload($data) {
     $data['post_data']['postFile'] = $video_path_240;
     $data['id']                    = Wo_RegisterPost($data['post_data']);
     if (file_exists($video_output_full_path_240)) {
-        if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1) {
+        if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
             $upload_s3 = Wo_UploadToS3($video_path_240);
         }
         $processing = 0;
@@ -8242,7 +8321,7 @@ function FFMPEGUpload($data) {
         $file_thumb = "upload/photos/" . date('Y') . '/' . date('m') . "/$hash.video_thumb_$uniq_id" . ".jpeg";
         $thumb      = $dir . "/" . $file_thumb;
         shell_exec("$ffmpeg_b -ss \"$time\" -i $video_file_full_path -vframes 1 -f mjpeg $thumb 2<&1");
-        if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1) {
+        if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
             $upload_s3 = Wo_UploadToS3($file_thumb);
         }
         $db->where('id', $data['id'])->update(T_POSTS, array(
@@ -8252,7 +8331,7 @@ function FFMPEGUpload($data) {
     if ($resolution >= 640 || $resolution == 0) {
         $shell = shell_exec("$ffmpeg_b -y -i $video_file_full_path -vcodec libx264 -preset " . $wo['config']['convert_speed'] . " -filter:v scale=640:-2 -crf 26 $video_output_full_path_360 2>&1");
         if (file_exists($video_output_full_path_360)) {
-            if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1) {
+            if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                 $upload_s3 = Wo_UploadToS3($video_path_360);
             }
             $db->where('id', $data['id'])->update(T_POSTS, array(
@@ -8263,7 +8342,7 @@ function FFMPEGUpload($data) {
     if ($resolution >= 854 || $resolution == 0) {
         $shell = shell_exec("$ffmpeg_b -y -i $video_file_full_path -vcodec libx264 -preset " . $wo['config']['convert_speed'] . " -filter:v scale=854:-2 -crf 26 $video_output_full_path_480 2>&1");
         if (file_exists($video_output_full_path_480)) {
-            if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1) {
+            if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                 $upload_s3 = Wo_UploadToS3($video_path_480);
             }
             $db->where('id', $data['id'])->update(T_POSTS, array(
@@ -8274,7 +8353,7 @@ function FFMPEGUpload($data) {
     if ($resolution >= 1280 || $resolution == 0) {
         $shell = shell_exec("$ffmpeg_b -y -i $video_file_full_path -vcodec libx264 -preset " . $wo['config']['convert_speed'] . " -filter:v scale=1280:-2 -crf 26 $video_output_full_path_720 2>&1");
         if (file_exists($video_output_full_path_720)) {
-            if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1) {
+            if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                 $upload_s3 = Wo_UploadToS3($video_path_720);
             }
             $db->where('id', $data['id'])->update(T_POSTS, array(
@@ -8285,7 +8364,7 @@ function FFMPEGUpload($data) {
     if ($resolution >= 1920 || $resolution == 0) {
         $shell = shell_exec("$ffmpeg_b -y -i $video_file_full_path -vcodec libx264 -preset " . $wo['config']['convert_speed'] . " -filter:v scale=1920:-2 -crf 26 $video_output_full_path_1080 2>&1");
         if (file_exists($video_output_full_path_1080)) {
-            if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1) {
+            if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                 $upload_s3 = Wo_UploadToS3($video_path_1080);
             }
             $db->where('id', $data['id'])->update(T_POSTS, array(
@@ -8296,7 +8375,7 @@ function FFMPEGUpload($data) {
     if ($resolution >= 2048 || $resolution == 0) {
         $shell = shell_exec("$ffmpeg_b -y -i $video_file_full_path -vcodec libx264 -preset " . $wo['config']['convert_speed'] . " -filter:v scale=2048:-2 -crf 26 $video_output_full_path_2048 2>&1");
         if (file_exists($video_output_full_path_2048)) {
-            if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1) {
+            if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                 $upload_s3 = Wo_UploadToS3($video_path_2048);
             }
             $db->where('id', $data['id'])->update(T_POSTS, array(
@@ -8307,7 +8386,7 @@ function FFMPEGUpload($data) {
     if ($resolution >= 3840 || $resolution == 0) {
         $shell = shell_exec("$ffmpeg_b -y -i $video_file_full_path -vcodec libx264 -preset " . $wo['config']['convert_speed'] . " -filter:v scale=3840:-2 -crf 26 $video_output_full_path_4096 2>&1");
         if (file_exists($video_output_full_path_4096)) {
-            if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1) {
+            if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                 $upload_s3 = Wo_UploadToS3($video_path_4096);
             }
             $db->where('id', $data['id'])->update(T_POSTS, array(
@@ -8435,31 +8514,31 @@ function GetModeBtn($value) {
     }
     $wo['website_modes_btn'] = array(
         'askfm' => array(
-            'liked_btn' => '<span class="active-like"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4.419c-2.826-5.695-11.999-4.064-11.999 3.27 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-7.327-9.17-8.972-12-3.27z"/></svg></span>',
-            'like_btn' => '<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181"/></svg>',
-            'comments_btn' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M9,22A1,1 0 0,1 8,21V18H4A2,2 0 0,1 2,16V4C2,2.89 2.9,2 4,2H20A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H13.9L10.2,21.71C10,21.9 9.75,22 9.5,22V22H9Z" /></svg>',
-            'share_btn' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z"></path></svg>',
-            'like_icon' => '<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181"/></svg>',
-            'liked_comment' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="feather"><path d="M12 4.419c-2.826-5.695-11.999-4.064-11.999 3.27 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-7.327-9.17-8.972-12-3.27z"/></svg>',
-            'like_comment' => '<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="feather"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181"/></svg>'
+            'liked_btn' => "<span class='active-like'><svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M12 4.419c-2.826-5.695-11.999-4.064-11.999 3.27 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-7.327-9.17-8.972-12-3.27z'/></svg></span>",
+            "like_btn" => "<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181'/></svg>",
+            "comments_btn" => "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='currentColor' d='M9,22A1,1 0 0,1 8,21V18H4A2,2 0 0,1 2,16V4C2,2.89 2.9,2 4,2H20A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H13.9L10.2,21.71C10,21.9 9.75,22 9.5,22V22H9Z' /></svg>",
+            "share_btn" => "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='currentColor' d='M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z'></path></svg>",
+            "like_icon" => "<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181'/></svg>",
+            "liked_comment" => "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' class='feather'><path d='M12 4.419c-2.826-5.695-11.999-4.064-11.999 3.27 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-7.327-9.17-8.972-12-3.27z'/></svg>",
+            "like_comment" => "<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='feather'><path d='M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181'/></svg>"
         ),
-        'twitter' => array(
-            'liked_btn' => '<span class="active-like"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4.419c-2.826-5.695-11.999-4.064-11.999 3.27 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-7.327-9.17-8.972-12-3.27z"/></svg></span>',
-            'like_btn' => '<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181"/></svg>',
-            'comments_btn' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M9,22A1,1 0 0,1 8,21V18H4A2,2 0 0,1 2,16V4C2,2.89 2.9,2 4,2H20A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H13.9L10.2,21.71C10,21.9 9.75,22 9.5,22V22H9Z" /></svg>',
-            'share_btn' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z"></path></svg>',
-            'like_icon' => '<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181"/></svg>',
-            'liked_comment' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="feather"><path d="M12 4.419c-2.826-5.695-11.999-4.064-11.999 3.27 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-7.327-9.17-8.972-12-3.27z"/></svg>',
-            'like_comment' => '<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="feather"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181"/></svg>'
+        "twitter" => array(
+            "liked_btn" => "<span class='active-like'><svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M12 4.419c-2.826-5.695-11.999-4.064-11.999 3.27 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-7.327-9.17-8.972-12-3.27z'/></svg></span>",
+            "like_btn" => "<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181'/></svg>",
+            "comments_btn" => "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='currentColor' d='M9,22A1,1 0 0,1 8,21V18H4A2,2 0 0,1 2,16V4C2,2.89 2.9,2 4,2H20A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H13.9L10.2,21.71C10,21.9 9.75,22 9.5,22V22H9Z' /></svg>",
+            "share_btn" => "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='currentColor' d='M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z'></path></svg>",
+            "like_icon" => "<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181'/></svg>",
+            "liked_comment" => "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' class='feather'><path d='M12 4.419c-2.826-5.695-11.999-4.064-11.999 3.27 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-7.327-9.17-8.972-12-3.27z'/></svg>",
+            "like_comment" => "<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='feather'><path d='M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181'/></svg>"
         ),
-        'instagram' => array(
-            'liked_btn' => '<span class="active-like"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4.419c-2.826-5.695-11.999-4.064-11.999 3.27 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-7.327-9.17-8.972-12-3.27z"/></svg></span>',
-            'like_btn' => '<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181"/></svg>',
-            'comments_btn' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M9,22A1,1 0 0,1 8,21V18H4A2,2 0 0,1 2,16V4C2,2.89 2.9,2 4,2H20A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H13.9L10.2,21.71C10,21.9 9.75,22 9.5,22V22H9Z" /></svg>',
-            'share_btn' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z"></path></svg>',
-            'like_icon' => '<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181"/></svg>',
-            'liked_comment' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="feather"><path d="M12 4.419c-2.826-5.695-11.999-4.064-11.999 3.27 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-7.327-9.17-8.972-12-3.27z"/></svg>',
-            'like_comment' => '<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="feather"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181"/></svg>'
+        "instagram" => array(
+            "liked_btn" => "<span class='active-like'><svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M12 4.419c-2.826-5.695-11.999-4.064-11.999 3.27 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-7.327-9.17-8.972-12-3.27z'/></svg></span>",
+            "like_btn" => "<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181'/></svg>",
+            "comments_btn" => "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='currentColor' d='M9,22A1,1 0 0,1 8,21V18H4A2,2 0 0,1 2,16V4C2,2.89 2.9,2 4,2H20A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H13.9L10.2,21.71C10,21.9 9.75,22 9.5,22V22H9Z' /></svg>",
+            "share_btn" => "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='currentColor' d='M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z'></path></svg>",
+            "like_icon" => "<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181'/></svg>",
+            "liked_comment" => "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' class='feather'><path d='M12 4.419c-2.826-5.695-11.999-4.064-11.999 3.27 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-7.327-9.17-8.972-12-3.27z'/></svg>",
+            "like_comment" => "<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='feather'><path d='M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181'/></svg>"
         )
     );
     if (!empty($wo['website_modes_btn'][$wo['config']['website_mode']]) && !empty($wo['website_modes_btn'][$wo['config']['website_mode']][$value])) {
@@ -8467,23 +8546,23 @@ function GetModeBtn($value) {
     }
     if ($wo['config']['theme'] == 'sunshine') {
         $btns = array(
-            'liked_btn' => '<span class="active-like"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg> ' . $wo['lang']['liked'] . '</span>',
-            'like_btn' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"> <path fill="currentColor" d="M23,10C23,8.89 22.1,8 21,8H14.68L15.64,3.43C15.66,3.33 15.67,3.22 15.67,3.11C15.67,2.7 15.5,2.32 15.23,2.05L14.17,1L7.59,7.58C7.22,7.95 7,8.45 7,9V19A2,2 0 0,0 9,21H18C18.83,21 19.54,20.5 19.84,19.78L22.86,12.73C22.95,12.5 23,12.26 23,12V10M1,21H5V9H1V21Z"></path> </svg> ' . $wo['lang']['like'],
-            'comments_btn' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M9,22A1,1 0 0,1 8,21V18H4A2,2 0 0,1 2,16V4C2,2.89 2.9,2 4,2H20A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H13.9L10.2,21.71C10,21.9 9.75,22 9.5,22V22H9Z" /></svg><span class="like-btn-mobile">' . $wo['lang']['comment_post_label'] . '</span>',
-            'share_btn' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z"></path></svg><span class="like-btn-mobile">' . $wo['lang']['share'] . '</span>',
-            'like_icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>',
-            'liked_comment' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-up active-like"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>',
-            'like_comment' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>'
+            'liked_btn' => "<span class='active-like'><svg xmlns='http://www.w3.org/2000/svg' width='58.553' height='58.266' viewBox='0 0 58.553 58.266' class='feather'> <path d='M-7080.317,1279.764l-26.729-1.173a1.657,1.657,0,0,1-1.55-1.717l1.11-33.374a4.112,4.112,0,0,1,2.361-3.6l.014-.005a13.62,13.62,0,0,1,1.978-.363h.007a9.007,9.007,0,0,0,3.249-.771c2.645-1.845,3.973-4.658,5.259-7.378l.005-.013.031-.061.059-.13.012-.023c.272-.576.61-1.289.944-1.929l0-.007c.576-1.105,2.327-4.46,4.406-5.107a2.3,2.3,0,0,1,.59-.105c.036,0,.072,0,.109,0a2.55,2.55,0,0,1,1.212.324c2.941,1.554,1.212,7.451.561,9.672a38.306,38.306,0,0,1-3.7,8.454l-.71,1.218,18.363.808a3.916,3.916,0,0,1,3.784,3.735,3.783,3.783,0,0,1-1.123,2.834,3.629,3.629,0,0,1-2.559,1.055c-.046,0-.1,0-.145,0h-.027l-2.141-.093-9.331-.41-.075,1.7,9.333.408a3.721,3.721,0,0,1,2.666,1.3,3.855,3.855,0,0,1,.936,2.934,3.779,3.779,0,0,1-3.821,3.38c-.061,0-.122,0-.181-.005l-1.974-.082-8.9-.392-.075,1.7,8.9.39a3.723,3.723,0,0,1,2.666,1.3,3.86,3.86,0,0,1,.937,2.933,3.784,3.784,0,0,1-3.827,3.381c-.057,0-.118,0-.177,0l-1.976-.088-8.472-.372-.075,1.7,8.474.372a3.726,3.726,0,0,1,2.666,1.3,3.857,3.857,0,0,1,.935,2.933,3.782,3.782,0,0,1-3.827,3.381C-7080.2,1279.765-7080.26,1279.765-7080.317,1279.764Zm-38.4,0-.089,0a6.558,6.558,0,0,1-6.193-6.8l.907-27.293a6.446,6.446,0,0,1,2.074-4.553,6.214,6.214,0,0,1,3.954-1.672c.081,0,.17-.005.29-.005s.212,0,.292.005a6.561,6.561,0,0,1,6.192,6.8l-.907,27.293a6.441,6.441,0,0,1-2.072,4.547,6.249,6.249,0,0,1-4.261,1.681Z' transform='translate(7126.251 -1222.75)' fill='none' stroke='currentColor' stroke-width='2.5'/> </svg> " . $wo['lang']['liked'] . "</span>",
+            'like_btn' => "<svg xmlns='http://www.w3.org/2000/svg' width='58.553' height='58.266' viewBox='0 0 58.553 58.266' class='feather'> <path d='M-7080.317,1279.764l-26.729-1.173a1.657,1.657,0,0,1-1.55-1.717l1.11-33.374a4.112,4.112,0,0,1,2.361-3.6l.014-.005a13.62,13.62,0,0,1,1.978-.363h.007a9.007,9.007,0,0,0,3.249-.771c2.645-1.845,3.973-4.658,5.259-7.378l.005-.013.031-.061.059-.13.012-.023c.272-.576.61-1.289.944-1.929l0-.007c.576-1.105,2.327-4.46,4.406-5.107a2.3,2.3,0,0,1,.59-.105c.036,0,.072,0,.109,0a2.55,2.55,0,0,1,1.212.324c2.941,1.554,1.212,7.451.561,9.672a38.306,38.306,0,0,1-3.7,8.454l-.71,1.218,18.363.808a3.916,3.916,0,0,1,3.784,3.735,3.783,3.783,0,0,1-1.123,2.834,3.629,3.629,0,0,1-2.559,1.055c-.046,0-.1,0-.145,0h-.027l-2.141-.093-9.331-.41-.075,1.7,9.333.408a3.721,3.721,0,0,1,2.666,1.3,3.855,3.855,0,0,1,.936,2.934,3.779,3.779,0,0,1-3.821,3.38c-.061,0-.122,0-.181-.005l-1.974-.082-8.9-.392-.075,1.7,8.9.39a3.723,3.723,0,0,1,2.666,1.3,3.86,3.86,0,0,1,.937,2.933,3.784,3.784,0,0,1-3.827,3.381c-.057,0-.118,0-.177,0l-1.976-.088-8.472-.372-.075,1.7,8.474.372a3.726,3.726,0,0,1,2.666,1.3,3.857,3.857,0,0,1,.935,2.933,3.782,3.782,0,0,1-3.827,3.381C-7080.2,1279.765-7080.26,1279.765-7080.317,1279.764Zm-38.4,0-.089,0a6.558,6.558,0,0,1-6.193-6.8l.907-27.293a6.446,6.446,0,0,1,2.074-4.553,6.214,6.214,0,0,1,3.954-1.672c.081,0,.17-.005.29-.005s.212,0,.292.005a6.561,6.561,0,0,1,6.192,6.8l-.907,27.293a6.441,6.441,0,0,1-2.072,4.547,6.249,6.249,0,0,1-4.261,1.681Z' transform='translate(7126.251 -1222.75)' fill='none' stroke='currentColor' stroke-width='2.5'/> </svg> " . $wo['lang']['like'],
+            'comments_btn' => '<svg height="682pt" viewBox="-21 -47 682.66669 682" width="682pt" xmlns="http://www.w3.org/2000/svg" class="feather feather-message-circle" fill="currentColor"><path d="m552.011719-1.332031h-464.023438c-48.515625 0-87.988281 39.464843-87.988281 87.988281v283.972656c0 48.414063 39.300781 87.816406 87.675781 87.988282v128.863281l185.191407-128.863281h279.144531c48.515625 0 87.988281-39.472657 87.988281-87.988282v-283.972656c0-48.523438-39.472656-87.988281-87.988281-87.988281zm50.488281 371.960937c0 27.835938-22.648438 50.488282-50.488281 50.488282h-290.910157l-135.925781 94.585937v-94.585937h-37.1875c-27.839843 0-50.488281-22.652344-50.488281-50.488282v-283.972656c0-27.84375 22.648438-50.488281 50.488281-50.488281h464.023438c27.839843 0 50.488281 22.644531 50.488281 50.488281zm0 0"/><path d="m171.292969 131.171875h297.414062v37.5h-297.414062zm0 0"/><path d="m171.292969 211.171875h297.414062v37.5h-297.414062zm0 0"/><path d="m171.292969 291.171875h297.414062v37.5h-297.414062zm0 0"/></svg> <span class="like-btn-mobile">' . $wo['lang']['comment_post_label'] . '</span>',
+            'share_btn' => '<svg class="feather feather-share" enable-background="new 0 0 512.231 512.231" height="512" viewBox="0 0 512.231 512.231" width="512" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><g><path d="m271.249 121.448c-70.515 3.65-136.443 33.004-187.025 83.587-54.152 54.151-83.975 125.899-83.975 202.025v105.171l38.098-87.825c44.499-88.669 134.739-147.458 232.902-152.927v121.202l240.733-196.638-240.733-196.043zm30 29.612v-87.94l163.267 132.958-163.267 133.361v-88.379h-15c-56.878 0-112.732 15.993-161.522 46.249-36.948 22.913-68.428 53.121-92.593 88.604 15.408-126.529 123.493-224.853 254.115-224.853z"/></g></svg> <span class="like-btn-mobile">' . $wo['lang']['share'] . '</span>',
+            'like_icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="58.553" height="58.266" viewBox="0 0 58.553 58.266" class="feather"> <path d="M-7080.317,1279.764l-26.729-1.173a1.657,1.657,0,0,1-1.55-1.717l1.11-33.374a4.112,4.112,0,0,1,2.361-3.6l.014-.005a13.62,13.62,0,0,1,1.978-.363h.007a9.007,9.007,0,0,0,3.249-.771c2.645-1.845,3.973-4.658,5.259-7.378l.005-.013.031-.061.059-.13.012-.023c.272-.576.61-1.289.944-1.929l0-.007c.576-1.105,2.327-4.46,4.406-5.107a2.3,2.3,0,0,1,.59-.105c.036,0,.072,0,.109,0a2.55,2.55,0,0,1,1.212.324c2.941,1.554,1.212,7.451.561,9.672a38.306,38.306,0,0,1-3.7,8.454l-.71,1.218,18.363.808a3.916,3.916,0,0,1,3.784,3.735,3.783,3.783,0,0,1-1.123,2.834,3.629,3.629,0,0,1-2.559,1.055c-.046,0-.1,0-.145,0h-.027l-2.141-.093-9.331-.41-.075,1.7,9.333.408a3.721,3.721,0,0,1,2.666,1.3,3.855,3.855,0,0,1,.936,2.934,3.779,3.779,0,0,1-3.821,3.38c-.061,0-.122,0-.181-.005l-1.974-.082-8.9-.392-.075,1.7,8.9.39a3.723,3.723,0,0,1,2.666,1.3,3.86,3.86,0,0,1,.937,2.933,3.784,3.784,0,0,1-3.827,3.381c-.057,0-.118,0-.177,0l-1.976-.088-8.472-.372-.075,1.7,8.474.372a3.726,3.726,0,0,1,2.666,1.3,3.857,3.857,0,0,1,.935,2.933,3.782,3.782,0,0,1-3.827,3.381C-7080.2,1279.765-7080.26,1279.765-7080.317,1279.764Zm-38.4,0-.089,0a6.558,6.558,0,0,1-6.193-6.8l.907-27.293a6.446,6.446,0,0,1,2.074-4.553,6.214,6.214,0,0,1,3.954-1.672c.081,0,.17-.005.29-.005s.212,0,.292.005a6.561,6.561,0,0,1,6.192,6.8l-.907,27.293a6.441,6.441,0,0,1-2.072,4.547,6.249,6.249,0,0,1-4.261,1.681Z" transform="translate(7126.251 -1222.75)" fill="none" stroke="currentColor" stroke-width="2.5"/> </svg>',
+            'liked_comment' => "<svg xmlns='http://www.w3.org/2000/svg' width='58.553' height='58.266' viewBox='0 0 58.553 58.266' class='feather active-like'> <path d='M-7080.317,1279.764l-26.729-1.173a1.657,1.657,0,0,1-1.55-1.717l1.11-33.374a4.112,4.112,0,0,1,2.361-3.6l.014-.005a13.62,13.62,0,0,1,1.978-.363h.007a9.007,9.007,0,0,0,3.249-.771c2.645-1.845,3.973-4.658,5.259-7.378l.005-.013.031-.061.059-.13.012-.023c.272-.576.61-1.289.944-1.929l0-.007c.576-1.105,2.327-4.46,4.406-5.107a2.3,2.3,0,0,1,.59-.105c.036,0,.072,0,.109,0a2.55,2.55,0,0,1,1.212.324c2.941,1.554,1.212,7.451.561,9.672a38.306,38.306,0,0,1-3.7,8.454l-.71,1.218,18.363.808a3.916,3.916,0,0,1,3.784,3.735,3.783,3.783,0,0,1-1.123,2.834,3.629,3.629,0,0,1-2.559,1.055c-.046,0-.1,0-.145,0h-.027l-2.141-.093-9.331-.41-.075,1.7,9.333.408a3.721,3.721,0,0,1,2.666,1.3,3.855,3.855,0,0,1,.936,2.934,3.779,3.779,0,0,1-3.821,3.38c-.061,0-.122,0-.181-.005l-1.974-.082-8.9-.392-.075,1.7,8.9.39a3.723,3.723,0,0,1,2.666,1.3,3.86,3.86,0,0,1,.937,2.933,3.784,3.784,0,0,1-3.827,3.381c-.057,0-.118,0-.177,0l-1.976-.088-8.472-.372-.075,1.7,8.474.372a3.726,3.726,0,0,1,2.666,1.3,3.857,3.857,0,0,1,.935,2.933,3.782,3.782,0,0,1-3.827,3.381C-7080.2,1279.765-7080.26,1279.765-7080.317,1279.764Zm-38.4,0-.089,0a6.558,6.558,0,0,1-6.193-6.8l.907-27.293a6.446,6.446,0,0,1,2.074-4.553,6.214,6.214,0,0,1,3.954-1.672c.081,0,.17-.005.29-.005s.212,0,.292.005a6.561,6.561,0,0,1,6.192,6.8l-.907,27.293a6.441,6.441,0,0,1-2.072,4.547,6.249,6.249,0,0,1-4.261,1.681Z' transform='translate(7126.251 -1222.75)' fill='none' stroke='currentColor' stroke-width='2.5'/> </svg>",
+            'like_comment' => "<svg xmlns='http://www.w3.org/2000/svg' width='58.553' height='58.266' viewBox='0 0 58.553 58.266' class='feather'> <path d='M-7080.317,1279.764l-26.729-1.173a1.657,1.657,0,0,1-1.55-1.717l1.11-33.374a4.112,4.112,0,0,1,2.361-3.6l.014-.005a13.62,13.62,0,0,1,1.978-.363h.007a9.007,9.007,0,0,0,3.249-.771c2.645-1.845,3.973-4.658,5.259-7.378l.005-.013.031-.061.059-.13.012-.023c.272-.576.61-1.289.944-1.929l0-.007c.576-1.105,2.327-4.46,4.406-5.107a2.3,2.3,0,0,1,.59-.105c.036,0,.072,0,.109,0a2.55,2.55,0,0,1,1.212.324c2.941,1.554,1.212,7.451.561,9.672a38.306,38.306,0,0,1-3.7,8.454l-.71,1.218,18.363.808a3.916,3.916,0,0,1,3.784,3.735,3.783,3.783,0,0,1-1.123,2.834,3.629,3.629,0,0,1-2.559,1.055c-.046,0-.1,0-.145,0h-.027l-2.141-.093-9.331-.41-.075,1.7,9.333.408a3.721,3.721,0,0,1,2.666,1.3,3.855,3.855,0,0,1,.936,2.934,3.779,3.779,0,0,1-3.821,3.38c-.061,0-.122,0-.181-.005l-1.974-.082-8.9-.392-.075,1.7,8.9.39a3.723,3.723,0,0,1,2.666,1.3,3.86,3.86,0,0,1,.937,2.933,3.784,3.784,0,0,1-3.827,3.381c-.057,0-.118,0-.177,0l-1.976-.088-8.472-.372-.075,1.7,8.474.372a3.726,3.726,0,0,1,2.666,1.3,3.857,3.857,0,0,1,.935,2.933,3.782,3.782,0,0,1-3.827,3.381C-7080.2,1279.765-7080.26,1279.765-7080.317,1279.764Zm-38.4,0-.089,0a6.558,6.558,0,0,1-6.193-6.8l.907-27.293a6.446,6.446,0,0,1,2.074-4.553,6.214,6.214,0,0,1,3.954-1.672c.081,0,.17-.005.29-.005s.212,0,.292.005a6.561,6.561,0,0,1,6.192,6.8l-.907,27.293a6.441,6.441,0,0,1-2.072,4.547,6.249,6.249,0,0,1-4.261,1.681Z' transform='translate(7126.251 -1222.75)' fill='none' stroke='currentColor' stroke-width='2.5'/> </svg>"
         );
     } else {
         $btns = array(
-            'liked_btn' => '<span class="active-like"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg> ' . $wo['lang']['liked'] . '</span>',
-            'like_btn' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg> ' . $wo['lang']['like'],
-            'comments_btn' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-circle"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> <span class="like-btn-mobile">' . $wo['lang']['comment_post_label'] . '</span> ',
-            'share_btn' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-share-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> <span class="like-btn-mobile">' . $wo['lang']['share'] . '</span>',
-            'like_icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>',
-            'liked_comment' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-up active-like"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>',
-            'like_comment' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>'
+			'liked_btn' => "<span class='active-like'><svg xmlns='http://www.w3.org/2000/svg' width='58.553' height='58.266' viewBox='0 0 58.553 58.266' class='feather'> <path d='M-7080.317,1279.764l-26.729-1.173a1.657,1.657,0,0,1-1.55-1.717l1.11-33.374a4.112,4.112,0,0,1,2.361-3.6l.014-.005a13.62,13.62,0,0,1,1.978-.363h.007a9.007,9.007,0,0,0,3.249-.771c2.645-1.845,3.973-4.658,5.259-7.378l.005-.013.031-.061.059-.13.012-.023c.272-.576.61-1.289.944-1.929l0-.007c.576-1.105,2.327-4.46,4.406-5.107a2.3,2.3,0,0,1,.59-.105c.036,0,.072,0,.109,0a2.55,2.55,0,0,1,1.212.324c2.941,1.554,1.212,7.451.561,9.672a38.306,38.306,0,0,1-3.7,8.454l-.71,1.218,18.363.808a3.916,3.916,0,0,1,3.784,3.735,3.783,3.783,0,0,1-1.123,2.834,3.629,3.629,0,0,1-2.559,1.055c-.046,0-.1,0-.145,0h-.027l-2.141-.093-9.331-.41-.075,1.7,9.333.408a3.721,3.721,0,0,1,2.666,1.3,3.855,3.855,0,0,1,.936,2.934,3.779,3.779,0,0,1-3.821,3.38c-.061,0-.122,0-.181-.005l-1.974-.082-8.9-.392-.075,1.7,8.9.39a3.723,3.723,0,0,1,2.666,1.3,3.86,3.86,0,0,1,.937,2.933,3.784,3.784,0,0,1-3.827,3.381c-.057,0-.118,0-.177,0l-1.976-.088-8.472-.372-.075,1.7,8.474.372a3.726,3.726,0,0,1,2.666,1.3,3.857,3.857,0,0,1,.935,2.933,3.782,3.782,0,0,1-3.827,3.381C-7080.2,1279.765-7080.26,1279.765-7080.317,1279.764Zm-38.4,0-.089,0a6.558,6.558,0,0,1-6.193-6.8l.907-27.293a6.446,6.446,0,0,1,2.074-4.553,6.214,6.214,0,0,1,3.954-1.672c.081,0,.17-.005.29-.005s.212,0,.292.005a6.561,6.561,0,0,1,6.192,6.8l-.907,27.293a6.441,6.441,0,0,1-2.072,4.547,6.249,6.249,0,0,1-4.261,1.681Z' transform='translate(7126.251 -1222.75)' fill='none' stroke='currentColor' stroke-width='2.5'/> </svg> " . $wo['lang']['liked'] . "</span>",
+            'like_btn' => "<svg xmlns='http://www.w3.org/2000/svg' width='58.553' height='58.266' viewBox='0 0 58.553 58.266' class='feather'> <path d='M-7080.317,1279.764l-26.729-1.173a1.657,1.657,0,0,1-1.55-1.717l1.11-33.374a4.112,4.112,0,0,1,2.361-3.6l.014-.005a13.62,13.62,0,0,1,1.978-.363h.007a9.007,9.007,0,0,0,3.249-.771c2.645-1.845,3.973-4.658,5.259-7.378l.005-.013.031-.061.059-.13.012-.023c.272-.576.61-1.289.944-1.929l0-.007c.576-1.105,2.327-4.46,4.406-5.107a2.3,2.3,0,0,1,.59-.105c.036,0,.072,0,.109,0a2.55,2.55,0,0,1,1.212.324c2.941,1.554,1.212,7.451.561,9.672a38.306,38.306,0,0,1-3.7,8.454l-.71,1.218,18.363.808a3.916,3.916,0,0,1,3.784,3.735,3.783,3.783,0,0,1-1.123,2.834,3.629,3.629,0,0,1-2.559,1.055c-.046,0-.1,0-.145,0h-.027l-2.141-.093-9.331-.41-.075,1.7,9.333.408a3.721,3.721,0,0,1,2.666,1.3,3.855,3.855,0,0,1,.936,2.934,3.779,3.779,0,0,1-3.821,3.38c-.061,0-.122,0-.181-.005l-1.974-.082-8.9-.392-.075,1.7,8.9.39a3.723,3.723,0,0,1,2.666,1.3,3.86,3.86,0,0,1,.937,2.933,3.784,3.784,0,0,1-3.827,3.381c-.057,0-.118,0-.177,0l-1.976-.088-8.472-.372-.075,1.7,8.474.372a3.726,3.726,0,0,1,2.666,1.3,3.857,3.857,0,0,1,.935,2.933,3.782,3.782,0,0,1-3.827,3.381C-7080.2,1279.765-7080.26,1279.765-7080.317,1279.764Zm-38.4,0-.089,0a6.558,6.558,0,0,1-6.193-6.8l.907-27.293a6.446,6.446,0,0,1,2.074-4.553,6.214,6.214,0,0,1,3.954-1.672c.081,0,.17-.005.29-.005s.212,0,.292.005a6.561,6.561,0,0,1,6.192,6.8l-.907,27.293a6.441,6.441,0,0,1-2.072,4.547,6.249,6.249,0,0,1-4.261,1.681Z' transform='translate(7126.251 -1222.75)' fill='none' stroke='currentColor' stroke-width='2.5'/> </svg> " . $wo['lang']['like'],
+            'comments_btn' => '<svg height="682pt" viewBox="-21 -47 682.66669 682" width="682pt" xmlns="http://www.w3.org/2000/svg" class="feather feather-message-circle" fill="currentColor"><path d="m552.011719-1.332031h-464.023438c-48.515625 0-87.988281 39.464843-87.988281 87.988281v283.972656c0 48.414063 39.300781 87.816406 87.675781 87.988282v128.863281l185.191407-128.863281h279.144531c48.515625 0 87.988281-39.472657 87.988281-87.988282v-283.972656c0-48.523438-39.472656-87.988281-87.988281-87.988281zm50.488281 371.960937c0 27.835938-22.648438 50.488282-50.488281 50.488282h-290.910157l-135.925781 94.585937v-94.585937h-37.1875c-27.839843 0-50.488281-22.652344-50.488281-50.488282v-283.972656c0-27.84375 22.648438-50.488281 50.488281-50.488281h464.023438c27.839843 0 50.488281 22.644531 50.488281 50.488281zm0 0"/><path d="m171.292969 131.171875h297.414062v37.5h-297.414062zm0 0"/><path d="m171.292969 211.171875h297.414062v37.5h-297.414062zm0 0"/><path d="m171.292969 291.171875h297.414062v37.5h-297.414062zm0 0"/></svg> <span class="like-btn-mobile">' . $wo['lang']['comment_post_label'] . '</span> ',
+            'share_btn' => '<svg class="feather feather-share" enable-background="new 0 0 512.231 512.231" height="512" viewBox="0 0 512.231 512.231" width="512" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><g><path d="m271.249 121.448c-70.515 3.65-136.443 33.004-187.025 83.587-54.152 54.151-83.975 125.899-83.975 202.025v105.171l38.098-87.825c44.499-88.669 134.739-147.458 232.902-152.927v121.202l240.733-196.638-240.733-196.043zm30 29.612v-87.94l163.267 132.958-163.267 133.361v-88.379h-15c-56.878 0-112.732 15.993-161.522 46.249-36.948 22.913-68.428 53.121-92.593 88.604 15.408-126.529 123.493-224.853 254.115-224.853z"/></g></svg> <span class="like-btn-mobile">' . $wo['lang']['share'] . '</span>',
+            'like_icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="58.553" height="58.266" viewBox="0 0 58.553 58.266" class="feather"> <path d="M-7080.317,1279.764l-26.729-1.173a1.657,1.657,0,0,1-1.55-1.717l1.11-33.374a4.112,4.112,0,0,1,2.361-3.6l.014-.005a13.62,13.62,0,0,1,1.978-.363h.007a9.007,9.007,0,0,0,3.249-.771c2.645-1.845,3.973-4.658,5.259-7.378l.005-.013.031-.061.059-.13.012-.023c.272-.576.61-1.289.944-1.929l0-.007c.576-1.105,2.327-4.46,4.406-5.107a2.3,2.3,0,0,1,.59-.105c.036,0,.072,0,.109,0a2.55,2.55,0,0,1,1.212.324c2.941,1.554,1.212,7.451.561,9.672a38.306,38.306,0,0,1-3.7,8.454l-.71,1.218,18.363.808a3.916,3.916,0,0,1,3.784,3.735,3.783,3.783,0,0,1-1.123,2.834,3.629,3.629,0,0,1-2.559,1.055c-.046,0-.1,0-.145,0h-.027l-2.141-.093-9.331-.41-.075,1.7,9.333.408a3.721,3.721,0,0,1,2.666,1.3,3.855,3.855,0,0,1,.936,2.934,3.779,3.779,0,0,1-3.821,3.38c-.061,0-.122,0-.181-.005l-1.974-.082-8.9-.392-.075,1.7,8.9.39a3.723,3.723,0,0,1,2.666,1.3,3.86,3.86,0,0,1,.937,2.933,3.784,3.784,0,0,1-3.827,3.381c-.057,0-.118,0-.177,0l-1.976-.088-8.472-.372-.075,1.7,8.474.372a3.726,3.726,0,0,1,2.666,1.3,3.857,3.857,0,0,1,.935,2.933,3.782,3.782,0,0,1-3.827,3.381C-7080.2,1279.765-7080.26,1279.765-7080.317,1279.764Zm-38.4,0-.089,0a6.558,6.558,0,0,1-6.193-6.8l.907-27.293a6.446,6.446,0,0,1,2.074-4.553,6.214,6.214,0,0,1,3.954-1.672c.081,0,.17-.005.29-.005s.212,0,.292.005a6.561,6.561,0,0,1,6.192,6.8l-.907,27.293a6.441,6.441,0,0,1-2.072,4.547,6.249,6.249,0,0,1-4.261,1.681Z" transform="translate(7126.251 -1222.75)" fill="none" stroke="currentColor" stroke-width="2.5"/> </svg>',
+            'liked_comment' => "<svg xmlns='http://www.w3.org/2000/svg' width='58.553' height='58.266' viewBox='0 0 58.553 58.266' class='feather active-like'> <path d='M-7080.317,1279.764l-26.729-1.173a1.657,1.657,0,0,1-1.55-1.717l1.11-33.374a4.112,4.112,0,0,1,2.361-3.6l.014-.005a13.62,13.62,0,0,1,1.978-.363h.007a9.007,9.007,0,0,0,3.249-.771c2.645-1.845,3.973-4.658,5.259-7.378l.005-.013.031-.061.059-.13.012-.023c.272-.576.61-1.289.944-1.929l0-.007c.576-1.105,2.327-4.46,4.406-5.107a2.3,2.3,0,0,1,.59-.105c.036,0,.072,0,.109,0a2.55,2.55,0,0,1,1.212.324c2.941,1.554,1.212,7.451.561,9.672a38.306,38.306,0,0,1-3.7,8.454l-.71,1.218,18.363.808a3.916,3.916,0,0,1,3.784,3.735,3.783,3.783,0,0,1-1.123,2.834,3.629,3.629,0,0,1-2.559,1.055c-.046,0-.1,0-.145,0h-.027l-2.141-.093-9.331-.41-.075,1.7,9.333.408a3.721,3.721,0,0,1,2.666,1.3,3.855,3.855,0,0,1,.936,2.934,3.779,3.779,0,0,1-3.821,3.38c-.061,0-.122,0-.181-.005l-1.974-.082-8.9-.392-.075,1.7,8.9.39a3.723,3.723,0,0,1,2.666,1.3,3.86,3.86,0,0,1,.937,2.933,3.784,3.784,0,0,1-3.827,3.381c-.057,0-.118,0-.177,0l-1.976-.088-8.472-.372-.075,1.7,8.474.372a3.726,3.726,0,0,1,2.666,1.3,3.857,3.857,0,0,1,.935,2.933,3.782,3.782,0,0,1-3.827,3.381C-7080.2,1279.765-7080.26,1279.765-7080.317,1279.764Zm-38.4,0-.089,0a6.558,6.558,0,0,1-6.193-6.8l.907-27.293a6.446,6.446,0,0,1,2.074-4.553,6.214,6.214,0,0,1,3.954-1.672c.081,0,.17-.005.29-.005s.212,0,.292.005a6.561,6.561,0,0,1,6.192,6.8l-.907,27.293a6.441,6.441,0,0,1-2.072,4.547,6.249,6.249,0,0,1-4.261,1.681Z' transform='translate(7126.251 -1222.75)' fill='none' stroke='currentColor' stroke-width='2.5'/> </svg>",
+            'like_comment' => "<svg xmlns='http://www.w3.org/2000/svg' width='58.553' height='58.266' viewBox='0 0 58.553 58.266' class='feather'> <path d='M-7080.317,1279.764l-26.729-1.173a1.657,1.657,0,0,1-1.55-1.717l1.11-33.374a4.112,4.112,0,0,1,2.361-3.6l.014-.005a13.62,13.62,0,0,1,1.978-.363h.007a9.007,9.007,0,0,0,3.249-.771c2.645-1.845,3.973-4.658,5.259-7.378l.005-.013.031-.061.059-.13.012-.023c.272-.576.61-1.289.944-1.929l0-.007c.576-1.105,2.327-4.46,4.406-5.107a2.3,2.3,0,0,1,.59-.105c.036,0,.072,0,.109,0a2.55,2.55,0,0,1,1.212.324c2.941,1.554,1.212,7.451.561,9.672a38.306,38.306,0,0,1-3.7,8.454l-.71,1.218,18.363.808a3.916,3.916,0,0,1,3.784,3.735,3.783,3.783,0,0,1-1.123,2.834,3.629,3.629,0,0,1-2.559,1.055c-.046,0-.1,0-.145,0h-.027l-2.141-.093-9.331-.41-.075,1.7,9.333.408a3.721,3.721,0,0,1,2.666,1.3,3.855,3.855,0,0,1,.936,2.934,3.779,3.779,0,0,1-3.821,3.38c-.061,0-.122,0-.181-.005l-1.974-.082-8.9-.392-.075,1.7,8.9.39a3.723,3.723,0,0,1,2.666,1.3,3.86,3.86,0,0,1,.937,2.933,3.784,3.784,0,0,1-3.827,3.381c-.057,0-.118,0-.177,0l-1.976-.088-8.472-.372-.075,1.7,8.474.372a3.726,3.726,0,0,1,2.666,1.3,3.857,3.857,0,0,1,.935,2.933,3.782,3.782,0,0,1-3.827,3.381C-7080.2,1279.765-7080.26,1279.765-7080.317,1279.764Zm-38.4,0-.089,0a6.558,6.558,0,0,1-6.193-6.8l.907-27.293a6.446,6.446,0,0,1,2.074-4.553,6.214,6.214,0,0,1,3.954-1.672c.081,0,.17-.005.29-.005s.212,0,.292.005a6.561,6.561,0,0,1,6.192,6.8l-.907,27.293a6.441,6.441,0,0,1-2.072,4.547,6.249,6.249,0,0,1-4.261,1.681Z' transform='translate(7126.251 -1222.75)' fill='none' stroke='currentColor' stroke-width='2.5'/> </svg>"
         );
     }
     return $btns[$value];

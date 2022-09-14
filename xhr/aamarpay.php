@@ -40,7 +40,7 @@ if ($f == 'aamarpay') {
 	            'success_url' => $wo['config']['site_url'] . "/requests.php?f=aamarpay&s=success_aamarpay", //your success route
 	            'fail_url' => $wo['config']['site_url'] . "/requests.php?f=aamarpay&s=cancel_aamarpay", //your fail route
 	            'cancel_url' => $wo['config']['site_url'] . "/requests.php?f=aamarpay&s=cancel_aamarpay", //your cancel url
-	            'opt_a' => '',  //optional paramter
+	            'opt_a' => $wo['user']['user_id'],  //optional paramter
 	            'opt_b' => '',
 	            'opt_c' => '',
 	            'opt_d' => '',
@@ -58,7 +58,6 @@ if ($f == 'aamarpay') {
 	        $result = curl_exec($ch);
 	        $url_forward = str_replace('"', '', stripslashes($result));
 	        curl_close($ch);
-	        $db->where('user_id',$wo['user']['user_id'])->update(T_USERS,array('aamarpay_tran_id' => $tran_id));
 	        if ($wo['config']['aamarpay_mode'] == 'sandbox') {
 	            $base_url = 'https://sandbox.aamarpay.com/'.$url_forward;
 	        }
@@ -77,13 +76,12 @@ if ($f == 'aamarpay') {
 	    exit();
 	}
 	if ($s == 'success_aamarpay') {
-		if (!empty($_POST['amount']) && !empty($_POST['mer_txnid']) && !empty($_POST['pay_status']) && $_POST['pay_status'] == 'Successful') {
-			$user = $db->objectBuilder()->where('aamarpay_tran_id',Wo_Secure($_POST['mer_txnid']))->getOne(T_USERS);
+		if (!empty($_POST['amount']) && !empty($_POST['mer_txnid']) && !empty($_POST['opt_a']) && !empty($_POST['pay_status']) && $_POST['pay_status'] == 'Successful') {
+			$user = $db->objectBuilder()->where('user_id',Wo_Secure($_POST['opt_a']))->getOne(T_USERS);
 			if (!empty($user)) {
 				$amount   = (int)Wo_Secure($_POST['amount']);
 				$db->where('user_id', $user->user_id)->update(T_USERS, array(
-                    'wallet' => $db->inc($amount),
-                    'aamarpay_tran_id' => ''
+                    'wallet' => $db->inc($amount)
                 ));
 
                 $create_payment_log = mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ('" . $user->user_id . "', 'WALLET', '" . $amount . "', 'aamarpay')");
@@ -101,7 +99,6 @@ if ($f == 'aamarpay') {
         exit();
 	}
 	if ($s == 'cancel_aamarpay') {
-		$db->where('user_id',$wo['user']['user_id'])->update(T_USERS,array('aamarpay_tran_id' => ''));
 		header("Location: " . Wo_SeoLink('index.php?link1=wallet'));
 	    exit();
 	}

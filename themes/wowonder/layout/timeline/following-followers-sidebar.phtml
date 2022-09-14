@@ -6,14 +6,12 @@
 		</div>
 	</div>
 	<li>
-		<div class="sidebar-following-users-container">
-            <?php
+		<div class="sidebar-following-users-container list-sidebar-element"><?php
             foreach (Wo_GetFollowing($wo['user_profile']['user_id'], 'profile', 9 , 0, array('in' => 'profile_sidebar', 'following_data' => $wo['user_profile']['following_data'])) as $wo['UsersList']) {
-               $wo['UsersList']['user_name'] = mb_substr($wo['UsersList']['name'],0,10, "utf-8");
+               $wo['UsersList']['user_name'] = $wo['UsersList']['name'];
                echo Wo_LoadPage('sidebar/profile-sidebar-user-list');
             } 
-            ?>
-		</div>
+            ?></div>
 	</li>
 	<li><div class="clear"></div></li>
 </ul>
@@ -24,14 +22,12 @@
 		</div>
 	</div>
 	<li>
-		<div class="sidebar-followers-users-container">
-            <?php 
+		<div class="sidebar-followers-users-container list-sidebar-element"><?php 
             foreach (Wo_GetFollowers($wo['user_profile']['user_id'],'profile',9 , 0, array('in' => 'profile_sidebar', 'followers_data' => $wo['user_profile']['followers_data'])) as $wo['UsersList']) {
-               $wo['UsersList']['user_name'] = mb_substr($wo['UsersList']['name'],0,10, "utf-8");
+               $wo['UsersList']['user_name'] = $wo['UsersList']['name'];
                echo Wo_LoadPage('sidebar/profile-sidebar-user-list');
              } 
-             ?>
-		</div>
+             ?></div>
 	</li>
 	<li><div class="clear"></div></li>
 </ul>

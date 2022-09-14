@@ -323,7 +323,42 @@ function Wo_OpenRequestsMenu() {
     Wo_progressIconLoader(requests_container.find('.requests-loading'));
   });
 }
-
+function Wo_CheckForCallAnswerTabs(id) {
+  $.get(Wo_Ajax_Requests_File(), {f:'check_for_answer', id:id}, function (data1) {
+    if (data1.status == 400 || data1.status == 200) {
+      clearTimeout(checkcalls);
+      setTimeout(function () {
+        $( '#re-calling-modal' ).remove();
+        $( '.modal-backdrop' ).remove();
+        $( 'body' ).removeClass( "modal-open" );
+        document.title = document_title;
+      }, 3000);
+    }
+  });
+  checkcalls = setTimeout(function () {
+      Wo_CheckForCallAnswerTabs(id);
+  }, 2000);
+}
+function Wo_CheckForAudioCallAnswerTabs(id) {
+  $.get(Wo_Ajax_Requests_File(), {f:'check_for_audio_answer', id:id}, function (data1) {
+    if (data1.status == 400 || data1.status == 200) {
+      clearTimeout(checkcalls);
+      setTimeout(function () {
+        $( '#re-calling-modal' ).remove();
+        $( '.modal-backdrop' ).remove();
+        $( 'body' ).removeClass( "modal-open" );
+        document.title = document_title;
+      }, 3000);
+      if (data1.status == 400) {
+        Wo_PlayVideoCall('stop');
+        Wo_PlayAudioCall('stop');
+      }
+    }
+  });
+  checkcalls = setTimeout(function () {
+      Wo_CheckForAudioCallAnswerTabs(id);
+  }, 2000);
+}
 // Notifications & follow requests updates
 function Wo_intervalUpdates(force_update = 0, loop = 0) {
   if (node_socket_flow == "0" || force_update == 1) {
@@ -431,6 +466,9 @@ function Wo_intervalUpdates(force_update = 0, loop = 0) {
       document.title = document_title;
     }
     if (data.calls == 200 && $('#re-calling-modal').length == 0 && $('#re-talking-modal').length == 0) {
+      if (node_socket_flow != "1") {
+        Wo_CheckForCallAnswerTabs(data.call_id);
+      }
          if ($('#calling-modal').length == 0) {
           $('body').append(data.calls_html);
           if (!$('#re-calling-modal').hasClass('calling')) {
@@ -444,6 +482,7 @@ function Wo_intervalUpdates(force_update = 0, loop = 0) {
             Wo_CloseModels();
             $('#re-calling-modal').addClass('calling');
             Wo_PlayVideoCall('stop');
+            Wo_PlayAudioCall('stop');
             document.title = document_title;
             setTimeout(function () {
               $( '#re-calling-modal' ).remove();
@@ -455,19 +494,23 @@ function Wo_intervalUpdates(force_update = 0, loop = 0) {
           }, 40000);
          }
     } else if (data.audio_calls == 200 && $('#re-calling-modal').length == 0 && $('#re-talking-modal').length == 0) {
+      if (node_socket_flow != "1") {
+        Wo_CheckForAudioCallAnswerTabs(data.call_id);
+      }
       if ($('#calling-modal').length == 0) {
           $('body').append(data.audio_calls_html);
           if (!$('#re-calling-modal').hasClass('calling')) {
             $('#re-calling-modal').modal({
              show: true
             });
-            Wo_PlayVideoCall('play');
+            Wo_PlayAudioCall('play');
           }
           document.title = 'New audio call..';
           setTimeout(function () {
             if ($('#re-talking-modal').length == 0) {
                Wo_CloseModels();
                $('#re-calling-modal').addClass('calling');
+               Wo_PlayAudioCall('stop');
                Wo_PlayVideoCall('stop');
                document.title = document_title;
                setTimeout(function () {
@@ -480,6 +523,7 @@ function Wo_intervalUpdates(force_update = 0, loop = 0) {
          }
     } else if (data.is_audio_call == 0 && data.is_call == 0 && ($('#re-calling-modal').length > 0 || $('#re-talking-modal').length > 0)) {
         Wo_PlayVideoCall('stop');
+        Wo_PlayAudioCall('stop');
         $( '#re-calling-modal' ).remove();
         $( '.modal-backdrop' ).remove();
         $( 'body' ).removeClass( "modal-open" );
@@ -1303,6 +1347,7 @@ function Wo_ReportPost(post_id) {
 
 function Wo_DisableComment(post_id, type) {
   var post = $('#post-' + post_id);
+  var p = post.find('.disable-comments').find('p').text();
   post.find('.disable-comments').html('<div class="post_drop_menu_loading"><div class="ball-pulse"><div></div><div></div><div></div></div></div>');
   if (type == 0 ) {
     post.find('.disable-comments').attr('onclick', 'Wo_DisableComment(' + post_id + ', 1);');
@@ -1317,12 +1362,13 @@ function Wo_DisableComment(post_id, type) {
     post_id: post_id,
     type: type
   }, function (data) {
-      post.find('.disable-comments').html(data.text);
+      post.find('.disable-comments').html('<svg viewBox="0 0 24 24"><path fill="currentColor" d="M9,22A1,1 0 0,1 8,21V18H4A2,2 0 0,1 2,16V4C2,2.89 2.9,2 4,2H20A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H13.9L10.2,21.71C10,21.9 9.75,22 9.5,22V22H9M5,5V7H19V5H5M5,9V11H13V9H5M5,13V15H15V13H5Z" /></svg>&nbsp;&nbsp;&nbsp;<div><b>'+data.text+'</b><p>'+p+'</p></div>');
   });
 }
 
 function Wo_PinPost(post_id, id, type) {
   var post = $('#post-' + post_id);
+  var p = post.find('.pin-post').find('p').text();
   post.find('.pin-post').html('<div class="post_drop_menu_loading"><div class="ball-pulse"><div></div><div></div><div></div></div></div>');
   $.get(Wo_Ajax_Requests_File(), {
     f: 'posts',
@@ -1331,27 +1377,20 @@ function Wo_PinPost(post_id, id, type) {
     id: id,
     type: type
   }, function (data) {
-    if(data.status == 200) {
-      post.find('.pin-post').html(data.text);
-    } else if(data.status == 300) {
-      post.find('.pin-post').html(data.text);
-    }
+    post.find('.pin-post').html('<svg viewBox="0 0 24 24"><path fill="currentColor" d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" /></svg>&nbsp;&nbsp;&nbsp;<div><b>'+data.text+'</b><p>'+p+'</p></div>');
   });
 }
 
 function Wo_BoostPost(post_id) {
   var post = $('#post-' + post_id);
+  var p = post.find('.boost-post').find('p').text();
   post.find('.boost-post').html('<div class="post_drop_menu_loading"><div class="ball-pulse"><div></div><div></div><div></div></div></div>');
   $.get(Wo_Ajax_Requests_File(), {
     f: 'posts',
     s: 'boost_post',
     post_id: post_id
   }, function (data) {
-    if(data.status == 200) {
-      post.find('.boost-post').html(data.text);
-    } else if(data.status == 300) {
-      post.find('.boost-post').html(data.text);
-    }
+    post.find('.boost-post').html('<svg viewBox="0 0 24 24"><path fill="currentColor" d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" /></svg>&nbsp;&nbsp;&nbsp;<div><b>'+data.text+'</b><p>'+p+'</p></div>');
   });
 }
 // open post Reacted users
@@ -2480,6 +2519,7 @@ function Wo_CheckForCallAnswer(id) {
       return false;
     } else if (data1.status == 400) {
       clearTimeout(checkcalls);
+      Wo_PlayVideoCall('stop');
       Wo_PlayAudioCall('stop');
       $('#calling-modal').find('.modal-title').html('<i class="fa fa fa-times"></i> ' + data1.text_call_declined);
       $('#calling-modal').find('.modal-body p').text(data1.text_call_declined_desc);
@@ -2496,6 +2536,7 @@ function Wo_CheckForAudioCallAnswer(id) {
       clearTimeout(checkcalls);
       $('#calling-modal').find('.modal-title').html('<i class="fa fa fa-phone"></i> ' + data1.text_answered);
       $('#calling-modal').find('.modal-body p').text(data1.text_please_wait);
+      Wo_PlayVideoCall('stop');
       Wo_PlayAudioCall('stop');
       setTimeout(function () {
           $( '#calling-modal' ).remove();
@@ -2507,7 +2548,9 @@ function Wo_CheckForAudioCallAnswer(id) {
           });
       }, 3000);
     } else if (data1.status == 400) {
+
       clearTimeout(checkcalls);
+      Wo_PlayVideoCall('stop');
       Wo_PlayAudioCall('stop');
       $('#calling-modal').find('.modal-title').html('<i class="fa fa fa-times"></i> ' + data1.text_call_declined);
       $('#calling-modal').find('.modal-body p').text(data1.text_call_declined_desc);
@@ -2529,6 +2572,7 @@ function Wo_AnswerCall(id, url, type) {
   Wo_progressIconLoader($('#re-calling-modal').find('.answer-call'));
   $.get(Wo_Ajax_Requests_File(), {f:'answer_call', id:id, type:type1}, function (data) {
     Wo_PlayVideoCall('stop');
+    Wo_PlayAudioCall('stop');
     if (type1 == 'video') {
       if (data.status == 200) {
          window.location.href = url;
@@ -2555,7 +2599,11 @@ function Wo_DeclineCall(id, url, type) {
   Wo_progressIconLoader($('#re-calling-modal').find('.decline-call'));
   $.get(Wo_Ajax_Requests_File(), {f:'decline_call', id:id, type:type1}, function (data) {
     if (data.status == 200) {
+      if (node_socket_flow == "1") {
+        socket.emit("decline_call", {user_id: _getCookie("user_id") });
+      }
       Wo_PlayVideoCall('stop');
+      Wo_PlayAudioCall('stop');
       $( '#re-calling-modal' ).remove();
       $( '.modal-backdrop' ).remove();
       $( 'body' ).removeClass( "modal-open" );
@@ -2578,6 +2626,7 @@ function Wo_CancelCall() {
   Wo_progressIconLoader($('#calling-modal').find('.cancel-call'));
   $.get(Wo_Ajax_Requests_File(), {f:'cancel_call'}, function (data) {
     if (data.status == 200) {
+      Wo_PlayVideoCall('stop');
       Wo_PlayAudioCall('stop');
       $( '#calling-modal' ).remove();
       $( '.modal-backdrop' ).remove();
@@ -2602,6 +2651,7 @@ function Wo_GenerateVideoCall(user_id1, user_id2) {
             $('#calling-modal').find('.modal-title').html('<i class="fa fa fa-video-camera"></i> ' + data.text_no_answer);
             $('#calling-modal').find('.modal-body p').text(data.text_please_try_again_later);
             clearTimeout(checkcalls);
+            Wo_PlayVideoCall('stop');
             Wo_PlayAudioCall('stop');
            }, 43000);
           Wo_PlayAudioCall('play');
@@ -2626,6 +2676,7 @@ function Wo_GenerateVoiceCall(user_id1, user_id2) {
             $('#calling-modal').find('.modal-title').html('<i class="fa fa fa-phone"></i> ' + data.text_no_answer);
             $('#calling-modal').find('.modal-body p').text(data.text_please_try_again_later);
             clearTimeout(checkcalls);
+            Wo_PlayVideoCall('stop');
             Wo_PlayAudioCall('stop');
            }, 43000);
           Wo_PlayAudioCall('play');
@@ -2636,22 +2687,22 @@ function Wo_GenerateVoiceCall(user_id1, user_id2) {
 function Wo_PlayAudioCall(type) {
   if (type == 'play') {
     document.getElementById('calling-sound').play();
-    playmusic_ = setTimeout(function() {
+    window.playmusic_ = setTimeout(function() {
        Wo_PlayAudioCall('play');
     }, 100);
   } else {
-    clearTimeout(playmusic_);
+    clearTimeout(window.playmusic_);
     document.getElementById('calling-sound').pause();
   }
 }
 function Wo_PlayVideoCall(type) {
   if (type == 'play') {
     document.getElementById('video-calling-sound').play();
-    playmusic = setTimeout(function() {
+    window.playmusic = setTimeout(function() {
        Wo_PlayVideoCall('play');
     }, 100);
   } else {
-    clearTimeout(playmusic);
+    clearTimeout(window.playmusic);
     document.getElementById('video-calling-sound').pause();
   }
 }
@@ -2669,6 +2720,7 @@ function textAreaAdjust(o, h, n) {
 
 function Wo_MarkAsSold(post_id, product_id) {
   var post = $('#post-' + post_id);
+  var p = post.find('.mark-as-sold-post').find('p').text();
   post.find('.mark-as-sold-post').html('<div class="post_drop_menu_loading"><div class="ball-pulse"><div></div><div></div><div></div></div></div>');
   $.get(Wo_Ajax_Requests_File(), {
     f: 'posts',
@@ -2678,7 +2730,7 @@ function Wo_MarkAsSold(post_id, product_id) {
   }, function (data) {
     if(data.status == 200) {
       post.find('.product-status').text(data.text);
-      post.find('.mark-as-sold-post').html(data.text);
+      post.find('.mark-as-sold-post').html('<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 13C19.34 13 19.67 13.04 20 13.09V8H4V21H13.35C13.13 20.37 13 19.7 13 19C13 15.69 15.69 13 19 13M9 13V11.5C9 11.22 9.22 11 9.5 11H14.5C14.78 11 15 11.22 15 11.5V13H9M21 7H3V3H21V7M22.5 17.25L17.75 22L15 19L16.16 17.84L17.75 19.43L21.34 15.84L22.5 17.25Z" /></svg>&nbsp;&nbsp;&nbsp;<div><b>'+data.text+'</b><p>'+p+'</p></div>');
       post.find('.mark-as-sold-post').removeAttr('onclick');
     }
   });
@@ -3265,6 +3317,46 @@ function load_ajax_emojii(id, path){
 		$('.emo-comment-container-' + id ).append("<span class=\"emoji_holder\" onclick=\"Wo_AddEmoToCommentInput("+ id +",'"+ value +"');\"><span>"+ value + "</span>");
 	});
 }
+function load_ajax_chat_emojii(id, path){
+    var emojjii = "😀*😁*😂*🤣*😃*😄*😅*😆*😉*😊*😋*😎*😍*😘*😗*😙*😚*🙂*🤗*🤩*🤔*🤨*😐*😑*😶*🙄*😏*😣*😥*😮*🤐*😯*😪*😫*😴*😌*😛*😜*😝*🤤*😒*😓*😔*😕*🙃*🤑*😲*☹️*🙁*😖*😞*😟*😤*😢*😭*😦*😧*😨*😩*🤯*😬*😰*😱*😳*🤪*😵*😡*😠*🤬*😷*🤒*🤕*🤢*🤮*🤧*😇*🤠*🤡*🤥*🤫*🤭*🧐*🤓*😈*👿*👹*👺*💀*👻*👽*🤖*💩*😺*😸*😹*😻*😼*😽*🙀*😿*😾*👶*👧*🧒*👦*👩*🧑*👨*👵*🧓*👴*👲*💅*🤳*💃*🕺*🕴*👫*👭*👬*💑*🤲*👐*🙌*👏*🤝*👍*👎*👊*✊*🤛*🤜*🤞*✌️*🤟*🤘*👌*👈*👉*👆*👇*☝️*✋*🤚*🖐*🖖*👋*🤙*💪*🖕*✍️*🙏*💍*💄*💋*👄*👅*👂*👃*👣*👁*👀*🧠*🗣*👤*👥";
+
+	$('.emo-container-' + id ).html("");
+	$.each(emojjii.split('*'), function(key, value) {
+		$('.emo-container-' + id ).append("<span class=\"emoji_holder\" onclick=\"Wo_AddEmoToChat("+ id +",'"+ value +"');\"><span>"+ value + "</span>");
+	});
+}
+function load_ajax_chat_group_emojii(id, path){
+    var emojjii = "😀*😁*😂*🤣*😃*😄*😅*😆*😉*😊*😋*😎*😍*😘*😗*😙*😚*🙂*🤗*🤩*🤔*🤨*😐*😑*😶*🙄*😏*😣*😥*😮*🤐*😯*😪*😫*😴*😌*😛*😜*😝*🤤*😒*😓*😔*😕*🙃*🤑*😲*☹️*🙁*😖*😞*😟*😤*😢*😭*😦*😧*😨*😩*🤯*😬*😰*😱*😳*🤪*😵*😡*😠*🤬*😷*🤒*🤕*🤢*🤮*🤧*😇*🤠*🤡*🤥*🤫*🤭*🧐*🤓*😈*👿*👹*👺*💀*👻*👽*🤖*💩*😺*😸*😹*😻*😼*😽*🙀*😿*😾*👶*👧*🧒*👦*👩*🧑*👨*👵*🧓*👴*👲*💅*🤳*💃*🕺*🕴*👫*👭*👬*💑*🤲*👐*🙌*👏*🤝*👍*👎*👊*✊*🤛*🤜*🤞*✌️*🤟*🤘*👌*👈*👉*👆*👇*☝️*✋*🤚*🖐*🖖*👋*🤙*💪*🖕*✍️*🙏*💍*💄*💋*👄*👅*👂*👃*👣*👁*👀*🧠*🗣*👤*👥";
+
+	$('.emo-group-container-' + id ).html("");
+	$.each(emojjii.split('*'), function(key, value) {
+		$('.emo-group-container-' + id ).append("<span class=\"emoji_holder\" onclick=\"Wo_AddEmoToGroup("+ id +",'"+ value +"');\"><span>"+ value + "</span>");
+	});
+}
+function load_ajax_chat_page_emojii(id, path){
+    var emojjii = "😀*😁*😂*🤣*😃*😄*😅*😆*😉*😊*😋*😎*😍*😘*😗*😙*😚*🙂*🤗*🤩*🤔*🤨*😐*😑*😶*🙄*😏*😣*😥*😮*🤐*😯*😪*😫*😴*😌*😛*😜*😝*🤤*😒*😓*😔*😕*🙃*🤑*😲*☹️*🙁*😖*😞*😟*😤*😢*😭*😦*😧*😨*😩*🤯*😬*😰*😱*😳*🤪*😵*😡*😠*🤬*😷*🤒*🤕*🤢*🤮*🤧*😇*🤠*🤡*🤥*🤫*🤭*🧐*🤓*😈*👿*👹*👺*💀*👻*👽*🤖*💩*😺*😸*😹*😻*😼*😽*🙀*😿*😾*👶*👧*🧒*👦*👩*🧑*👨*👵*🧓*👴*👲*💅*🤳*💃*🕺*🕴*👫*👭*👬*💑*🤲*👐*🙌*👏*🤝*👍*👎*👊*✊*🤛*🤜*🤞*✌️*🤟*🤘*👌*👈*👉*👆*👇*☝️*✋*🤚*🖐*🖖*👋*🤙*💪*🖕*✍️*🙏*💍*💄*💋*👄*👅*👂*👃*👣*👁*👀*🧠*🗣*👤*👥";
+
+	$('.emo-container-' + id ).html("");
+	$.each(emojjii.split('*'), function(key, value) {
+		$('.emo-container-' + id ).append("<span class=\"emoji_holder\" onclick=\"Wo_AddEmoToPage("+ id +",'"+ value +"');\"><span>"+ value + "</span>");
+	});
+}
+function load_ajax_message_emojii(path){
+    var emojjii = "😀*😁*😂*🤣*😃*😄*😅*😆*😉*😊*😋*😎*😍*😘*😗*😙*😚*🙂*🤗*🤩*🤔*🤨*😐*😑*😶*🙄*😏*😣*😥*😮*🤐*😯*😪*😫*😴*😌*😛*😜*😝*🤤*😒*😓*😔*😕*🙃*🤑*😲*☹️*🙁*😖*😞*😟*😤*😢*😭*😦*😧*😨*😩*🤯*😬*😰*😱*😳*🤪*😵*😡*😠*🤬*😷*🤒*🤕*🤢*🤮*🤧*😇*🤠*🤡*🤥*🤫*🤭*🧐*🤓*😈*👿*👹*👺*💀*👻*👽*🤖*💩*😺*😸*😹*😻*😼*😽*🙀*😿*😾*👶*👧*🧒*👦*👩*🧑*👨*👵*🧓*👴*👲*💅*🤳*💃*🕺*🕴*👫*👭*👬*💑*🤲*👐*🙌*👏*🤝*👍*👎*👊*✊*🤛*🤜*🤞*✌️*🤟*🤘*👌*👈*👉*👆*👇*☝️*✋*🤚*🖐*🖖*👋*🤙*💪*🖕*✍️*🙏*💍*💄*💋*👄*👅*👂*👃*👣*👁*👀*🧠*🗣*👤*👥";
+
+	$('.emo-message-container').html("");
+	$.each(emojjii.split('*'), function(key, value) {
+		$('.emo-message-container').append("<span class=\"emoji_holder\" onclick=\"Wo_AddEmoToMessageInput('"+ value +"');\"><span>"+ value + "</span>");
+	});
+}
+function load_ajax_publisher_emojii(path){
+    var emojjii = "😀*😁*😂*🤣*😃*😄*😅*😆*😉*😊*😋*😎*😍*😘*😗*😙*😚*🙂*🤗*🤩*🤔*🤨*😐*😑*😶*🙄*😏*😣*😥*😮*🤐*😯*😪*😫*😴*😌*😛*😜*😝*🤤*😒*😓*😔*😕*🙃*🤑*😲*☹️*🙁*😖*😞*😟*😤*😢*😭*😦*😧*😨*😩*🤯*😬*😰*😱*😳*🤪*😵*😡*😠*🤬*😷*🤒*🤕*🤢*🤮*🤧*😇*🤠*🤡*🤥*🤫*🤭*🧐*🤓*😈*👿*👹*👺*💀*👻*👽*🤖*💩*😺*😸*😹*😻*😼*😽*🙀*😿*😾*👶*👧*🧒*👦*👩*🧑*👨*👵*🧓*👴*👲*💅*🤳*💃*🕺*🕴*👫*👭*👬*💑*🤲*👐*🙌*👏*🤝*👍*👎*👊*✊*🤛*🤜*🤞*✌️*🤟*🤘*👌*👈*👉*👆*👇*☝️*✋*🤚*🖐*🖖*👋*🤙*💪*🖕*✍️*🙏*💍*💄*💋*👄*👅*👂*👃*👣*👁*👀*🧠*🗣*👤*👥";
+
+	$('.publisher-box-emooji').html("");
+	$.each(emojjii.split('*'), function(key, value) {
+		$('.publisher-box-emooji').append("<span class=\"emoji_holder\" onclick=\"Wo_AddEmo('"+ value +"', '#post-textarea textarea'), Wo_ShowPosInfo();\"><span>"+ value + "</span>");
+	});
+}
 function load_ajax_reply_emojii(id, path){
     var emojjii = "😀*😁*😂*🤣*😃*😄*😅*😆*😉*😊*😋*😎*😍*😘*😗*😙*😚*🙂*🤗*🤩*🤔*🤨*😐*😑*😶*🙄*😏*😣*😥*😮*🤐*😯*😪*😫*😴*😌*😛*😜*😝*🤤*😒*😓*😔*😕*🙃*🤑*😲*☹️*🙁*😖*😞*😟*😤*😢*😭*😦*😧*😨*😩*🤯*😬*😰*😱*😳*🤪*😵*😡*😠*🤬*😷*🤒*🤕*🤢*🤮*🤧*😇*🤠*🤡*🤥*🤫*🤭*🧐*🤓*😈*👿*👹*👺*💀*👻*👽*🤖*💩*😺*😸*😹*😻*😼*😽*🙀*😿*😾*👶*👧*🧒*👦*👩*🧑*👨*👵*🧓*👴*👲*💅*🤳*💃*🕺*🕴*👫*👭*👬*💑*🤲*👐*🙌*👏*🤝*👍*👎*👊*✊*🤛*🤜*🤞*✌️*🤟*🤘*👌*👈*👉*👆*👇*☝️*✋*🤚*🖐*🖖*👋*🤙*💪*🖕*✍️*🙏*💍*💄*💋*👄*👅*👂*👃*👣*👁*👀*🧠*🗣*👤*👥";
 
@@ -3338,6 +3430,9 @@ function _getCookie(cname) {
       if (c.indexOf(name) == 0) {
           return c.substring(name.length, c.length);
       }
+  }
+  if (cname == 'user_id') {
+    return _getSession('user_id');
   }
   return "";
 }

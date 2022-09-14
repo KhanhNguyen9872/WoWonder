@@ -9,35 +9,11 @@ $node_file_name = '../nodejs/config.json';
 
 function check_($check) {
     $siteurl           = urlencode(getBaseUrl());
-    $arrContextOptions = array(
-        "ssl" => array(
-            "verify_peer" => false,
-            "verify_peer_name" => false
-        )
-    );
-    $file              = file_get_contents('http://www.wowonder.com/purchase.php?code=' . $check . '&url=' . $siteurl, false, stream_context_create($arrContextOptions));
-    if ($file) {
-        $check             = json_decode($file, true);
-    } else {
-        $check             = array('status' => 'SUCCESS', 'url' => $siteurl, 'code' => $check);
-    }
-    return $check;
+    return array('status' => 'SUCCESS', 'url' => $siteurl, 'code' => $check);
 }
 function check_success($check) {
     $siteurl           = urlencode(getBaseUrl());
-    $arrContextOptions = array(
-        "ssl" => array(
-            "verify_peer" => false,
-            "verify_peer_name" => false
-        )
-    );
-    $file              = file_get_contents('http://www.wowonder.com/purchase.php?code=' . $check . '&success=true&url=' . $siteurl, false, stream_context_create($arrContextOptions));
-    if ($file) {
-        $check             = json_decode($file, true);
-    } else {
-        $check             = array('status' => 'SUCCESS', 'url' => $siteurl, 'code' => $check);
-    }
-    return $check;
+    return array('status' => 'SUCCESS', 'url' => $siteurl, 'code' => $check);
 }
 
 if (!empty($_POST['install'])) {
@@ -74,7 +50,7 @@ if (!empty($_POST['install'])) {
    //}
    //} else {
    //$ServerErrors[] = 'Failed to connect to server, please try again later, or contact us.';
-   //}
+   ///}
    $site_url0 = $_POST['site_url'];
    $site_url = str_replace('http://', 'https://', $site_url0);
    if (empty($ServerErrors)) {
@@ -112,6 +88,8 @@ $sql_db_port = "'  . $_POST['sql_port'] . '";
 // Site URL
 $site_url = "' . $site_url . '"; // e.g (http://example.com)
 
+$auto_redirect = true;
+
 // Purchase code
 $purchase_code = "' . trim($_POST['purshase_code']) . '"; // Your purchase code, don\'t give it to anyone.
 ?>';
@@ -144,12 +122,12 @@ if (file_exists('../htaccess.txt')) {
            }
         }
         if ($query) {
-          //$p2 = check_success(trim($_POST['purshase_code']));
-          //if(isset($p2['status'])) {
-          //if ($p2['status'] == 'SUCCESS') {
-          $can = 1;
-          //}
-          //}
+           //$p2 = check_success(trim($_POST['purshase_code']));
+           //if(isset($p2['status'])) {
+           //if ($p2['status'] == 'SUCCESS') {
+           $can = 1;
+           //}
+           //}
            $con1 = mysqli_connect($_POST['sql_host'], $_POST['sql_user'], $_POST['sql_pass'], $_POST['sql_name'],  $_POST['sql_port']);
            if ($can == 1) {
               $query_one = mysqli_query($con1, "UPDATE `Wo_Config` SET `value` = '" . mysqli_real_escape_string($con1, 1). "' WHERE `name` = 'is_ok'");
@@ -177,8 +155,6 @@ if (file_exists('../htaccess.txt')) {
            }
             // chmod general config file
             @chmod("./assets/init.php", 0777);
-            // chmod libraries
-            @chmod("./libraries/PayPal", 0777);
             //chmod upload folder
             @chmod("./upload", 0777);
 
@@ -231,6 +207,7 @@ if (file_exists('../htaccess.txt')) {
             $disabled = false;
             $mysqli = true;
             $is_writable = true;
+            $is_lang_writable = true;
             $is_node_json_writable = true;
             $mbstring = true;
             $is_htaccess = true;
@@ -256,7 +233,7 @@ if (file_exists('../htaccess.txt')) {
             $gd = false;
             $disabled = true;
             }
-            if (!version_compare(PHP_VERSION, '5.5.0', '>=')) {
+            if (!version_compare(PHP_VERSION, '7.1.0', '>=')) {
             $php = false;
             $disabled = true;
             }
@@ -266,6 +243,10 @@ if (file_exists('../htaccess.txt')) {
             }
             if (!is_writable('../nodejs/config.json')) {
             $is_node_json_writable = false;
+            $disabled = true;
+            }
+            if (!is_writable('../nodejs/models/wo_langs.js')) {
+            $is_lang_writable = false;
             $disabled = true;
             }
             if (!file_exists('../.htaccess')) {
@@ -349,8 +330,8 @@ if (file_exists('../htaccess.txt')) {
                     </thead>
                     <tbody>
                       <tr>
-                        <td>PHP 5.5+</td>
-                        <td>Required PHP version 5.5 or more</td>
+                        <td>PHP 7.1+</td>
+                        <td>Required PHP version 7.1 or more</td>
                         <td><?php echo ($php == true) ? '<font color="green"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M9.707 17.707l10-10-1.414-1.414L9 15.586l-4.293-4.293-1.414 1.414 5 5a.997.997 0 0 0 1.414 0z"/></svg> Installed</font>' : '<font color="red"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M6.707 18.707L12 13.414l5.293 5.293 1.414-1.414L13.414 12l5.293-5.293-1.414-1.414L12 10.586 6.707 5.293 5.293 6.707 10.586 12l-5.293 5.293z"/></svg> Not installed</font>'?></td>
                       </tr>
                       <tr>
@@ -405,8 +386,13 @@ if (file_exists('../htaccess.txt')) {
                       </tr>
                       <tr>
                         <td>config.json</td>
-                        <td>Required config.php to be writable for the installation <small>(Located in nodejs/config.json)</small></td>
-                        <td><?php echo ($is_writable == true) ? '<font color="green"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M9.707 17.707l10-10-1.414-1.414L9 15.586l-4.293-4.293-1.414 1.414 5 5a.997.997 0 0 0 1.414 0z"/></svg> Writable</font>' : '<font color="red"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M6.707 18.707L12 13.414l5.293 5.293 1.414-1.414L13.414 12l5.293-5.293-1.414-1.414L12 10.586 6.707 5.293 5.293 6.707 10.586 12l-5.293 5.293z"/></svg> Not writable</font>'?></td>
+                        <td>Required config.json to be writable for the installation <small>(Located in nodejs/config.json)</small></td>
+                        <td><?php echo ($is_node_json_writable == true) ? '<font color="green"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M9.707 17.707l10-10-1.414-1.414L9 15.586l-4.293-4.293-1.414 1.414 5 5a.997.997 0 0 0 1.414 0z"/></svg> Writable</font>' : '<font color="red"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M6.707 18.707L12 13.414l5.293 5.293 1.414-1.414L13.414 12l5.293-5.293-1.414-1.414L12 10.586 6.707 5.293 5.293 6.707 10.586 12l-5.293 5.293z"/></svg> Not writable</font>'?></td>
+                      </tr>
+                      <tr>
+                        <td>wo_langs.js</td>
+                        <td>Required wo_langs.js to be writable for the installation <small>(Located in nodejs/models/wo_langs.js)</small></td>
+                        <td><?php echo ($is_lang_writable == true) ? '<font color="green"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M9.707 17.707l10-10-1.414-1.414L9 15.586l-4.293-4.293-1.414 1.414 5 5a.997.997 0 0 0 1.414 0z"/></svg> Writable</font>' : '<font color="red"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M6.707 18.707L12 13.414l5.293 5.293 1.414-1.414L13.414 12l5.293-5.293-1.414-1.414L12 10.586 6.707 5.293 5.293 6.707 10.586 12l-5.293 5.293z"/></svg> Not writable</font>'?></td>
                       </tr>
                     </tbody>
                   </table>

@@ -34,17 +34,16 @@ function Wo_GetPopularBlogs($limit) {
 		?>
 		</ul>
 	</div>
-
+	<?php if ($wo['config']['user_ads'] == 1 && $wo['loggedin']): ?>
 	<div class="widget sidebar">
-	    <?php if ($wo['config']['user_ads'] == 1): ?>
-            <?php 
-                foreach (Wo_GetSideBarAds() as $wo['sidebar-ad']) {
-                    echo Wo_LoadPage('ads/includes/sidebar-ad');
-                }
-            ?>
-            <div class="clear"></div>
-        <?php endif; ?>
+        <?php 
+            foreach (Wo_GetSideBarAds() as $wo['sidebar-ad']) {
+                echo Wo_LoadPage('ads/includes/sidebar-ad');
+            }
+        ?>
+        <div class="clear"></div>
     </div>
+    <?php endif; ?>
 	
 	<!--Categories-->
 	<div class="widget">

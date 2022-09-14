@@ -133,7 +133,7 @@ function DeleteBan(id,type = 'show') {
     url:  Wo_Ajax_Requests_File(),
     type: 'GET',
     dataType: 'json',
-    data: {f: 'admincp',s:'rm-invitation',id:id},
+    data: {f: 'manage-invitation',s:'rm-invitation',id:id},
  })
  .done(function(data) {
     if (data.status == 200) {
@@ -149,7 +149,7 @@ jQuery(document).ready(function($) {
       url: Wo_Ajax_Requests_File(),
       type:'GET',
       dataType:'json',
-      data: {f: 'admincp',s:'insert-invitation'},
+      data: {f: 'manage-invitation',s:'insert-invitation'},
       beforeSend: function() {
         $('#add-invitation').find('button').text('Please wait..');
       },

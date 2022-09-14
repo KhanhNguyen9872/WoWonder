@@ -133,10 +133,10 @@ if ($f == 'register') {
         }
         if ($wo['config']['auto_username'] == 1) {
             if (!empty($_POST['first_name'])) {
-                $re_data['first_name'] = Wo_Secure($_POST['first_name']);
+                $re_data['first_name'] = Wo_Secure($_POST['first_name'],1);
             }
             if (!empty($_POST['last_name'])) {
-                $re_data['last_name'] = Wo_Secure($_POST['last_name']);
+                $re_data['last_name'] = Wo_Secure($_POST['last_name'],1);
             }
         }
         if ($gender == 'female') {

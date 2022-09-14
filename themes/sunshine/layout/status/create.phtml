@@ -29,15 +29,14 @@
 						</div>
 						<div class="form-group col-lg-12">
 							<label class="col-md-12" for="group_name"><?php echo $wo['lang']['select'];?> *</label>
-      						<div class="col-md-12" title="Select media">
+      						<div class="col-md-12" title="Select media" data-block="thumdrop-zone">
       							<div id="select-status-media">
       								<p class="img">			
       									<span>
 											<span style="display:block">
 											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-image"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
 											</span>
-											<?php echo $wo['lang']['select']; ?>
-											<?php echo $wo['lang']['photos']; ?> &amp; <?php echo $wo['lang']['videos']; ?>
+											<?php echo $wo['lang']['drop_img_videos_here'] ?> <?php echo $wo['lang']['or']; ?> <?php echo $wo['lang']['browse_to_upload']; ?>
 										</span>
       									
       								</p>
@@ -78,7 +77,7 @@
 					 
 					<div class="create-status-alert hidden">
 						<div class="alert alert-danger">
-                           <p><?php echo $wo['lang']['max_number_status'] ?></p>
+                           <p><?php echo $wo['lang']['max_number_status_6'] ?></p>
                         </div>
 					</div>
 					
@@ -87,7 +86,7 @@
 						<button type="submit" class="btn btn-main setting-panel-mdbtn"><?php echo $wo['lang']['create'];?></button>
 					</div>
 
-					<input type="file" name="statusMedia[]" class="hidden" id="user-storymedia">
+					<input type="file" name="statusMedia[]" class="hidden" id="user-storymedia" multiple>
 					<input type="file" name="cover" class="hidden" id="user-storymedia-2">
 				</form>
 			</div>
@@ -99,6 +98,47 @@
 </div>
 
 <script>
+	jQuery(document).ready(function($) {
+    var thumb_drop_block = $("[data-block='thumdrop-zone']");
+
+    if (typeof(window.FileReader) == 'undefined') {
+      thumb_drop_block.find('.thumbnail-rendderer div').text('Drag drop is not supported in your browser!');
+    }
+    else{
+      thumb_drop_block[0].ondragover = function() {
+          thumb_drop_block.addClass('hover');
+          return false;
+      };
+          
+      thumb_drop_block[0].ondragleave = function() {
+          thumb_drop_block.removeClass('hover');
+          return false;
+      };
+
+      thumb_drop_block[0].ondrop = function(event) {
+          event.preventDefault();
+          thumb_drop_block.removeClass('hover');
+          var file = event.dataTransfer.files;
+          if (file.length > 6) {
+          	$(".create-status-alert").removeClass('hidden');
+          	return false;
+          }
+          if (file.length == 1) {
+          	var ext = getExtension(file[0].name);
+		    switch (ext.toLowerCase()) {
+			    case 'm4v':
+			    case 'avi':
+			    case 'mpg':
+			    case 'mp4':
+			    $('#custom_thumbnail').slideDown();
+		    }
+          }
+          $("#user-storymedia").prop('files', file);
+          $("#user-story-total input").val(file.length + ' file(s) selected');
+          $("#user-story-total").removeClass('hidden').slideDown(200);
+      };
+    }
+  });
 	function getExtension(filename) {
 	  var parts = filename.split('.');
 	  return parts[parts.length - 1];
@@ -107,7 +147,7 @@
       $("#user-storymedia").change(function () {
         var numFiles = this.files.length;
 
-        if (numFiles > 20) {
+        if (numFiles > 6) {
          $("#user-storymedia").val('');
          $(".create-status-alert").removeClass('hidden');
         }
@@ -128,7 +168,7 @@
       });
       $("#user-storymedia-2").change(function () {
         var numFiles = this.files.length;
-        if (numFiles > 20) {
+        if (numFiles > 6) {
          $("#user-storymedia-2").val('');
          $(".create-status-alert").removeClass('hidden');
         }

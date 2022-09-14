@@ -1,8 +1,13 @@
-<div class="list-group profile-lists">
-	<div class="list-group-item">
-		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-list"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3" y2="6"></line><line x1="3" y1="12" x2="3" y2="12"></line><line x1="3" y1="18" x2="3" y2="18"></line></svg>
-		<?php echo $wo['lang']['activities'];?>
+<div class="page-margin wow_content mt-0">
+	<div class="wo_page_hdng pag_neg_padd pag_alone">
+		<div class="wo_page_hdng_innr">
+			<span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M7,5H21V7H7V5M7,13V11H21V13H7M4,4.5A1.5,1.5 0 0,1 5.5,6A1.5,1.5 0 0,1 4,7.5A1.5,1.5 0 0,1 2.5,6A1.5,1.5 0 0,1 4,4.5M4,10.5A1.5,1.5 0 0,1 5.5,12A1.5,1.5 0 0,1 4,13.5A1.5,1.5 0 0,1 2.5,12A1.5,1.5 0 0,1 4,10.5M7,19V17H21V19H7M4,16.5A1.5,1.5 0 0,1 5.5,18A1.5,1.5 0 0,1 4,19.5A1.5,1.5 0 0,1 2.5,18A1.5,1.5 0 0,1 4,16.5Z"></path></svg></span> <?php echo $wo['lang']['activities'];?>
+		</div>
 	</div>
+</div>
+			
+<div class="list-group profile-lists">
+
     <div id="following-list" class="row" style="margin: 0;">
         <?php $activities = Wo_GetActivities(array('me' => true, 'limit' => 20));?>
         <ul class="activity-container no-padding-left-list">

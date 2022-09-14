@@ -143,4 +143,8 @@ define('T_USER_OPEN_TO', 'Wo_UserOpenTo');
 define('T_USER_TIERS', 'Wo_UserTiers');
 define('T_USER_SKILLS', 'Wo_UserSkills');
 define('T_USER_LANGUAGES', 'Wo_UserLanguages');
+define('T_LANG_ISO', 'Wo_LangIso');
+define('T_PENDING_PAYMENTS', 'Wo_PendingPayments');
+define('T_UPLOADED_MEDIA', 'Wo_UploadedMedia');
+
 ?>

@@ -20,9 +20,9 @@ a, .blog-h-list h3, .main-blog-sidebar .popular-articles li .article-title, .wo_
 .wo_ads_wallet .my_wallet, .form-control, .wo_settings_page .setting-panel input[type=email], .wo_settings_page .setting-panel input[type=password], .wo_settings_page .setting-panel input[type=text], .wo_settings_page .setting-panel select, .modal-footer, .create-ads-cont input, .wo_settings_page .setting-panel textarea, .create-ads-cont .create-ads-inner-right button, .create-ads-cont .create-ads-inner-left, .postFooter, .read-blog .blog-author-info, .create-article-form .bootstrap-tagsinput, .chat-btns-w, #sendMessage, .event_two_blocks li:first-child, .thread-replies, textarea, #search-nearby-users .nearby-users-gender, .table-bordered, pre, .nav-tabs, .wo_sidebar_groups, .wo_settings_page .wo_design_button, .recent, .notifications-dropdown .turn-off-sound, .messages-recipients-list, .movies-top-breadcrumb, .movies-search input, input, .wo_market .market_bottom .market_bottom_header, .wo_market .market_bottom .product .product_info, .wo_search_page .tab-content, .wo_search_page_side .wo_settings_page, .earn_points .counter, .wo_user_side_info li, .activity-container .activity, .wo_sidebar_pages, .publisher-box .publisher-box-footer .pub-footer-bottom, .feeling-type.feeling-types, .feeling-type ul, .answers input, .post-fetched-url, .wo_post_ad, .image-file, .wo_product_row, .wo_product_row .product-name, .wo_r_features ul li, select, .admin-panel .col-md-9 .list-group-item:first-child, .setting-panel .col-md-8 .list-group-item:first-child, .profile-lists .list-group-item:first-child, .col-md-8 .list-group-item:first-child, .col-md-3.custom .list-group-item:first-child, .col-sm-4 .list-group-item:first-child, .col-md-7 .list-group-item:first-child, .col-md-9 .list-group-item:first-child, .red-list .list-group-item:first-child, .active.list-group-item:first-child, .order-by, .wowonder-well, .wallet_transactions, .create-ads-cont.wo_settings_page, .create-ads-cont .create-ads-inner-right, .fake_ad_post .fads_cover, .wo_my_articlez, .wo_my_articlez .post-options, .main-blog-sidebar .widget, .main-blog-sidebar .popular-articles li, .sun_chat_bottom, .event_invite_frnd, .right_user_info li.user-desc-field, .sun_forum_sections table tr, .sun_thread_main_reply .t-right_prt h5.time, .sun_thread_replies .thread-replies .t-right_prt h5.time, .sun_price_plan tbody td, .sun_sec_pay .sun_sec_pblock, .wo_my__groups, .sun_sett_sidebar > ul > li, .wo_imagecombo_lbox .lightbox-post-footer.post-comments, .wo_page_profile .page-info-cont .first_row, .wo_market .market_widget .m_widget_head, .sun_sett_sidebar .sun_sett_submenu > ul, .wo_sidebar_users, .sun_startup .continue-button, #wo_post_stat_button, .sun_pub_mid_foot, .sun_side_widget .right_user_info .user-social-links {border-color: #363636 !important;}
 
 .payment_box .btn {border-bottom: 1px solid rgba(188, 188, 188, 0.07);color: #c4c4c4;}
-.alert, .form-control, .modal-footer, .create-ads-cont .select-admedai-box, .create-ads-cont .select-admedai-box button, .create-ads-cont .select-admedai-box input[readonly], .create-ads-cont .create-ads-inner-right button, .create-article-form .prv-img, .bootstrap-tagsinput, .chat-btns-w, #wo_comment_combo.comment-toggle, #wo_comment_combo .comment_combo_footer, textarea, #cusrange-reader, .pricing .price-table-head, pre, code, .wo_settings_page .wo_design_button, input, .wo_radio_btn input[type=radio]+span, .earn_points .counter, .wo_sidebar_products, #select-status-media-2, #select-status-media, .publisher-box #camera-button-btn, .publisher-box .add-emoticons .dropdown-toggle, #video-form div.video-poster-image .thumb-renderer, .post-fetched-url:hover, .options .poll-option, select, .wo_adv_search_filter_side .wo_settings_page .setting-panel input[type=text].age_number, .wo_adv_search_filter_side .ui-slider, .key_shortcts th span, ul.profile-completion-bar li.completion-bar div.completion-bar-wrapper, .wow_membr_signup_plan {background: #363636 !important;}
+.alert, .form-control, .modal-footer, .create-ads-cont .select-admedai-box, .create-ads-cont .select-admedai-box button, .create-ads-cont .select-admedai-box input[readonly], .create-ads-cont .create-ads-inner-right button, .create-article-form .prv-img, .bootstrap-tagsinput, .chat-btns-w, #wo_comment_combo.comment-toggle, #wo_comment_combo .comment_combo_footer, textarea, #cusrange-reader, .pricing .price-table-head, pre, code, .wo_settings_page .wo_design_button, input, .wo_radio_btn input[type=radio]+span, .earn_points .counter, .wo_sidebar_products, #select-status-media-2, #select-status-media, .publisher-box #camera-button-btn, .publisher-box .add-emoticons .dropdown-toggle, #video-form div.video-poster-image .thumb-renderer, .post-fetched-url:hover, .options .poll-option, select, .wo_adv_search_filter_side .wo_settings_page .setting-panel input[type=text].age_number, .wo_adv_search_filter_side .ui-slider, ul.profile-completion-bar li.completion-bar div.completion-bar-wrapper, .wow_membr_signup_plan {background: #363636 !important;}
 .alert-info {color: #57acd7;}
-.estimated_ad_limit, .earn_points .points_tip, #select-status-media, #select-status-media-2, #video-form div.video-poster-image .thumb-renderer, .wo_votes, .key_shortcts th span, .modal-header {border-color: rgba(255, 255, 255, 0.23);}
+.estimated_ad_limit, .earn_points .points_tip, #select-status-media, #select-status-media-2, #video-form div.video-poster-image .thumb-renderer, .wo_votes, .modal-header {border-color: rgba(255, 255, 255, 0.23);}
 .dropdown-menu>li>a:hover, .dropdown-menu>li>a:focus, .dropdown-menu>li>a:hover, .left-sidebar ul li a:hover {background: #333 !important;}
 hr, .lightbox-content .comment-section .stats {border-color: #424242 !important;}
 .dropdown-menu .divider {background: #424242 !important;}
@@ -554,3 +554,33 @@ body .insta#wo_post_stat_button .stat-item {
 .page_admin_list {
     border-color: #545454;
 }
+
+.sun_post .post .post-privacy-menu > li > div b, .sun_post .post .post-privacy-menu > li > a b {
+    color: #fff;
+}
+
+
+.key_shortcts th .key {
+    background: #313131;
+    border-color: #5d5d5d #383838 #454545;
+}
+.key_shortcts th span {
+    background: #646464;
+}
+
+.wo_imagecombo_lbox.story_lightbox .comment-section .load-more .btn {
+    background: #3a3a3a;
+    color: #ffffff;
+}
+
+.active_sessions .as_list {
+    border-color: #424242;
+}
+.active_sessions .as_list .platform_icon {
+    background: rgb(255 255 255 / 7%);
+}
+
+.lang_select_modal .language_select a {
+    border-color: #444;
+}
+.lang_select_modal .language_select:hover {background-color: rgb(255 255 255 / 5%) !important;}

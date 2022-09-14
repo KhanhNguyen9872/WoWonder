@@ -143,15 +143,28 @@ if ($f == 'ads') {
         $request[] = ($_GET['ad-id'] < 1 || empty($_POST['gender']));
         $request[] = (empty($_POST['bidding']) || empty($_POST['location']));
         $request[] = (empty($_POST['audience-list']) || !is_array($_POST['audience-list']));
+        $request[] = (empty($_POST['appears']));
         if (in_array(true, $request)) {
             $error = $error_icon . $wo['lang']['please_check_details'];
         } else {
             if (strlen($_POST['name']) < 3 || strlen($_POST['name']) > 100) {
                 $error = $error_icon . $wo['lang']['invalid_company_name'];
-            } else if (!filter_var($_POST['website'], FILTER_VALIDATE_URL) || $_POST['website'] > 3000) {
+            } else if (!filter_var($_POST['website'], FILTER_VALIDATE_URL) || strlen($_POST['website'])  > 3000) {
                 $error = $error_icon . $wo['lang']['enter_valid_url'];
             } else if (strlen($_POST['headline']) < 5 || strlen($_POST['headline']) > 200) {
                 $error = $error_icon . $wo['lang']['enter_valid_title'];
+            } else if (!in_array($_POST['appears'], array(
+                    'post',
+                    'sidebar',
+                    'video',
+                    'jobs',
+                    'forum',
+                    'movies',
+                    'offer',
+                    'funding',
+                    'entire',
+                ))) {
+                $error = $error_icon . $wo['lang']['please_check_details'];
             }
             if (!in_array($_POST['bidding'], array(
                 'clicks',
@@ -187,6 +200,7 @@ if ($f == 'ads') {
                 'location' => Wo_Secure($_POST['location']),
                 'audience' => Wo_Secure(implode(',', $_POST['audience-list'])),
                 'gender' => Wo_Secure($_POST['gender']),
+                'appears' => Wo_Secure($_POST['appears']),
                 'bidding' => Wo_Secure($_POST['bidding']),
                 'posted' => time()
             );

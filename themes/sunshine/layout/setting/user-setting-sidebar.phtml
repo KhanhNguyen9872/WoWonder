@@ -129,6 +129,11 @@
 				<svg xmlns="http://www.w3.org/2000/svg" class="<?php echo Wo_RightToLeft('pull-right');?>" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M7,10L12,15L17,10H7Z" /></svg>
 			</a>
 			<ul class="collapse <?php echo ($wo['setting_page'] == 'affiliates' || $wo['setting_page'] == 'my_points' || $wo['setting_page'] == 'payments' || $wo['setting_page'] == 'transaction_log') ? 'in': '';?>" id="earning-sett">
+				<?php if ($wo['config']['affiliate_system'] == 1 || $wo['config']['point_allow_withdrawal'] == 1 || $wo['config']['funding_system'] == 1 || $wo['config']['store_system'] == 'on') { ?>
+					<li class="<?php echo ($wo['setting_page'] == 'payments') ? 'active': '';?>" dir="auto">
+						<a href="<?php echo Wo_SeoLink('index.php?link1=setting&' . $wo['user_setting'] . 'page=payments');?>" data-ajax="?link1=setting&<?php echo $wo['user_setting'];?>page=payments"><?php echo $wo['lang']['my_earnings'];?></a>
+					</li>
+				<?php } ?>
 				<?php if ($wo['config']['affiliate_system'] == 1) {?>
 				<li class="<?php echo ($wo['setting_page'] == 'affiliates') ? 'active': '';?>" dir="auto">
 					<a href="<?php echo Wo_SeoLink('index.php?link1=setting&' . $wo['user_setting'] . 'page=affiliates');?>" data-ajax="?link1=setting&<?php echo $wo['user_setting'];?>page=affiliates"><?php echo $wo['lang']['my_affiliates'];?></a>

@@ -107,7 +107,7 @@ if (!empty($_POST['postText'])) {
 
 
 
-
+$video_thumb   = '';
 $media         = '';
 $mediaFilename = '';
 $mediaName     = '';
@@ -187,11 +187,13 @@ if (isset($_FILES['postVideo']['name']) && empty($mediaFilename)) {
         }
         $amazone_s3                   = $wo['config']['amazone_s3'];
         $wasabi_storage               = $wo['config']['wasabi_storage'];
+        $backblaze_storage               = $wo['config']['backblaze_storage'];
         $ftp_upload                   = $wo['config']['ftp_upload'];
         $spaces                       = $wo['config']['spaces'];
         $cloud_upload                 = $wo['config']['cloud_upload'];
         $wo['config']['amazone_s3']   = 0;
         $wo['config']['wasabi_storage']   = 0;
+        $wo['config']['backblaze_storage']   = 0;
         $wo['config']['ftp_upload']   = 0;
         $wo['config']['spaces']       = 0;
         $wo['config']['cloud_upload'] = 0;
@@ -200,6 +202,7 @@ if (isset($_FILES['postVideo']['name']) && empty($mediaFilename)) {
     if ($wo['config']['ffmpeg_system'] == 'on') {
         $wo['config']['amazone_s3']   = $amazone_s3;
         $wo['config']['wasabi_storage']   = $wasabi_storage;
+        $wo['config']['backblaze_storage']   = $backblaze_storage;
         $wo['config']['ftp_upload']   = $ftp_upload;
         $wo['config']['spaces']       = $spaces;
         $wo['config']['cloud_upload'] = $cloud_upload;
@@ -209,6 +212,29 @@ if (isset($_FILES['postVideo']['name']) && empty($mediaFilename)) {
         $mediaName     = $media['name'];
         if (!empty($mediaFilename) && $wo['config']['ffmpeg_system'] == 'on') {
             $ffmpeg_convert_video = $mediaFilename;
+        }
+        $img_types = array(
+                        'image/png',
+                        'image/jpeg',
+                        'image/jpg',
+                        'image/gif'
+                    );
+        if (!empty($_FILES['video_thumb']) && in_array($_FILES["video_thumb"]["type"], $img_types)) {
+            $fileInfo = array(
+                'file' => $_FILES["video_thumb"]["tmp_name"],
+                'name' => $_FILES['video_thumb']['name'],
+                'size' => $_FILES["video_thumb"]["size"],
+                'type' => $_FILES["video_thumb"]["type"],
+                'types' => 'jpeg,png,jpg,gif',
+                'crop' => array(
+                    'width' => 525,
+                    'height' => 295
+                )
+            );
+            $media    = Wo_ShareFile($fileInfo);
+            if (!empty($media)) {
+                $video_thumb = $media['filename'];
+            }
         }
     }
     if (empty($mediaFilename)) {
@@ -406,7 +432,9 @@ if (empty($error_message)) {
         'postPlaying' => Wo_Secure($playing),
         'postWatching' => Wo_Secure($watching),
         'postTraveling' => Wo_Secure($traveling),
-        'time' => time()
+        'postFileThumb' => Wo_Secure($video_thumb),
+        'time' => time(),
+        'multi_image_post' => 0,
     );
     if (isset($_POST['postSticker']) && Wo_IsUrl($_POST['postSticker']) && empty($_FILES) && empty($_POST['postRecord'])) {
         $_POST['postSticker'] = preg_replace('/on[^<>=]+=[^<>]*/m', '', $_POST['postSticker']);
@@ -462,6 +490,9 @@ if (empty($error_message)) {
         session_write_close();
         if (is_callable('fastcgi_finish_request')) {
             fastcgi_finish_request();
+        }
+        if (is_callable('litespeed_finish_request')) {
+            litespeed_finish_request();
         }
         $id = FFMPEGUpload(array(
             'filename' => $ffmpeg_convert_video,

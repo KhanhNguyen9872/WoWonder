@@ -21,6 +21,8 @@ if (!empty($_POST['new_password']) && !empty($_POST['email']) && !empty($_POST['
 	// }
 	if (Wo_isValidPasswordResetToken($_POST['code']) === false && Wo_isValidPasswordResetToken2($_POST['code']) === false) {
 		$update = false;
+		$error_code    = 9;
+		$error_message = 'email , code wrong';
 	}
 	if ($update == true) {
 		if (strlen($_POST['new_password']) >= 6) {

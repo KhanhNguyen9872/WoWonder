@@ -22,18 +22,11 @@ if (!empty($_GET['url'])) {
 				<textarea onkeyup="textAreaAdjust(this, 70)" name="postText" class="form-control postText" cols="10" rows="3" placeholder="<?php echo TextForMode('publisher_box_placeholder'); ?>" dir="auto"><?php echo $url; ?></textarea>
 				<!--Add Emojis-->
 				<div class="dropdown add-emoticons">
-					<a href="#" class="dropdown-toggle" type="button" id="dropdownEmo" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+					<a href="#" class="dropdown-toggle" type="button" id="dropdownEmo" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" onclick="load_ajax_publisher_emojii('<?php echo $wo['config']['theme_url'];?>/emoji/');">
 						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="24" height="24" viewBox="0 0 24 24" class="feather feather-emoticons"><path d="M12,23 C5.92486775,23 1,18.0751322 1,12 C1,5.92486775 5.92486775,1 12,1 C18.0751322,1 23,5.92486775 23,12 C23,18.0751322 18.0751322,23 12,23 Z M12,21 C16.9705627,21 21,16.9705627 21,12 C21,7.02943725 16.9705627,3 12,3 C7.02943725,3 3,7.02943725 3,12 C3,16.9705627 7.02943725,21 12,21 Z M15.2746538,14.2978292 L16.9105622,15.4483958 C15.7945475,17.0351773 13.9775544,18 12,18 C10.0224456,18 8.20545254,17.0351773 7.08943782,15.4483958 L8.72534624,14.2978292 C9.4707028,15.3575983 10.6804996,16 12,16 C13.3195004,16 14.5292972,15.3575983 15.2746538,14.2978292 Z M14,11 L14,9 L16,9 L16,11 L14,11 Z M8,11 L8,9 L10,9 L10,11 L8,11 Z" /></svg>
 					</a>
-					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownEmo">
-						<div>
-							<?php  
-							foreach ($wo['emo'] as $code => $name) {
-								$code   = $code;
-								echo  '<span onclick="Wo_AddEmo(\'' . $code . '\',\'#post-textarea textarea\'), Wo_ShowPosInfo();"><i class="pointer twa-lg twa twa-' . $name . '"></i></span>';
-							} 
-							?>
-						</div>
+					<ul class="dropdown-menu dropdown-menu-right publisher-box-emooji" aria-labelledby="dropdownEmo">
+
 					</ul>
 				</div>
 			</div>
@@ -882,13 +875,37 @@ jQuery(document).click(function(event){
         jQuery('.sun_pub_privacy').removeClass('showMenu');
     }
 });
-
+var imgArray = [];
 var deleted_images = [];
 function DeleteImageById(name,id) {
-	deleted_images.push(name);
 	$('#image_to_'+id).remove();
-}
+	imgArray.splice(id, 1);
+	var image_holder = $("#image-holder");
+	image_holder.empty();
 
+	for (var i = 0; i < imgArray.length; i++){
+
+		var reader = new FileReader();
+		var ii = 0;
+		reader.onload = function (e) {
+			name = "'"+imgArray[ii].name+"'";
+		  image_holder.append('<span class="thumb-image-delete" id="image_to_'+ii+'"><span onclick="DeleteImageById('+name+','+ii+')" class="pointer thumb-image-delete-btn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg></span><img src="'+e.target.result+'" class="thumb-image"></span>')
+		  ii = ii +1;
+
+		}
+		image_holder.show();
+    reader.readAsDataURL(imgArray[i]);
+	}
+	$("#publisher-photos")[0].files = new FileListItems(imgArray);
+	if ($('.add_more_images').length == 0) {
+		image_holder.prepend('<span class="wow_prod_imgs add_more_images"><div class="upload-product-image" onclick="document.getElementById(\'publisher-photos\').click(); return false"><div class="upload-image-content"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z"></path></svg></div></div></span>')
+	}
+}
+function FileListItems (files) {
+  var b = new ClipboardEvent("").clipboardData || new DataTransfer()
+  for (var i = 0, len = files.length; i<len; i++) b.items.add(files[i])
+  return b.files
+}
 $(document).ready(function() {
 	$("textarea.postText").keyup(function(){
 		if($(this).val().length > 180){
@@ -908,38 +925,47 @@ $(document).ready(function() {
 		$(this).addClass('selected');
 	});
 	
-	$("#publisher-photos").on('change', function() {
+	$("#publisher-photos").on('change', function(e) {
 		$('#postSticker').val('');
-	deleted_images = [];
-	//Get count of selected files
-	var countFiles = $(this)[0].files.length;
-	var imgPath = $(this)[0].value;
-	var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
-	var image_holder = $("#image-holder");
-	image_holder.empty();
-	if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
-		if (typeof(FileReader) != "undefined") {
-		//loop for each file selected for uploaded.
-		for (var i = 0; i < countFiles; i++) 
-		{
-			var reader = new FileReader();
-			var ii = 0;
-			reader.onload = function(e) {
-				name = "'"+$("#publisher-photos")[0].files[ii].name+"'";
-				 image_holder.append('<span class="thumb-image-delete" id="image_to_'+ii+'"><span onclick="DeleteImageById('+name+','+ii+')" class="pointer thumb-image-delete-btn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg></span><img src="'+e.target.result+'" class="thumb-image"></span>')
-				 ii = ii +1;
-				// $("<img />", {
-    //                 "src": e.target.result,
-    //                 "class": "thumb-image"
-    //               }).appendTo(image_holder);
-                }
-                image_holder.show();
-                reader.readAsDataURL($(this)[0].files[i]);
-              }
-            } else {
-              image_holder.html("<p>This browser does not support FileReader.</p>");
-            }
-         }
+		var imgPath = $(this)[0].value;
+		var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+		var image_holder = $("#image-holder");
+		var countFiles = $(this)[0].files.length;
+		let self = this;
+
+		if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+			if (typeof(FileReader) != "undefined") {
+				for (var i = 0; i < countFiles; i++){
+
+					var reader = new FileReader();
+					
+					imgArray.push($(self)[0].files[i]);
+					if ($("#image-holder .thumb-image-delete").length == 0) {
+						var ii = 0;
+					}
+					else{
+						var ii = $("#image-holder .thumb-image-delete").length;
+					}
+					
+					reader.onload = function (e) {
+						name = "'"+$(self)[0].files[ii].name+"'";
+					  image_holder.append('<span class="thumb-image-delete" id="image_to_'+ii+'"><span onclick="DeleteImageById('+name+','+ii+')" class="pointer thumb-image-delete-btn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg></span><img src="'+e.target.result+'" class="thumb-image"></span>')
+					  ii = ii +1;
+
+					}
+					image_holder.show();
+          reader.readAsDataURL($("#publisher-photos")[0].files[i]);
+				}
+				$("#publisher-photos")[0].files = new FileListItems(imgArray);
+				if ($('.add_more_images').length == 0) {
+					image_holder.prepend('<span class="wow_prod_imgs add_more_images"><div class="upload-product-image" onclick="document.getElementById(\'publisher-photos\').click(); return false"><div class="upload-image-content"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z"></path></svg></div></div></span>')
+				}
+					
+			}
+			else {
+        image_holder.html("<p>This browser does not support FileReader.</p>");
+      }
+		}
 	});
 });
 
@@ -1216,12 +1242,14 @@ $(function () {
       $("#postRecord").val('');
       $("#postSticker").val('');
       if(data.status == 200) {
+      	$("#image-holder").empty();
+      	imgArray = [];
       	$('#user_post_count').text(data.post_count);
 
         if(data.html.length > 0) {
           $('#posts, #posts_hashtag').find('.posts-container').remove();
         }
-        if (data.mention.length > 0 && node_socket_flow == "1") {
+        if (data.mention && data.mention.length > 0 && node_socket_flow == "1") {
 	        $.each(data.mention, function( index, value ) {
 	          socket.emit("user_notification", { to_id: value, user_id: _getCookie("user_id")});
 	        });

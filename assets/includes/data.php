@@ -290,7 +290,7 @@ $wo["footer_pages"]       = array(
     "purchased",
     "orders",
     "order",
-    "checkout"
+    "checkout",
 );
 $wo["css_file_header"]    = "
 <style>

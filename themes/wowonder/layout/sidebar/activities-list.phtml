@@ -3,7 +3,16 @@ $wo['activity']['type_text'] = '';
 $wo['activity']['icon']      = '';
 $post_publisher = '';
 if (!empty($wo['activity']['postData'])) {
-    $post_publisher              = '<a class="second-user-color" data-ajax="?link1=timeline&u=' . $wo['activity']['postData']['publisher']['username'] . '" href="' . $wo['activity']['postData']['publisher']['url'] . '">' . $wo['activity']['postData']['publisher']['name'] . '</a>';
+    if ($wo['config']['shout_box_system'] == 1 && $wo['activity']['postData']['postPrivacy'] == 4) {
+        $post_publisher              = '<a class="second-user-color" href="javascript:void(0)">' . $wo['lang']['anonymous'] . '</a>';
+    }
+    else{
+        $post_publisher              = '<a class="second-user-color" data-ajax="?link1=timeline&u=' . $wo['activity']['postData']['publisher']['username'] . '" href="' . $wo['activity']['postData']['publisher']['url'] . '">' . $wo['activity']['postData']['publisher']['name'] . '</a>';
+    }
+    $replaced_txt                = array(
+    $post_publisher,
+    $wo['activity']['postData']['url']
+);
 }
 
 $orginal_txt                 = array(

@@ -39,8 +39,8 @@ if ($f == 'groups') {
             $re_group_data = array(
                 'group_name' => Wo_Secure($_POST['group_name']),
                 'user_id' => Wo_Secure($wo['user']['user_id']),
-                'group_title' => Wo_Secure($_POST['group_title']),
-                'about' => Wo_Secure($_POST['about']),
+                'group_title' => Wo_Secure($_POST['group_title'],1),
+                'about' => Wo_Secure($_POST['about'],1),
                 'category' => Wo_Secure($_POST['category']),
                 'sub_category' => $sub_category,
                 'privacy' => Wo_Secure($privacy),
@@ -100,9 +100,9 @@ if ($f == 'groups') {
             if (empty($errors)) {
                 $Update_data = array(
                     'website' => $_POST['website'],
-                    'page_description' => $_POST['page_description'],
+                    'page_description' => Wo_Secure($_POST['page_description'],1),
                     'company' => $_POST['company'],
-                    'address' => $_POST['address'],
+                    'address' => Wo_Secure($_POST['address'],1),
                     'phone' => $_POST['phone']
                 );
                 if (Wo_UpdatePageData($_POST['page_id'], $Update_data)) {
@@ -242,10 +242,10 @@ if ($f == 'groups') {
                         }
                         $Update_data = array(
                             'group_name' => $_POST['group_name'],
-                            'group_title' => $_POST['group_title'],
+                            'group_title' => Wo_Secure($_POST['group_title'],1),
                             'category' => $_POST['group_category'],
                             'sub_category' => $sub_category,
-                            'about' => $_POST['about']
+                            'about' => Wo_Secure($_POST['about'],1)
                         );
                         $fields      = Wo_GetCustomFields('group');
                         if (!empty($fields)) {

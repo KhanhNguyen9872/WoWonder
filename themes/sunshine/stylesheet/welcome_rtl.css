@@ -46,6 +46,10 @@ body #welcomeheader .mdbtn {
 	min-width: auto;
 }
 
+body .lang_select_modal .language_info svg {
+    right: auto;left: 0;
+}
+
 
 
 @media (min-width: 800px) {

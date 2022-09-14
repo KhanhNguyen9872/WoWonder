@@ -27,7 +27,7 @@ if (!empty($_GET['user']) && empty($_GET['page'])) {
                         <input type="text" name="query" id="query" onkeyup="Wo_GetMessagesUsers(this.value);" class="form-control" placeholder="<?php echo $wo['lang']['search'];?>" autocomplete="off">
                     </div>
                     <div class="msg_mrk_rd">
-                        <button type="button" class="btn btn-main mark_read" title="<?php echo $wo['lang']['mark_all_as_read'] ?>" onclick="MarkAsReadAll();">
+                        <button type="button" class="btn btn-main mark_read" title="<?php echo $wo['lang']['mark_all_as_read'] ?>" onclick="MarkAsReadAll(this);">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M14,10H2V12H14V10M14,6H2V8H14V6M2,16H10V14H2V16M21.5,11.5L23,13L16,20L11.5,15.5L13,14L16,17L21.5,11.5Z"></path></svg>
                         </button>
                     </div>
@@ -110,7 +110,7 @@ if (!empty($_GET['user']) && empty($_GET['page'])) {
 					</div>
 				</div>
 				<div class="msg_mrk_rd2">
-					<button type="button" class="btn main mark_read" title="<?php echo $wo['lang']['mark_all_as_read'] ?>" onclick="MarkAsReadAll();">
+					<button type="button" class="btn main mark_read" title="<?php echo $wo['lang']['mark_all_as_read'] ?>" onclick="MarkAsReadAll(this);">
 						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M14,10H2V12H14V10M14,6H2V8H14V6M2,16H10V14H2V16M21.5,11.5L23,13L16,20L11.5,15.5L13,14L16,17L21.5,11.5Z"></path></svg>
 					</button>
 				</div>
@@ -180,18 +180,13 @@ if (!empty($_GET['user']) && empty($_GET['page'])) {
 								<div class="text-right charsLeft-message"><span id="charsLeft"></span></div>
 								<span class="message-option-btns">
 									<div class="dropup">
-										<a href="#" class="emo-message dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" >
+										<a href="#" class="emo-message dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" onclick="load_ajax_message_emojii('<?php echo $wo['config']['theme_url'];?>/emoji/');">
 											<span class="btn btn-file">
 												<svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2C6.486,2,2,6.486,2,12s4.486,10,10,10c5.514,0,10-4.486,10-10S17.514,2,12,2z M8.5,8C9.328,8,10,8.896,10,10	s-0.672,2-1.5,2S7,11.104,7,10S7.672,8,8.5,8z M12,18c-1.905,0-3.654-0.874-4.8-2.399l1.599-1.201C9.563,15.417,10.73,16,12,16	c1.27,0,2.436-0.583,3.2-1.601l1.6,1.201C15.653,17.126,13.904,18,12,18z M15.5,12c-0.828,0-1.5-0.896-1.5-2s0.672-2,1.5-2	S17,8.896,17,10S16.328,12,15.5,12z"></path></svg>
 											</span>
 										</a>
 										<div class="emo-message-container dropdown-menu mobileemojisnd dropdown-menu-right" role="menu" style="width: 100px">
-											<?php  
-												foreach ($wo['emo'] as $code => $name) {
-												$code   = $code;
-												echo  '<span style="float: left" onclick="Wo_AddEmoToMessageInput(\'' . $code . '\');"><i class="pointer twa-lg twa twa-' . $name . '"></i></span>'; 
-												} 
-											?>
+
 										</div>
 									</div>
 
@@ -493,10 +488,23 @@ function Wo_ChatSticker(self){
 
 
 
-function MarkAsReadAll() {
+function MarkAsReadAll(self) {
+	$(self).html('<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid"><rect x="0" y="0" width="25" height="25" fill="none" class="bk"></rect><circle cx="50" cy="50" r="40" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round"><animate attributeName="stroke-dashoffset" dur="1.5s" repeatCount="indefinite" from="0" to="502"></animate><animate attributeName="stroke-dasharray" dur="1.5s" repeatCount="indefinite" values="150.6 100.4;1 250;150.6 100.4"></animate></circle></svg>');
 	$.post(Wo_Ajax_Requests_File() + '?f=mark_as_read', function(data, textStatus, xhr) {
-		Wo_UpdateUsers();
-		Wo_intervalUpdates();
+		if (data.status == 200) {
+			$('.messages-notification-container').find('.new-update-alert').hide();
+	        $('.messages-notification-container').find('.sixteen-font-size').removeClass('unread-update');
+	        $('.messages-notification-container').find('.new-update-alert').text(0);
+	        $('.messages-notification-container').find('.new-update-alert').attr('data_messsages_count', 0);
+			Wo_UpdateUsers();
+			Wo_intervalUpdates();
+			setTimeout(function () {
+				$(self).html('<svg width="20" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve"> <circle style="fill:currentColor" cx="25" cy="25" r="25"/> <polyline style="fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" points=" 38,15 22,33 12,25 "/> </svg>');
+				setTimeout(function () {
+					$(self).html('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M14,10H2V12H14V10M14,6H2V8H14V6M2,16H10V14H2V16M21.5,11.5L23,13L16,20L11.5,15.5L13,14L16,17L21.5,11.5Z"></path></svg>');
+				},1000);
+			},1000);
+		}
 	});
 }
 $(document).on('click','.mobileopenlist',function(){
@@ -1390,7 +1398,7 @@ function Wo_getNewMessages() {
         }
         if(data.status == 200) {
           if(!$(".messages-container").find(".no-messages").length){
-            if(+user_id === +data.sender || (data.self && (+data.id === +user_id))){
+            if(+user_id === +data.sender || ((+data.id === +user_id))){
               $('.message-contnaier:last').find('.message-typing').empty()
               $(".messages-container").append(data.html);
               setTimeout(function(){

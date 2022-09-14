@@ -87,9 +87,6 @@ if ($f == 'paystack') {
                 $result = json_decode($request, true);
                 if (!empty($result)) {
                     if (!empty($result['status']) && $result['status'] == 1 && !empty($result['data']) && !empty($result['data']['authorization_url']) && !empty($result['data']['access_code'])) {
-                        $db->where('user_id', $wo['user']['id'])->update(T_USERS, array(
-                            'paystack_ref' => $reference
-                        ));
                         $data['status'] = 200;
                         $data['url']    = $result['data']['authorization_url'];
                     } else {

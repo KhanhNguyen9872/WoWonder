@@ -895,10 +895,10 @@ function Wo_ShareChatFile(id) {
    <?php } ?>
 }
 
-function Wo_AddEmoToChat(code, id) {
+function Wo_AddEmoToChat(id, code) {
     inputTag = $('.chat-sending-form-'+ id +' textarea');
     inputVal = inputTag.val();
-    //$('.emo-container').hide();
+    $('.emo-container').hide();
     if (typeof(inputTag.attr('placeholder')) != "undefined") {
         inputPlaceholder = inputTag.attr('placeholder');
         if (inputPlaceholder == inputVal) {
@@ -914,12 +914,31 @@ function Wo_AddEmoToChat(code, id) {
     inputTag.keyup().focus();
 }
 
-function Wo_AddEmoToGroup(code, id,type = '') {
-	inputTag = $('.group-chat-sending-'+ id +' textarea');
-	if (type == 'page') {
+function Wo_AddEmoToGroup(id, code,type = '') {
+    inputTag = $('.group-chat-sending-'+ id +' textarea');
+    if (type == 'page') {
 		inputTag = $('.page-chat-sending-'+ id +' textarea');
 	}
-    
+    inputVal = inputTag.val();
+    $('.emo-container').hide();
+    if (typeof(inputTag.attr('placeholder')) != "undefined") {
+        inputPlaceholder = inputTag.attr('placeholder');
+        if (inputPlaceholder == inputVal) {
+            inputTag.val('');
+            inputVal = inputTag.val();
+        }
+    }
+    if (inputVal.length == 0) {
+        inputTag.val(code + ' ');
+    } else {
+        inputTag.val(inputVal + ' ' + code);
+    }
+    inputTag.keyup().focus();
+}
+
+function Wo_AddEmoToPage(id, code) {
+	inputTag = $('.page-chat-sending-'+ id +' textarea');
+
     inputVal = inputTag.val();
     $('.emo-container').hide();
     if (typeof(inputTag.attr('placeholder')) != "undefined") {

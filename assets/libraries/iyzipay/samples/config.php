@@ -4,7 +4,7 @@ require_once(dirname(__DIR__).'/IyzipayBootstrap.php');
 IyzipayBootstrap::init();
 $url = 'https://sandbox-api.iyzipay.com';
 if ($wo['config']['iyzipay_mode'] == '0') {
-	$url = 'https://merchant.iyzipay.com';
+	$url = 'https://api.iyzipay.com';
 }
 
 class IyzipayConfig

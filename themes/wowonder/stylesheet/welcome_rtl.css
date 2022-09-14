@@ -5,6 +5,10 @@
 .terms label{padding-right: 30px;}
 .terms label::before{left: auto;right: 0;}
 
+body .lang_select_modal .language_info svg {
+    right: auto;left: 0;
+}
+
 @media (max-width:930px) {
 .login {flex-direction: column;}
 }

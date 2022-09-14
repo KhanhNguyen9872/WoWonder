@@ -5,14 +5,12 @@
 		</div>
 	</div>
 	<li>
-		<div class="sidebar-groups-container">
-			<?php 
+		<div class="sidebar-groups-container list-sidebar-element"><?php 
 			foreach (Wo_GetUsersGroups($wo['user_profile']['user_id'], 9, array('in' => 'profile_sidebar', 'groups_data' => $wo['user_profile']['groups_data'])) as $wo['GroupList']) {
-				$wo['GroupList']['name'] = mb_substr($wo['GroupList']['name'], 0, 10, "utf-8");
+				$wo['GroupList']['name'] = $wo['GroupList']['name'];
 				echo Wo_LoadPage('sidebar/sidebar-groups-list');
 			}
-			?>
-		</div>
+			?></div>
 	</li>
 	<li><div class="clear"></div></li>
 </ul>

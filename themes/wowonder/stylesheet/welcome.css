@@ -21,7 +21,7 @@ footer:empty{padding:0}
 .login_left_combo > .img {margin-top: auto;border: 16px solid rgb(255 255 255 / 64%);border-radius: 40px 40px 0 0;border-bottom: 0;}
 .login_left_combo > .img img {width: 100%;border-radius: 20px 20px 0 0;aspect-ratio: 1;object-fit: cover;}
 
-.login_innre {display: -webkit-box;display: -moz-box;display: -ms-flexbox;display: -webkit-flex;display: flex;-webkit-flex-direction: column;flex-direction: column;min-height: calc(100% - 40px);}
+.login_innre {display: -webkit-box;display: -moz-box;display: -ms-flexbox;display: -webkit-flex;display: flex;-webkit-flex-direction: column;flex-direction: column;min-height: calc(100% - 60px);}
 .login_innre:after,.login_innre:before {-webkit-box-flex: 1;box-flex: 1;-webkit-flex-grow: 1;flex-grow: 1;content: '';display: block;height: 24px}
 
 .terms,.terms label,.user-image,.users-profiles{position:relative}
@@ -189,6 +189,53 @@ svg {vertical-align: middle;}
 .send_again .btn::before {
     opacity: 0.15;
 }
+
+
+/*Language Select*/
+.lang_select_modal .language_info {
+	height: 100%;
+    position: relative;
+    padding: 30px;
+    background: linear-gradient(90deg, #4caf50, transparent 90%);
+    border-radius: max(0px, min(8px, calc((100vw - 4px - 100%) * 9999))) / 8px;
+}
+.lang_select_modal .language_info h3 {
+	margin: 0 0 4px;
+    color: #fff;
+    line-height: 1;
+}
+.lang_select_modal .language_info svg {
+	    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin-bottom: -15px;
+    height: auto;
+    width: 90px;
+}
+.lang_select_modal ul {
+	padding: 24px 0 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    overflow: hidden;
+}
+.lang_select_modal .language_select {
+	flex: 1 1 160px;margin: 0 0 -1px;
+}
+.lang_select_modal .language_select a {
+	display: block;
+    text-decoration: none;
+    font-size: 15px;
+    line-height: 46px;
+    padding: 0 20px;
+    transition: background-color .1s;
+    border: 1px solid #d7d7d7;
+    margin: 0px -1px;
+    border-top: 0;
+    border-left: 0;
+}
+.lang_select_modal .language_select:hover {background-color: rgb(0 0 0 / 3%) !important;}
 
 
 

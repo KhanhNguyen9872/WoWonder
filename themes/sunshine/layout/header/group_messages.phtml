@@ -10,7 +10,7 @@ if (!empty($messages) && !empty($messages[0])) {
 }
 $unread_class = '';
 if (!empty($message) && isset($message['time']) && isset($message['from_id']) && $message['from_id'] != $wo['user']['id']) {
-   if ($message['time'] > $wo['user']['lastseen']) {
+   if ($message['time'] > $message['chat_data']['last_seen']) {
        $unread_class = ' unread';
    }
 }

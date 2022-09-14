@@ -32,7 +32,7 @@ if ($f == 'cashfree') {
 		    if ($type == 'wallet') {
 		    	if (!empty($_POST['amount']) && is_numeric($_POST['amount']) && $_POST['amount'] > 0) {
 		    		$price = $_POST['amount'];
-		    		$callback_url = $wo['config']['site_url'] . "/requests.php?f=cashfree&s=wallet&amount=".$price;
+		    		$callback_url = $wo['config']['site_url'] . "/requests.php?f=cashfree&s=wallet&amount=".$price."&user_id=".$wo['user']['user_id'];
 		    	}
 		    	else{
 		    		$data['status'] = 400;
@@ -284,40 +284,48 @@ if ($f == 'cashfree') {
     }
 
     if ($s == 'wallet') {
-    	if (empty($_POST['txStatus']) || $_POST['txStatus'] != 'SUCCESS') {
+    	if (empty($_POST['txStatus']) || $_POST['txStatus'] != 'SUCCESS' || empty($_GET['user_id']) || !is_numeric($_GET['user_id'])) {
     		header("Location: " . Wo_SeoLink('index.php?link1=oops'));
 	        exit();
     	}
-    	$orderId = $_POST["orderId"];
-		$orderAmount = $_POST["orderAmount"];
-		$referenceId = $_POST["referenceId"];
-		$txStatus = $_POST["txStatus"];
-		$paymentMode = $_POST["paymentMode"];
-		$txMsg = $_POST["txMsg"];
-		$txTime = $_POST["txTime"];
-		$signature = $_POST["signature"];
-		$data = $orderId.$orderAmount.$referenceId.$txStatus.$paymentMode.$txMsg.$txTime;
-		$hash_hmac = hash_hmac('sha256', $data, $wo['config']['cashfree_secret_key'], true) ;
-		$computedSignature = base64_encode($hash_hmac);
-		if ($signature == $computedSignature) {
-            if (Wo_ReplenishingUserBalance($_GET['amount'])) {
-                $_GET['amount'] = Wo_Secure($_GET['amount']);
-                $create_payment_log = mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ('" . $wo['user']['id'] . "', 'WALLET', '" . $_GET['amount'] . "', 'Cashfree')");
-                $_SESSION['replenished_amount'] = $_GET['amount'];
-                if (!empty($_COOKIE['redirect_page'])) {
-                	$redirect_page = preg_replace('/on[^<>=]+=[^<>]*/m', '', $_COOKIE['redirect_page']);
-				    $redirect_page = preg_replace('/\((.*?)\)/m', '', $redirect_page);
-                	header("Location: " . $redirect_page);
-                }
-                else{
-                	header("Location: " . Wo_SeoLink('index.php?link1=wallet'));
-                }
-                exit();
-            } else {
-                header("Location: " . Wo_SeoLink('index.php?link1=wallet'));
-                exit();
-            }
-        } else {
+    	$wo['user'] = Wo_UserData(Wo_Secure($_GET["user_id"]));
+		if (!empty($wo['user'])) {
+
+	    	$orderId = $_POST["orderId"];
+			$orderAmount = $_POST["orderAmount"];
+			$referenceId = $_POST["referenceId"];
+			$txStatus = $_POST["txStatus"];
+			$paymentMode = $_POST["paymentMode"];
+			$txMsg = $_POST["txMsg"];
+			$txTime = $_POST["txTime"];
+			$signature = $_POST["signature"];
+			$data = $orderId.$orderAmount.$referenceId.$txStatus.$paymentMode.$txMsg.$txTime;
+			$hash_hmac = hash_hmac('sha256', $data, $wo['config']['cashfree_secret_key'], true) ;
+			$computedSignature = base64_encode($hash_hmac);
+			if ($signature == $computedSignature) {
+				$wo["loggedin"] = true;
+	            if (Wo_ReplenishingUserBalance($_GET['amount'])) {
+	                $_GET['amount'] = Wo_Secure($_GET['amount']);
+	                $create_payment_log = mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ('" . $wo['user']['id'] . "', 'WALLET', '" . $_GET['amount'] . "', 'Cashfree')");
+	                $_SESSION['replenished_amount'] = $_GET['amount'];
+	                if (!empty($_COOKIE['redirect_page'])) {
+	                	$redirect_page = preg_replace('/on[^<>=]+=[^<>]*/m', '', $_COOKIE['redirect_page']);
+					    $redirect_page = preg_replace('/\((.*?)\)/m', '', $redirect_page);
+	                	header("Location: " . $redirect_page);
+	                }
+	                else{
+	                	header("Location: " . Wo_SeoLink('index.php?link1=wallet'));
+	                }
+	                exit();
+	            } else {
+	                header("Location: " . Wo_SeoLink('index.php?link1=wallet'));
+	                exit();
+	            }
+	        } else {
+	            header("Location: " . Wo_SeoLink('index.php?link1=wallet'));
+	            exit();
+	        }
+	    } else {
             header("Location: " . Wo_SeoLink('index.php?link1=wallet'));
             exit();
         }

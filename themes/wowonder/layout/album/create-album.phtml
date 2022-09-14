@@ -17,7 +17,7 @@
 						<input id="album_name" name="album_name" type="text" value="<?php echo $wo['album']['album_name'];?>">
 						<span class="help-block"><?php echo $wo['lang']['album_name_help'] ?></span>
 					</div>
-					<div class="wow_form_fields">
+					<div class="wow_form_fields"  data-block="thumdrop-zone">
 						<label><?php echo $wo['lang']['photos'];?></label>
 						<div class="wow_fcov_image">
 							<div id="productimage-holder">
@@ -25,7 +25,7 @@
 							</div>
 							<div class="upload_ad_image" onclick="document.getElementById('publisher-photos').click(); return false">
 								<div class="upload_ad_image_content">
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M8.5,13.5L11,16.5L14.5,12L19,18H5M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19Z"></path></svg> <?php echo $wo['lang']['choose_image'] ?>
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M8.5,13.5L11,16.5L14.5,12L19,18H5M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19Z"></path></svg> <?php echo $wo['lang']['drop_img_here'] ?> <?php echo $wo['lang']['or']; ?> <?php echo $wo['lang']['browse_to_upload']; ?>
 								</div>
 							</div>
 						</div>
@@ -59,6 +59,40 @@
 </div>
 
 <script type="text/javascript">
+jQuery(document).ready(function($) {
+    var thumb_drop_block = $("[data-block='thumdrop-zone']");
+
+    if (typeof(window.FileReader) == 'undefined') {
+      thumb_drop_block.find('.upload_ad_image_content').text('Drag drop is not supported in your browser!');
+    }
+    else{
+      thumb_drop_block[0].ondragover = function() {
+          thumb_drop_block.addClass('hover');
+          return false;
+      };
+          
+      thumb_drop_block[0].ondragleave = function() {
+          thumb_drop_block.removeClass('hover');
+          return false;
+      };
+
+      thumb_drop_block[0].ondrop = function(event) {
+          event.preventDefault();
+          var product_image_holder = $("#productimage-holder");
+					product_image_holder.find('img').remove();
+
+          thumb_drop_block.removeClass('hover');
+          var file = event.dataTransfer.files;
+          for (var i = file.length - 1; i >= 0; i--) {
+          	product_image_holder.append("<img src='" + window.URL.createObjectURL(file[i]) + "' alt='Picture' class='thumb-image'>")
+          }
+
+          $("#publisher-photos").prop('files', file);
+          $("#photo-form input").val(file.length + ' file(s) selected');
+          $("#photo-form").slideDown(200);
+      };
+    }
+  });
 $(document).ready(function() {
 	$("#publisher-photos").on('change', function() {
 	//Get count of selected files

@@ -333,7 +333,7 @@ module.exports.chatListOwnerTrueWithMedia = async (ctx, data, fromUser, nextId, 
     });
     reactions_info_html = await funcs.Wo_GetPostReactions(ctx,nextId,'message');
     var file_size = "0MB";
-    if (ctx.globalconfig['amazone_s3'] != 1 && ctx.globalconfig['wasabi_storage'] != 1 && ctx.globalconfig['spaces'] != 1 && ctx.globalconfig['ftp_upload'] != 1 && ctx.globalconfig['cloud_upload'] != 1) {
+    if (ctx.globalconfig['amazone_s3'] != 1 && ctx.globalconfig['wasabi_storage'] != 1 && ctx.globalconfig['spaces'] != 1 && ctx.globalconfig['ftp_upload'] != 1 && ctx.globalconfig['cloud_upload'] != 1 && ctx.globalconfig['backblaze_storage'] != 1) {
         var current_message = await funcs.Wo_GetMessageByID(ctx,data.mediaId);
         if (current_message && current_message != undefined && current_message.media && current_message.media != undefined) {
             s = fs.statSync(path.resolve(__dirname, '../../'+current_message.media));
@@ -432,7 +432,7 @@ module.exports.chatListOwnerFalseWithMedia = async (ctx, data, fromUser, nextId,
     });
     reactions_info_html = await funcs.Wo_GetPostReactions(ctx,nextId,'message');
     var file_size = "0MB";
-    if (ctx.globalconfig['amazone_s3'] != 1 && ctx.globalconfig['wasabi_storage'] != 1 && ctx.globalconfig['spaces'] != 1 && ctx.globalconfig['ftp_upload'] != 1 && ctx.globalconfig['cloud_upload'] != 1) {
+    if (ctx.globalconfig['amazone_s3'] != 1 && ctx.globalconfig['wasabi_storage'] != 1 && ctx.globalconfig['spaces'] != 1 && ctx.globalconfig['ftp_upload'] != 1 && ctx.globalconfig['cloud_upload'] != 1 && ctx.globalconfig['backblaze_storage'] != 1) {
         var current_message = await funcs.Wo_GetMessageByID(ctx,data.mediaId);
         if (current_message && current_message != undefined && current_message.media && current_message.media != undefined) {
             s = fs.statSync(path.resolve(__dirname, '../../'+current_message.media));
@@ -648,7 +648,7 @@ module.exports.messageListOwnerTrueWithMedia = async (ctx, data, fromUser, messa
         }
     }
     var file_size = "0MB";
-    if (ctx.globalconfig['amazone_s3'] != 1 && ctx.globalconfig['wasabi_storage'] != 1 && ctx.globalconfig['spaces'] != 1 && ctx.globalconfig['ftp_upload'] != 1 && ctx.globalconfig['cloud_upload'] != 1) {
+    if (ctx.globalconfig['amazone_s3'] != 1 && ctx.globalconfig['wasabi_storage'] != 1 && ctx.globalconfig['spaces'] != 1 && ctx.globalconfig['ftp_upload'] != 1 && ctx.globalconfig['cloud_upload'] != 1 && ctx.globalconfig['backblaze_storage'] != 1) {
         var current_message = await funcs.Wo_GetMessageByID(ctx,data.mediaId);
         if (current_message && current_message != undefined && current_message.media && current_message.media != undefined) {
             s = fs.statSync(path.resolve(__dirname, '../../'+current_message.media));
@@ -868,7 +868,7 @@ module.exports.messageListOwnerFalseWithMedia = async (ctx, data, message, fromU
         }
     }
     var file_size = "0MB";
-    if (ctx.globalconfig['amazone_s3'] != 1 && ctx.globalconfig['wasabi_storage'] != 1 && ctx.globalconfig['spaces'] != 1 && ctx.globalconfig['ftp_upload'] != 1 && ctx.globalconfig['cloud_upload'] != 1) {
+    if (ctx.globalconfig['amazone_s3'] != 1 && ctx.globalconfig['wasabi_storage'] != 1 && ctx.globalconfig['spaces'] != 1 && ctx.globalconfig['ftp_upload'] != 1 && ctx.globalconfig['cloud_upload'] != 1 && ctx.globalconfig['backblaze_storage'] != 1) {
         var current_message = await funcs.Wo_GetMessageByID(ctx,data.mediaId);
         if (current_message && current_message != undefined && current_message.media && current_message.media != undefined) {
             s = fs.statSync(path.resolve(__dirname, '../../'+current_message.media));

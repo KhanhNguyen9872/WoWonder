@@ -61,11 +61,11 @@ h3.recommended-movies{width: 100%;margin-left: 0px;	padding-left: 9px;font-size:
 .movies .movies-inner .movies-film-wrapper {padding: 0 6px;width: 20%;margin-bottom: 15px;}
 .movies .movies-inner .empty_state {width: 100%;}
 .movies .movies-film-wrapper figure{position: relative;width: 100%;	height: 100%;margin-bottom: 20px;}
-.movies .movies-film-wrapper figure h3{	font-size: 16px;display: block;padding: 0px 5px 0px 0px;margin: 4px 0px 7px;width: 100%;font-weight: bold;font-family: lato;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align: center;}
-.movies .movies-film-wrapper figure h3 a{text-decoration:none;color: inherit}
-.movies .movies-film-wrapper figure p{text-transform: capitalize;margin: -4px 0px 5px;text-align: center;}
-.movies .movies-film-wrapper figure img{width: 100%;aspect-ratio: 0.67;box-shadow: 0 4px 10px 0px rgb(50 50 50 / 18%);margin-bottom: 10px;border-radius: 8px;transition: all 0.2s ease;}
-.movies .movies-film-wrapper:hover figure img {transform: translateY(-3px);}
+.movies .movies-film-wrapper figure h3, .related-movies-wrapper .related-movies-carousel .related-film-wrapper h3 {	font-size: 16px;display: block;padding: 0px 5px 0px 0px;margin: 4px 0px 7px;width: 100%;font-weight: bold;font-family: lato;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align: center;}
+.movies .movies-film-wrapper figure h3 a, .related-movies-wrapper .related-movies-carousel .related-film-wrapper h3 a {text-decoration:none;color: inherit}
+.movies .movies-film-wrapper figure p, .related-movies-wrapper .related-movies-carousel .related-film-wrapper p {text-transform: capitalize;margin: -4px 0px 5px;text-align: center;}
+.movies .movies-film-wrapper figure img, .related-movies-wrapper .related-movies-carousel .related-film-wrapper img {width: 100%;aspect-ratio: 0.67;box-shadow: 0 4px 10px 0px rgb(50 50 50 / 18%);margin-bottom: 10px;border-radius: 8px;transition: all 0.2s ease;}
+.movies .movies-film-wrapper:hover figure img, .related-movies-wrapper .related-movies-carousel .related-film-wrapper:hover img {transform: translateY(-3px);}
 .movies .movies-film-wrapper figure .movie_rating_sml {
 	    display: flex;
     position: absolute;
@@ -114,9 +114,6 @@ h3.recommended-movies{width: 100%;margin-left: 0px;	padding-left: 9px;font-size:
 .related-movies-wrapper .related-movies-carousel{width: 100%;overflow: hidden;}
 .related-movies-wrapper .related-movies-carousel .related-film-wrapper{margin-top: 15px; overflow: hidden;	background-color: #fff;	padding-bottom: 5px;position: relative;	width: 185px;margin-right: 10px;padding: 0px 10px;outline: 0;}
 .related-movies-wrapper .related-movies-carousel .related-film-wrapper:hover{cursor: move;}
-.related-movies-wrapper .related-movies-carousel .related-film-wrapper img{	width: 100%;}
-.related-movies-wrapper .related-movies-carousel .related-film-wrapper h4{font-family: OpenSansRegular,Arial;font-size: 12px;color: #222D34;padding-left: 5px;}
-.related-movies-wrapper .related-movies-carousel .related-film-wrapper span{font-family: OpenSansLight,Arial;color: #757A7D;font-size: 13px;padding-left: 5px;}
 .played-film-details{width: 100%;overflow: hidden;}
 .played-film-details ul{padding-left: 0;}
 .played-film-details p{font-size: 15px;line-height: 25px;}
@@ -152,6 +149,52 @@ h3.recommended-movies{width: 100%;margin-left: 0px;	padding-left: 9px;font-size:
 .wow_movie_infos .mve_thmb img {position: absolute;top: 0;right:0;left:0;bottom:0;width: 100%;height: 100%;border-radius: 5px;}
 .wow_movie_infos .mve_nfo {padding-left: 20px;}
 .wow_moviecontent .wo_page_hdng_innr {font-weight: 500;}
+
+.movies-comment-item-body {
+	margin-left: 55px;
+}
+.movies-com-wrapper .movies-comlist-container .movies-comment-item .movies-comment-item-body div.comment-heading {
+	display: inline-block;
+    background: #f0f2f5;
+    border-radius: 0px 20px 20px 20px;
+    padding: 12px 16px;
+    margin-left: 0;
+    max-width: calc(100% - 70px);
+}
+.movies-com-wrapper .movies-comlist-container .movies-comment-item .movies-comment-item-body div.comment-heading .user {
+    font-size: 14.5px;
+    font-weight: 700;
+    margin: 0 0 5px;
+    display: inline-block;
+}
+.movies-com-wrapper .movies-comlist-container .movies-comment-item .comment-text, .movies-com-wrapper .movies-comlist-container .movies-comment-item .reply-text {
+	width: 100%;
+}
+.movies-com-wrapper .movies-comlist-container .movies-comment-item .movies-comment-item-body .comment-icons {
+	font-size: 12px;margin: 4px 2px 0;
+}
+
+/*Movie Popcorn*/
+.wo_wtch_mv_pcrn {
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    opacity: 0.6;
+    pointer-events: none;
+}
+.wo_wtch_mv_pcrn.pcrn3 {
+    left: -50px;
+    bottom: 0;
+    transform: rotate(30deg);
+}
+.wo_wtch_mv_pcrn.pcrn4 {
+    right: -50px;
+    bottom: 0px;
+    transform: rotate(-30deg);
+}
+
+
+
 
 
 

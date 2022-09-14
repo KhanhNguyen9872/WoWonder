@@ -1,9 +1,14 @@
 <?php 
-if (!isset($_GET['film-id']) || !is_numeric($_GET['film-id']) || $wo['config']['movies'] == 0 || !$wo['config']['can_use_movies']) {
+if (!isset($_GET['film-id']) || $wo['config']['movies'] == 0 || !$wo['config']['can_use_movies']) {
   header("Location: " . Wo_SeoLink('index.php?link1=welcome'));
   exit();
 }
 $id = Wo_Secure($_GET['film-id']);
+$id = Wo_GetPostIdFromUrl($id);
+if (empty($id) || !is_numeric($id)) {
+    header("Location: " . $wo['config']['site_url']);
+    exit();
+}
 $source = Wo_GetMovies(array('id' => $id));
 if (count($source) > 0) {
 	$query = mysqli_query($sqlConnect, "UPDATE " . T_MOVIES . " SET views = views + 1 WHERE id = '$id'");

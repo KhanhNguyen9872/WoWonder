@@ -27,7 +27,7 @@
 				</div>
 			</div>
 			<div class="col-md-5">
-				<div class="wow_form_fields">
+				<div class="wow_form_fields page_sub_category_c" style="<?php echo (!empty($wo['group_sub_categories'][array_keys($wo['group_categories'])[0]]) ? '' : 'display: none;'); ?>">
 					<label for="group_sub_category"><?php echo $wo['lang']['sub_category'] ?></label>
 					<select id="group_sub_category" name="group_sub_category">
 						<?php
@@ -81,8 +81,10 @@ echo "var sub_categories_array = ". $js_array . ";\n";
 		var text = "";
 		if (typeof(sub_categories_array[id]) == 'undefined') {
 		    $('#group_sub_category').html('');
+		    $('.page_sub_category_c').slideUp();
 		}
 		else{
+			$('.page_sub_category_c').slideDown();
 		   	sub_categories_array[id].forEach(function(entry) {
 				text = text + "<option value='"+entry.id+"'>"+entry.lang+"</option>";
 			});

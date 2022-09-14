@@ -27,6 +27,8 @@
 			</ul>
 			<p><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="#ffc000" d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z" /></svg> <?php echo round($wo['movie']['rating'],1); ?> <span class="middot">·</span> <?php echo $wo['movie']['duration']; ?> min <span class="middot">·</span> <?php echo strtoupper($wo['movie']['release']); ?></p>
 		</div>
+		<img class="wo_wtch_mv_pcrn pcrn3" src="<?php echo $wo['config']['theme_url'];?>/img/popcorn5.svg">
+		<img class="wo_wtch_mv_pcrn pcrn4" src="<?php echo $wo['config']['theme_url'];?>/img/popcorn4.svg">
 	</div>
 
 	<div class="wow_main_blogs_bg"></div>
@@ -96,22 +98,40 @@
 					<div class="film-player-wrapper">
 						<?php if (!empty($wo['movie']['source'])): ?>
 							<div class="video-js-responsive-container vjs-hd">
-								<video class="video-js vjs-big-play-centered" controls preload="auto" style="width: 100%; height: 100%;">
+								<video class="plyrr-movie" preload="auto">
 									<source src="<?php echo $wo['movie']['source']; ?>" type='video/mp4'>
 									<source src="<?php echo $wo['movie']['source']; ?>" type='video/webm'>
 								</video>
 							</div>
+							<script>
+								var wovideo = '.plyrr-movie';
+								var players = Plyr.setup(wovideo, {
+									ratio: '16:9',
+									fullscreen: {
+										iosNative: true
+									}
+								});
+							</script>
 						<?php elseif(!empty($wo['movie']['iframe'])): ?>
 							<div class="watch_player_movie">
 								<iframe src="<?php echo $wo['movie']['iframe']; ?>" frameborder="0"></iframe>
 							</div>
 						<?php else: ?>
 							<div class="video-js-responsive-container vjs-hd">
-								<video style="width: 100%; height: 100%;" class="video-js vjs-big-play-centered" controls preload="auto">
+								<video class="plyrr-movie" preload="auto">
 									<source src="<?php echo $wo['movie']['video']; ?>" type='video/mp4'>
 									<source src="<?php echo $wo['movie']['video']; ?>" type='video/webm'>
 								</video>
 							</div>
+							<script>
+								var wovideo = '.plyrr-movie';
+								var players = Plyr.setup(wovideo, {
+									ratio: '16:9',
+									fullscreen: {
+										iosNative: true
+									}
+								});
+							</script>
 						<?php endif; ?>
 					</div>
 

@@ -87,7 +87,7 @@ RewriteRule ^blog-category/(\d+)(/?|)$ index.php?link1=blog-category&id=$1 [NC,Q
 RewriteRule ^create-blog(/?|)$ index.php?link1=create-blog [NC,QSA]
 RewriteRule ^edit-blog/(\d+)(/?|)$ index.php?link1=edit-blog&id=$1 [NC,QSA]
 RewriteRule ^my-blogs(/?|)$ index.php?link1=my-blogs [NC,QSA]
-RewriteRule ^read-blog/(.*)$ index.php?link1=read-blog&id=$1 [NC,QSA]
+RewriteRule ^read-blog/(.*)(/?|)$ index.php?link1=read-blog&id=$1 [NC,QSA]
 RewriteRule ^app_api(/?|)$ index.php?link1=app_api [NC,QSA]
 RewriteRule ^api_request(/?|)$ index.php?link1=app_api [NC,QSA]
 RewriteRule ^authorize(/?|)$ index.php?link1=authorize [NC,QSA]
@@ -153,7 +153,7 @@ RewriteRule ^events/(\d+)(/?|)$ index.php?link1=show-event&eid=$1 [NC,QSA]
 RewriteRule ^movies(/?|)$ index.php?link1=movies [NC,QSA]
 RewriteRule ^movies/genre/([A-Za-z-]+)(/?|)$ index.php?link1=movies-genre&genre=$1 [NC,QSA]
 RewriteRule ^movies/country/([A-Za-z-]+)(/?|)$ index.php?link1=movies-country&country=$1 [NC,QSA]
-RewriteRule ^movies/watch/(\d+)(/?|)$ index.php?link1=watch-film&film-id=$1 [NC,QSA]
+RewriteRule ^movies/watch/(.*)(/?|)$ index.php?link1=watch-film&film-id=$1 [NC,QSA]
 
 # *** ADS ***
 RewriteRule ^ads(/?|)$ index.php?link1=ads [NC,QSA]

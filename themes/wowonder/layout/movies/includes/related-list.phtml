@@ -1,9 +1,8 @@
 <div class="related-film-wrapper">
-	<img src="<?php echo $wo['filmInfo']['cover']; ?>" alt="">
 	<a href="<?php echo $wo['filmInfo']['url']; ?>">
-		<h4>
-		<?php echo $wo['filmInfo']['name']; ?>
-		</h4>
+		<img src="<?php echo $wo['filmInfo']['cover']; ?>" alt="" class="responsive-img">
 	</a>
-	<span><?php echo $wo['filmInfo']['release']; ?></span>
+	
+	<h3 title="<?php echo $wo['filmInfo']['name']; ?>"><a href="<?php echo $wo['filmInfo']['url']; ?>"><?php echo $wo['filmInfo']['name']; ?></a></h3>
+	<p><?php echo $wo['filmInfo']['release']; ?></p>
 </div>

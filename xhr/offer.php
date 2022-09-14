@@ -109,7 +109,7 @@ if ($f == 'offer' && $wo['config']['offer_system'] == 1) {
                         'discount_percent' => $discount_percent,
                         'spend' => $spend,
                         'amount_off' => $amount_off,
-                        'description' => Wo_Secure($_POST['description']),
+                        'description' => Wo_Secure($_POST['description'],1),
                         'expire_date' => Wo_Secure($_POST['expire_date']),
                         'expire_time' => Wo_Secure($_POST['expire_time']),
                         'discounted_items' => Wo_Secure($_POST['discounted_items']),
@@ -120,7 +120,7 @@ if ($f == 'offer' && $wo['config']['offer_system'] == 1) {
                         'time' => time()
                     ));
                     // $description = mb_substr(Wo_Secure($_POST['description']), 0, 175, "UTF-8") . "...";
-                    $description = Wo_Secure($_POST['description']);
+                    $description = Wo_Secure($_POST['description'],1);
                     $post_id     = $db->insert(T_POSTS, array(
                         'page_id' => $page_data->page_id,
                         'postText' => $description,
@@ -253,7 +253,7 @@ if ($f == 'offer' && $wo['config']['offer_system'] == 1) {
                         $data['error'] = $error_icon . $wo['lang']['discounted_items_less'];
                     }
                     if (empty($data['error'])) {
-                        $description    = mb_substr(Wo_Secure($_POST['description']), 0, 175, "UTF-8") . "...";
+                        $description    = mb_substr(Wo_Secure($_POST['description'],1), 0, 175, "UTF-8") . "...";
                         $offer_id       = $db->where('id', $offer_id)->update(T_OFFER, array(
                             'discount_type' => $discount_type,
                             'buy' => $buy,
@@ -262,7 +262,7 @@ if ($f == 'offer' && $wo['config']['offer_system'] == 1) {
                             'discount_percent' => $discount_percent,
                             'spend' => $spend,
                             'amount_off' => $amount_off,
-                            'description' => Wo_Secure($_POST['description']),
+                            'description' => Wo_Secure($_POST['description'],1),
                             'discounted_items' => Wo_Secure($_POST['discounted_items'])
                         ));
                         $post_id        = $db->where('offer_id', $offer_id)->update(T_POSTS, array(

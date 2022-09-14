@@ -2,8 +2,8 @@
 if ($f == 'reports') {
     if ($s == 'report_user' && isset($_POST['user']) && is_numeric($_POST['user'])) {
         $user = Wo_Secure($_POST['user']);
-        $text = (!empty($_POST['text']) ? Wo_Secure($_POST['text']) : '');
-        $reason = (!empty($_POST['reason']) && in_array($_POST['reason'], $wo['config']['report_reasons']) ? Wo_Secure($_POST['reason']) : '');
+        $text = (!empty($_POST['text']) ? Wo_Secure($_POST['text'],1) : '');
+        $reason = (!empty($_POST['reason']) && in_array($_POST['reason'], $wo['config']['report_reasons']) ? Wo_Secure($_POST['reason'],0) : '');
         $code = Wo_ReportUser($user, $text,$reason);
         $data = array(
             'status' => 304

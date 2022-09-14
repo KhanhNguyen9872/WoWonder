@@ -61,7 +61,7 @@ if ($_GET['link1'] == 'showthread') {
 						<ul class="dropdown-menu dropdown-menu-right" role="menu">
 							<?php foreach ($wo['forums'] as $jump): ?>
 								<li>
-									<a href="<?php echo Wo_SeoLink('index.php?link1=forums&fid='.$jump['id']);?>" class="<?php if ($jump['name'] == $wo['forums']['name']) echo 'bold'; ?>"><?php echo $jump['name']; ?></a>
+									<a href="<?php echo Wo_SeoLink('index.php?link1=forums&fid='.$jump['id']);?>" class=""><?php echo $jump['name_lang']; ?></a>
 								</li>
 							<?php endforeach ?>
 						</ul>

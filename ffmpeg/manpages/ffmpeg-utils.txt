@@ -15,18 +15,18 @@ SYNTAX
        FFmpeg adopts the following quoting and escaping mechanism, unless
        explicitly specified. The following rules are applied:
 
-       o   ' and \ are special characters (respectively used for quoting and
+       ·   ' and \ are special characters (respectively used for quoting and
 	   escaping). In addition to them, there might be other special
 	   characters depending on the specific syntax where the escaping and
 	   quoting are employed.
 
-       o   A special character is escaped by prefixing it with a \.
+       ·   A special character is escaped by prefixing it with a \.
 
-       o   All characters enclosed between '' are included literally in the
+       ·   All characters enclosed between '' are included literally in the
 	   parsed string. The quote character ' itself cannot be quoted, so
 	   you may need to close the quote and escape it.
 
-       o   Leading and trailing whitespaces, unless escaped or quoted, are
+       ·   Leading and trailing whitespaces, unless escaped or quoted, are
 	   removed from the parsed string.
 
        Note that you may need to add a second level of escaping when using the
@@ -42,25 +42,25 @@ SYNTAX
 
        Examples
 
-       o   Escape the string "Crime d'Amour" containing the "'" special
+       ·   Escape the string "Crime d'Amour" containing the "'" special
 	   character:
 
 		   Crime d\'Amour
 
-       o   The string above contains a quote, so the "'" needs to be escaped
+       ·   The string above contains a quote, so the "'" needs to be escaped
 	   when quoting it:
 
 		   'Crime d'\''Amour'
 
-       o   Include leading or trailing whitespaces using quoting:
+       ·   Include leading or trailing whitespaces using quoting:
 
 		   '  this string starts and ends with whitespaces  '
 
-       o   Escaping and quoting can be mixed together:
+       ·   Escaping and quoting can be mixed together:
 
 		   ' The string '\'string\'' is a string '
 
-       o   To include a literal \ you can use either escaping or quoting:
+       ·   To include a literal \ you can use either escaping or quoting:
 
 		   'c:\foo' can be written as c:\\foo
 
@@ -87,11 +87,9 @@ SYNTAX
 
        or
 
-	       [-]<S>+[.<m>...][s|ms|us]
+	       [-]<S>+[.<m>...]
 
        S expresses the number of seconds, with the optional decimal part m.
-       The optional literal suffixes s, ms or us indicate to interpret the
-       value as seconds, milliseconds or microseconds, respectively.
 
        In both expressions, the optional - indicates negative duration.
 
@@ -100,14 +98,6 @@ SYNTAX
        The following examples are all valid time duration:
 
        55  55 seconds
-
-       0.2 0.2 seconds
-
-       200ms
-	   200 milliseconds, that's 0.2s
-
-       200000us
-	   200000 microseconds, that's 0.2s
 
        12:03:45
 	   12 hours, 03 minutes and 45 seconds
@@ -872,40 +862,28 @@ SYNTAX
        octagonal
 	   FL+FR+FC+BL+BR+BC+SL+SR
 
-       hexadecagonal
-	   FL+FR+FC+BL+BR+BC+SL+SR+WL+WR+TBL+TBR+TBC+TFC+TFL+TFR
-
        downmix
 	   DL+DR
 
-       22.2
-	   FL+FR+FC+LFE+BL+BR+FLC+FRC+BC+SL+SR+TC+TFL+TFC+TFR+TBL+TBC+TBR+LFE2+TSL+TSR+BFC+BFL+BFR
-
        A custom channel layout can be specified as a sequence of terms,
-       separated by '+'.  Each term can be:
+       separated by '+' or '|'. Each term can be:
 
-       o   the name of a single channel (e.g. FL, FR, FC, LFE, etc.), each
-	   optionally containing a custom name after a '@', (e.g. FL@Left,
-	   FR@Right, FC@Center, LFE@Low_Frequency, etc.)
-
-       A standard channel layout can be specified by the following:
-
-       o   the name of a single channel (e.g. FL, FR, FC, LFE, etc.)
-
-       o   the name of a standard channel layout (e.g. mono, stereo, 4.0,
+       ·   the name of a standard channel layout (e.g. mono, stereo, 4.0,
 	   quad, 5.0, etc.)
 
-       o   a number of channels, in decimal, followed by 'c', yielding the
-	   default channel layout for that number of channels (see the
-	   function "av_channel_layout_default"). Note that not all channel
-	   counts have a default layout.
+       ·   the name of a single channel (e.g. FL, FR, FC, LFE, etc.)
 
-       o   a number of channels, in decimal, followed by 'C', yielding an
+       ·   a number of channels, in decimal, followed by 'c', yielding the
+	   default channel layout for that number of channels (see the
+	   function "av_get_default_channel_layout"). Note that not all
+	   channel counts have a default layout.
+
+       ·   a number of channels, in decimal, followed by 'C', yielding an
 	   unknown channel layout with the specified number of channels. Note
 	   that not all channel layout specification strings support unknown
 	   channel layouts.
 
-       o   a channel layout mask, in hexadecimal starting with "0x" (see the
+       ·   a channel layout mask, in hexadecimal starting with "0x" (see the
 	   "AV_CH_*" macros in libavutil/channel_layout.h.
 
        Before libavutil version 53 the trailing character "c" to specify a
@@ -913,7 +891,7 @@ SYNTAX
        channel layout mask can also be specified as a decimal number (if and
        only if not followed by "c" or "C").
 
-       See also the function "av_channel_layout_from_string" defined in
+       See also the function "av_get_channel_layout" defined in
        libavutil/channel_layout.h.
 
 EXPRESSION EVALUATION
@@ -1089,9 +1067,6 @@ EXPRESSION EVALUATION
 	   Round the value of expression expr to the nearest integer. For
 	   example, "round(1.5)" is "2.0".
 
-       sgn(x)
-	   Compute sign of x.
-
        sin(x)
 	   Compute sine of x.
 
@@ -1221,8 +1196,33 @@ EXPRESSION EVALUATION
 
        Y   10^24 / 2^70
 
+OPENCL OPTIONS
+       When FFmpeg is configured with "--enable-opencl", it is possible to set
+       the options for the global OpenCL context.
+
+       The list of supported options follows:
+
+       build_options
+	   Set build options used to compile the registered kernels.
+
+	   See reference "OpenCL Specification Version: 1.2 chapter 5.6.4".
+
+       platform_idx
+	   Select the index of the platform to run OpenCL code.
+
+	   The specified index must be one of the indexes in the device list
+	   which can be obtained with "ffmpeg -opencl_bench" or
+	   "av_opencl_get_device_list()".
+
+       device_idx
+	   Select the index of the device used to run OpenCL code.
+
+	   The specified index must be one of the indexes in the device list
+	   which can be obtained with "ffmpeg -opencl_bench" or
+	   "av_opencl_get_device_list()".
+
 SEE ALSO
-       ffmpeg(1), ffplay(1), ffprobe(1), libavutil(3)
+       ffmpeg(1), ffplay(1), ffprobe(1), ffserver(1), libavutil(3)
 
 AUTHORS
        The FFmpeg developers.

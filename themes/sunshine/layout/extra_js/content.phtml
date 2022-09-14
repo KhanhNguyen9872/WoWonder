@@ -471,7 +471,7 @@ function Wo_RegisterPageLike(id) {
   element_like = $('[id=like-' + id + ']');
   html_like = '<button type="button" onclick="Wo_RegisterPageLike(' + id + ')" class="btn-active btn btn-default btn-sm wo_following_btn" id="wo_useract_btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg><span class="button-text"> <?php echo $wo["lang"]["liked"];?></span></button>';
   if (element_like.find('button').hasClass('btn-active')) {
-  	html_like = '<button type="button" onclick="Wo_RegisterPageLike(' + id + ')" class="btn btn-default btn-sm wo_follow_btn" id="wo_useract_btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg><span class="button-text"> <?php echo $wo["lang"]["like"];?></span></button>';
+  	html_like = '<button type="button" onclick="Wo_RegisterPageLike(' + id + ')" class="btn btn-default btn-sm wo_follow_btn" id="wo_useract_btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg><span class="button-text"> ' + "<?php echo $wo["lang"]["like"];?></span></button>";
   }
   element_like.html(html_like);
   $.get(Wo_Ajax_Requests_File(), {f: 'like_page', page_id: id}, function (data) {
@@ -497,9 +497,9 @@ function Wo_RegisterPageLike(id) {
 
 function Wo_RegisterLike(post_id) {
   var post = $('[id=post-' + post_id + ']');
-    html_like = '<?php echo GetModeBtn('liked_btn'); ?>';
+    html_like = "<?php echo GetModeBtn('liked_btn'); ?>"; 
     if (post.find("[id^=like-button]").parent().find('.active-like').length > 0) {
-      html_like = '<?php echo GetModeBtn('like_btn'); ?>';
+      html_like = "<?php echo GetModeBtn('like_btn'); ?>";
     }
   <?php if ($wo['config']['second_post_button'] == 'dislike') { ?>
    post.find("[id^=wonder-button]").html('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-down"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg> <span class="like-btn-mobile"> <?php echo $wo["lang"]["dislike"];?></span>');
@@ -581,25 +581,62 @@ function Wo_Translate(id,lang){
   if (!id || !lang && Wo_IsLangValid(lang)) {
     return false;
   }else{
+    <?php if ($wo['config']['google_translate'] != 1 && $wo['config']['yandex_translate'] != 1) { ?>
+      return false;
+    <?php } ?>
     var translatable_text = $("[data-translate-text="+id+"]").text();
     if (lang == Wo_DetectTextLang(translatable_text)) {
-      $("[data-trans-btn=" + id + "]").removeAttr('onclick')
+      // $("[data-trans-btn=" + id + "]").removeAttr('onclick')
+      // return false;
+    }
+    
+    $("[data-trans-btn="+id+"]").text("<?php echo($wo['lang']['loading']); ?>");
+    if ($("[data-translate-text="+id+"]").parents('.post-description').find('.data_translated').length > 0) {
+      let tx = $("[data-translate-text="+id+"]").parents('.post-description').find('.data_translated').text();
+      $("[data-translate-text="+id+"]").parents('.post-description').find('.data_translated').remove();
+      $("[data-translate-text="+id+"]").text(tx);
+      $("[data-trans-btn="+id+"]").text("<?php echo($wo['lang']['translate']); ?>");
       return false;
     }
+    $("[data-translate-text="+id+"]").parents('.post-description').append('<span class="hidden data_translated">'+translatable_text+'</span>');
+
+    <?php if ($wo['config']['google_translate'] == 1) { ?>
+      let url = "https://translation.googleapis.com/language/translate/v2?key=<?php echo($wo['config']['google_translation_api']); ?>";
+      let method = "POST";
+      let r_data = {
+          q:String(translatable_text),
+          target:String(lang)
+      };
+    <?php }else if($wo['config']['yandex_translate'] == 1){ ?>
+      let url = "https://translate.yandex.net/api/v1.5/tr.json/translate";
+      let method = "GET";
+      let r_data = {
+          key:'<?php echo $wo['config']['yandex_translation_api']; ?>',
+          text:String(translatable_text),
+          lang:String(lang)
+      };
+    <?php } ?>
+
     $.ajax({
-      url: 'https://translate.yandex.net/api/v1.5/tr.json/translate',
-      type: 'GET',
+      url: url,
+      type: method,
       dataType: 'json',
-      data: {
-        key:'<?php echo $wo['config']['yandex_translation_api']; ?>',
-        text:String(translatable_text),
-        lang:String(lang)},
+      data: r_data
     }).done(function(data) {
-      if (data.code == 200) {
-        $("[data-translate-text="+id+"]").text(data.text[0])
-        $("[data-trans-btn=" + id + "]").removeAttr('onclick')
-      }
+      <?php if ($wo['config']['google_translate'] == 1) { ?>
+        let translation = data.data.translations[0].translatedText;
+        $("[data-translate-text="+id+"]").text(translation)
+        <?php }else if($wo['config']['yandex_translate'] == 1){ ?>
+        if (data.code == 200) {
+          $("[data-translate-text="+id+"]").text(data.text[0])
+        }
+      <?php } ?>
+      $("[data-trans-btn="+id+"]").text("<?php echo($wo['lang']['show_original']); ?>");
     }).fail(function() {
+      let tx = $("[data-translate-text="+id+"]").parents('.post-description').find('.data_translated').text();
+      $("[data-translate-text="+id+"]").parents('.post-description').find('.data_translated').remove();
+      $("[data-translate-text="+id+"]").text(tx);
+      $("[data-trans-btn="+id+"]").text("<?php echo($wo['lang']['translate']); ?>");
       console.log("translation error");
     })
   }
@@ -852,21 +889,6 @@ function Wo_GetPaymentMethods(self) {
   });
 }
 
-function Wo_GetPayPalDonateLink(fund_id,amount) {
-  if (!amount || !fund_id) {
-    return false;
-  }
-
-  $('.btn-paypal').attr('disabled', true).text("<?php echo $wo["lang"]["please_wait"]?>");
-  $.post(Wo_Ajax_Requests_File() + '?f=funding&s=get_paypal_url', {fund_id:fund_id,amount:amount}, function(data) {
-    if (data.status == 200) {
-      window.location.href = data.url;
-    } else {
-      $('.btn-paypal').attr('disabled', false).html("PayPal App not set yet.");
-    }
-  });
-}
-
 function Wo_StripeDonate(fund_id,amount,type = 'credit_card') {
   if (!amount || !fund_id) {
     return false;
@@ -921,25 +943,6 @@ function Wo_BitcoinDonate(fund_id,amount) {
   });
 }
 
-
-
-
-function Wo_CheckOutCardDonate(fund_id,amount) {
-  if (!amount || !fund_id) {
-    return false;
-  }
-
-  $('.btn-check').attr('disabled', true).text("<?php echo $wo["lang"]["please_wait"]?>");
-  $('#donate_check_amount').val(amount)
-  $('#donate_check_fund_id').val(fund_id)
-
-  $("#2checkout_alert_donate_wallet").html('');
-  $('#pay-go-pro').modal('hide');
-  $('#2checkout_wallet_donate_modal').modal({
-        show: true
-  });
-
-}
 function openInNewTab(url, id) {
    var myWindow = window.open(url, "", "width=600,height=700");
    return false;
@@ -1048,7 +1051,7 @@ $(window).on('load', function() {
         $('.reactions-box-container-'+post_id).toggle();
         $('.post-reactions-icons-'+post_id).html(data.reactions);
         $('.status-reaction-'+post_id).removeClass("active-like");
-        $('.status-reaction-'+post_id).html('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg> ' + data.like_lang).css({"color": "inherit"});
+        $('.status-reaction-'+post_id).html('<svg xmlns="http://www.w3.org/2000/svg" width="58.553" height="58.266" viewBox="0 0 58.553 58.266" class="feather"> <path d="M-7080.317,1279.764l-26.729-1.173a1.657,1.657,0,0,1-1.55-1.717l1.11-33.374a4.112,4.112,0,0,1,2.361-3.6l.014-.005a13.62,13.62,0,0,1,1.978-.363h.007a9.007,9.007,0,0,0,3.249-.771c2.645-1.845,3.973-4.658,5.259-7.378l.005-.013.031-.061.059-.13.012-.023c.272-.576.61-1.289.944-1.929l0-.007c.576-1.105,2.327-4.46,4.406-5.107a2.3,2.3,0,0,1,.59-.105c.036,0,.072,0,.109,0a2.55,2.55,0,0,1,1.212.324c2.941,1.554,1.212,7.451.561,9.672a38.306,38.306,0,0,1-3.7,8.454l-.71,1.218,18.363.808a3.916,3.916,0,0,1,3.784,3.735,3.783,3.783,0,0,1-1.123,2.834,3.629,3.629,0,0,1-2.559,1.055c-.046,0-.1,0-.145,0h-.027l-2.141-.093-9.331-.41-.075,1.7,9.333.408a3.721,3.721,0,0,1,2.666,1.3,3.855,3.855,0,0,1,.936,2.934,3.779,3.779,0,0,1-3.821,3.38c-.061,0-.122,0-.181-.005l-1.974-.082-8.9-.392-.075,1.7,8.9.39a3.723,3.723,0,0,1,2.666,1.3,3.86,3.86,0,0,1,.937,2.933,3.784,3.784,0,0,1-3.827,3.381c-.057,0-.118,0-.177,0l-1.976-.088-8.472-.372-.075,1.7,8.474.372a3.726,3.726,0,0,1,2.666,1.3,3.857,3.857,0,0,1,.935,2.933,3.782,3.782,0,0,1-3.827,3.381C-7080.2,1279.765-7080.26,1279.765-7080.317,1279.764Zm-38.4,0-.089,0a6.558,6.558,0,0,1-6.193-6.8l.907-27.293a6.446,6.446,0,0,1,2.074-4.553,6.214,6.214,0,0,1,3.954-1.672c.081,0,.17-.005.29-.005s.212,0,.292.005a6.561,6.561,0,0,1,6.192,6.8l-.907,27.293a6.441,6.441,0,0,1-2.072,4.547,6.249,6.249,0,0,1-4.261,1.681Z" transform="translate(7126.251 -1222.75)" fill="none" stroke="currentColor" stroke-width="2.5"></path> </svg> ' + data.like_lang).css({"color": "inherit"});
       }
       $(self).attr('data_react','0');
     });
@@ -1340,7 +1343,7 @@ function BuyProducts(type = 'show',price) {
   }
   address_id = $('input[name=choose-address]:checked').val();
   if (type == 'hide') {
-        $('#buy_product_modal').find('.btn-mat').html("<?php echo $wo['lang']['pay'].' '.$wo['config']['classified_currency_s']; ?>"+price);
+        $('#buy_product_modal').find('.btn-mat').html("<?php echo $wo['lang']['pay'].' '.$wo['config']['currency_symbol_array'][$wo['config']['currency']]; ?>"+price);
         $('#buy_product_modal').find('.btn-mat').attr('onclick', "BuyProducts('show','"+price+"')");
         $('#buy_product_modal').modal('show');
         return false;
@@ -1526,13 +1529,13 @@ function Wo_RegisterCommentLike(comment_id) {
           comment.find("#WonderComment").html('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-down"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>');
       }
       <?php } ?>
-      comment.find("#LikeComment").html('<?php echo GetModeBtn('liked_comment'); ?>').fadeIn(150);
+      comment.find("#LikeComment").html("<?php echo GetModeBtn('liked_comment'); ?>").fadeIn(150);
       comment.find("#comment-likes").text(data.likes);
     } else {
       if (node_socket_flow == "1") {
         socket.emit("comment_notification", { comment_id: comment_id, user_id: _getCookie("user_id"), type: "removed" });
       }
-      comment.find("#LikeComment").html('<?php echo GetModeBtn('like_comment'); ?>').fadeIn(150);
+      comment.find("#LikeComment").html("<?php echo GetModeBtn('like_comment'); ?>").fadeIn(150);
       comment.find("#comment-likes").text(data.likes);
     }
   });
@@ -1751,31 +1754,5 @@ function Wo_OpenBannedMenu(type = 'notification'){
 function AddYandexResult(target,self,result_co) {
   $(target).val($(self).text());
   $(result_co).html('');
-}
-function ReadMoreText(selector) {
-  let text = "<?php echo($wo['lang']['read_more_text']); ?>";
-  if (typeof selector == 'object') {
-    selector = $(selector).attr('class');
-  }
-  for (var i = 0; i < $(selector).length; i++) {
-    var t = $(selector)[i];
-    if (!$(t).hasClass('ReadMoreAdded') && $(t).text().trim().length > 0 && $(t).height() > 190) {
-      var c = new Date().getUTCMilliseconds() + (Math.floor(Math.random() * 9999)) + 100 + "_" + i;
-      $(t).addClass(c);
-      $(t).addClass('ReadMoreAdded');
-      $(t).css({ maxHeight: "170px" })
-      $(t).after('<a href="javascript:void(0)" onclick="ShowReadMoreText(\'.'+c+'\',this)">'+text+'</a>');
-    }
-  }
-}
-function ShowReadMoreText(selector,self) {
-  let text = "<?php echo($wo['lang']['read_less_text']); ?>";
-  $(selector).css({ maxHeight: "" })
-  $(self).replaceWith('<a href="javascript:void(0)" onclick="HideReadMoreText(\''+selector+'\',this)">'+text+'</a>')
-}
-function HideReadMoreText(selector,self) {
-  let text = "<?php echo($wo['lang']['read_more_text']); ?>";
-  $(selector).css({ maxHeight: "170px" })
-  $(self).replaceWith('<a href="javascript:void(0)" onclick="ShowReadMoreText(\''+selector+'\',this)">'+text+'</a>')
 }
 </script>

@@ -11,10 +11,9 @@ DESCRIPTION
 SCALER OPTIONS
        The video scaler supports the following named options.
 
-       Options may be set by specifying -option value in the FFmpeg tools,
-       with a few API-only exceptions noted below.  For programmatic use, they
-       can be set explicitly in the "SwsContext" options or through the
-       libavutil/opt.h API.
+       Options may be set by specifying -option value in the FFmpeg tools. For
+       programmatic use, they can be set explicitly in the "SwsContext"
+       options or through the libavutil/opt.h API.
 
        sws_flags
 	   Set the scaler flags. This is also used to set the scaling
@@ -52,8 +51,7 @@ SCALER OPTIONS
 	       Select sinc rescaling algorithm.
 
 	   lanczos
-	       Select Lanczos rescaling algorithm. The default width (alpha)
-	       is 3 and can be changed by setting "param0".
+	       Select Lanczos rescaling algorithm.
 
 	   spline
 	       Select natural bicubic spline rescaling algorithm.
@@ -73,31 +71,29 @@ SCALER OPTIONS
 	   bitexact
 	       Enable bitexact output.
 
-       srcw (API only)
+       srcw
 	   Set source width.
 
-       srch (API only)
+       srch
 	   Set source height.
 
-       dstw (API only)
+       dstw
 	   Set destination width.
 
-       dsth (API only)
+       dsth
 	   Set destination height.
 
-       src_format (API only)
+       src_format
 	   Set source pixel format (must be expressed as an integer).
 
-       dst_format (API only)
+       dst_format
 	   Set destination pixel format (must be expressed as an integer).
 
-       src_range (boolean)
-	   If value is set to 1, indicates source is full range. Default value
-	   is 0, which indicates source is limited range.
+       src_range
+	   Select source range.
 
-       dst_range (boolean)
-	   If value is set to 1, enable full range for destination. Default
-	   value is 0, which enables limited range.
+       dst_range
+	   Select destination range.
 
        param0, param1
 	   Set scaling algorithm parameters. The specified values are specific
@@ -140,7 +136,7 @@ SCALER OPTIONS
 	       No blending
 
 SEE ALSO
-       ffmpeg(1), ffplay(1), ffprobe(1), libswscale(3)
+       ffmpeg(1), ffplay(1), ffprobe(1), ffserver(1), libswscale(3)
 
 AUTHORS
        The FFmpeg developers.

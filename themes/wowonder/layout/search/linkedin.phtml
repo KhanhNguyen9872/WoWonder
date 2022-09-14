@@ -1,147 +1,142 @@
 <div class="page-margin">
-	<div class="wow_main_float_head searchs new_search">
+	<div class="wow_main_float_head new_market searchs new_searchh">
 		<div class="container">
-			<h1>
-				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"></path></svg> <?php echo $wo['lang']['search']; ?>
-			</h1>
-			<div class="wow_search_head wo_job_search_head">
-				<div class="wow_srch_fields">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" /></svg>
-					<input type="text" onkeyup="Wo_SearchAll(this.value)" placeholder="<?php echo $wo['lang']['keyword']; ?>" id="search_for_text" value="<?php echo (isset($_GET['query'])) ? Wo_Secure($_GET['query']): '';?>">
-				</div>
-				<div class="wow_srch_fields">
-					<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5" /></svg>
-					<input type="text" onkeyup="Wo_SearchAllCertifications(this.value)" placeholder="<?php echo $wo['lang']['certifications'];?> <?php echo $wo['lang']['keyword']; ?>" id="search_for_certifications">
-				</div>
-				<div class="wow_srch_fields">
-					<div class="dropdown">
-						<button id="srch_fltrs" class="btn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M6,13H18V11H6M3,6V8H21V6M10,18H14V16H10V18Z" /></svg> <?php echo $wo['lang']['filter'];?> <span class="caret"></span></button>
-						<ul class="dropdown-menu wow_srch_drp_mnu" aria-labelledby="srch_fltrs">
-							<li>
-								<?php
-									$checked_array = array('full_time' => '',
-			                           'contract' => '',
-			                           'part_time' => '',
-			                           'internship' => '',
-			                           'temporary' => '',
-			                           'on_site' => '',
-			                           'hybrid' => '',
-			                           'remote' => '');
-									if (!empty($_GET['job_type'])) {
-										foreach ($_GET['job_type'] as $key => $value) {
-											if (in_array($value, array_keys($checked_array))) {
-												$checked_array[$value] = 'checked';
-											}
-										}
-									}
-									if (!empty($_GET['workplaces'])) {
-										foreach ($_GET['workplaces'] as $key => $value) {
-											if (in_array($value, array_keys($checked_array))) {
-												$checked_array[$value] = 'checked';
-											}
-										}
-									}
-								?>
-								<div class="wow_srch_innr_filtr">
-									<p><?php echo $wo['lang']['job_types']; ?></p>
-									<div class="pp_mat_input">
-										<div class="round_check">
-											<input type="checkbox" id="full_time" name="job_type[]" value="full_time" <?php echo $checked_array['full_time']; ?>>
-											<label for="full_time" class="radio-inline"><?php echo $wo['lang']['full_time']; ?></label>
-										</div>
-										<div class="round_check">
-											<input type="checkbox" id="contract" name="job_type[]" value="contract" <?php echo $checked_array['contract']; ?>>
-											<label for="contract" class="radio-inline"><?php echo $wo['lang']['contract']; ?></label>
-										</div>
-										<div class="round_check">
-											<input type="checkbox" id="part_time" name="job_type[]" value="part_time" <?php echo $checked_array['part_time']; ?>>
-											<label for="part_time" class="radio-inline"><?php echo $wo['lang']['part_time']; ?></label>
-										</div>
-										<div class="round_check">
-											<input type="checkbox" id="internship" name="job_type[]" value="internship" <?php echo $checked_array['internship']; ?>>
-											<label for="internship" class="radio-inline"><?php echo $wo['lang']['internship']; ?></label>
-										</div>
-										<div class="round_check">
-											<input type="checkbox" id="temporary" name="job_type[]" value="temporary" <?php echo $checked_array['temporary']; ?>>
-											<label for="temporary" class="radio-inline"><?php echo $wo['lang']['temporary']; ?></label>
-										</div>
-									</div>
-								</div>
-							</li>
-							<li>
-								<div class="wow_srch_innr_filtr">
-									<p><?php echo $wo['lang']['workplaces']; ?></p>
-									<div class="pp_mat_input">
-										<div class="round_check">
-											<input type="checkbox" id="on_site" name="workplaces[]" value="on_site" <?php echo $checked_array['on_site']; ?>>
-											<label for="on_site" class="radio-inline"><?php echo $wo['lang']['on_site']; ?></label>
-										</div>
-										<div class="round_check">
-											<input type="checkbox" id="hybrid" name="workplaces[]" value="hybrid" <?php echo $checked_array['hybrid']; ?>>
-											<label for="hybrid" class="radio-inline"><?php echo $wo['lang']['hybrid']; ?></label>
-										</div>
-										<div class="round_check">
-											<input type="checkbox" id="remote" name="workplaces[]" value="remote" <?php echo $checked_array['remote']; ?>>
-											<label for="remote" class="radio-inline"><?php echo $wo['lang']['remote']; ?></label>
-										</div>
-									</div>
-								</div>
-							</li>
-							<li>
-								<div class="wow_srch_innr_filtr">
-									<p><?php echo $wo['lang']['experience']; ?></p>
-									<div class="pp_mat_input">
-										<div class="select-nearby-users-distance">
-											<form>
-												<input type="range" class="cusrange" id="nearby-users-distance" name="amountRange" onchange="Wo_SearchExperience();" value="0" min="0" max="40" oninput="this.form.amountInput.value=this.value">
-												<input type="number" name="amountInput" min="0" max="40" value="0" oninput="this.form.amountRange.value=this.value" readonly id="cusrange-reader"/>
-											</form>
-										</div>
-									</div>
-								</div>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-			
-			<ul class="nav nav-tabs wow_srch_tabs wo_job_search_tabs">
-				<li class="round_check">
-					<input type="radio" id="search_type_all" name="search_type" value="all" checked>
-					<label for="search_type_all">
-						<a class="btn btn-mat"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z" /></svg> <?php echo $wo['lang']['all'];?></a>
-					</label>
-				</li>
-				<li class="round_check">
-					<input type="radio" id="search_type_users" name="search_type" value="users">
-					<label for="search_type_users">
-						<a class="btn btn-mat"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z" /></svg> <?php echo $wo['lang']['users'];?></a>
-					</label>
-				</li>
-				<li class="round_check">
-					<input type="radio" id="search_type_pages" name="search_type" value="pages">
-					<label for="search_type_pages">
-						<a class="btn btn-mat"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M14.4,6L14,4H5V21H7V14H12.6L13,16H20V6H14.4Z" /></svg> <?php echo $wo['lang']['pages'];?></a>
-					</label>
-				</li>
-				<li class="round_check">
-					<input type="radio" id="search_type_groups" name="search_type" value="groups">
-					<label for="search_type_groups">
-						<a class="btn btn-mat"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5 3A2 2 0 0 0 3 5H5M7 3V5H9V3M11 3V5H13V3M15 3V5H17V3M19 3V5H21A2 2 0 0 0 19 3M3 7V9H5V7M7 7V11H11V7M13 7V11H17V7M19 7V9H21V7M3 11V13H5V11M19 11V13H21V11M7 13V17H11V13M13 13V17H17V13M3 15V17H5V15M19 15V17H21V15M3 19A2 2 0 0 0 5 21V19M7 19V21H9V19M11 19V21H13V19M15 19V21H17V19M19 19V21A2 2 0 0 0 21 19Z" /></svg> <?php echo $wo['lang']['groups'];?></a>
-					</label>
-				</li>
-				<li class="round_check">
-					<input type="radio" id="search_type_service" name="search_type" value="service">
-					<label for="search_type_service">
-						<a class="btn btn-mat"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M11,13.5V21.5H3V13.5H11M12,2L17.5,11H6.5L12,2M17.5,13C20,13 22,15 22,17.5C22,20 20,22 17.5,22C15,22 13,20 13,17.5C13,15 15,13 17.5,13Z" /></svg> <?php echo $wo['lang']['services'];?></a>
-					</label>
-				</li>
-			</ul>
-			
+			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"></path></svg>
+			<h1><?php echo $wo['lang']['search'];?></h1>
+			<p><?php echo TextForMode('search_header_label'); ?></p>
 		</div>
 	</div>
 	
 	<div class="wow_main_blogs_bg"></div>
+
+	<div class="wow_content wo_job_head_filter wo_market_head_filter wow_search_head">
+		<div class="search-blog">
+			<input type="text" onkeyup="Wo_SearchAll(this.value)" placeholder="<?php echo $wo['lang']['keyword']; ?>" id="search_for_text" value="<?php echo (isset($_GET['query'])) ? Wo_Secure($_GET['query']): '';?>">
+		</div>
+		<div class="search-blog">
+			<input type="text" onkeyup="Wo_SearchAllCertifications(this.value)" placeholder="<?php echo $wo['lang']['certifications'];?> <?php echo $wo['lang']['keyword']; ?>" id="search_for_certifications">
+		</div>
+		<div class="dropdown wo_job_main_widget">
+			<div id="srch_fltrs" class="m_widget_head dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?php echo $wo['lang']['filter'];?> <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M7,10L12,15L17,10H7Z"></path></svg></div>
+			<ul class="dropdown-menu wow_srch_drp_mnu" aria-labelledby="srch_fltrs">
+				<li>
+					<?php
+						$checked_array = array('full_time' => '',
+						   'contract' => '',
+						   'part_time' => '',
+						   'internship' => '',
+						   'temporary' => '',
+						   'on_site' => '',
+						   'hybrid' => '',
+						   'remote' => '');
+						if (!empty($_GET['job_type'])) {
+							foreach ($_GET['job_type'] as $key => $value) {
+								if (in_array($value, array_keys($checked_array))) {
+									$checked_array[$value] = 'checked';
+								}
+							}
+						}
+						if (!empty($_GET['workplaces'])) {
+							foreach ($_GET['workplaces'] as $key => $value) {
+								if (in_array($value, array_keys($checked_array))) {
+									$checked_array[$value] = 'checked';
+								}
+							}
+						}
+					?>
+					<div class="wow_srch_innr_filtr">
+						<p><?php echo $wo['lang']['job_types']; ?></p>
+						<div class="pp_mat_input">
+							<div class="round_check">
+								<input type="checkbox" id="full_time" name="job_type[]" value="full_time" <?php echo $checked_array['full_time']; ?>>
+								<label for="full_time" class="radio-inline"><?php echo $wo['lang']['full_time']; ?></label>
+							</div>
+							<div class="round_check">
+								<input type="checkbox" id="contract" name="job_type[]" value="contract" <?php echo $checked_array['contract']; ?>>
+								<label for="contract" class="radio-inline"><?php echo $wo['lang']['contract']; ?></label>
+							</div>
+							<div class="round_check">
+								<input type="checkbox" id="part_time" name="job_type[]" value="part_time" <?php echo $checked_array['part_time']; ?>>
+								<label for="part_time" class="radio-inline"><?php echo $wo['lang']['part_time']; ?></label>
+							</div>
+							<div class="round_check">
+								<input type="checkbox" id="internship" name="job_type[]" value="internship" <?php echo $checked_array['internship']; ?>>
+								<label for="internship" class="radio-inline"><?php echo $wo['lang']['internship']; ?></label>
+							</div>
+							<div class="round_check">
+								<input type="checkbox" id="temporary" name="job_type[]" value="temporary" <?php echo $checked_array['temporary']; ?>>
+								<label for="temporary" class="radio-inline"><?php echo $wo['lang']['temporary']; ?></label>
+							</div>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div class="wow_srch_innr_filtr">
+						<p><?php echo $wo['lang']['workplaces']; ?></p>
+						<div class="pp_mat_input">
+							<div class="round_check">
+								<input type="checkbox" id="on_site" name="workplaces[]" value="on_site" <?php echo $checked_array['on_site']; ?>>
+								<label for="on_site" class="radio-inline"><?php echo $wo['lang']['on_site']; ?></label>
+							</div>
+							<div class="round_check">
+								<input type="checkbox" id="hybrid" name="workplaces[]" value="hybrid" <?php echo $checked_array['hybrid']; ?>>
+								<label for="hybrid" class="radio-inline"><?php echo $wo['lang']['hybrid']; ?></label>
+							</div>
+							<div class="round_check">
+								<input type="checkbox" id="remote" name="workplaces[]" value="remote" <?php echo $checked_array['remote']; ?>>
+								<label for="remote" class="radio-inline"><?php echo $wo['lang']['remote']; ?></label>
+							</div>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div class="wow_srch_innr_filtr">
+						<p><?php echo $wo['lang']['experience']; ?></p>
+						<div class="pp_mat_input">
+							<div class="select-nearby-users-distance">
+								<form>
+									<input type="range" class="cusrange" id="nearby-users-distance" name="amountRange" onchange="Wo_SearchExperience();" value="0" min="0" max="40" oninput="this.form.amountInput.value=this.value">
+									<input type="number" name="amountInput" min="0" max="40" value="0" oninput="this.form.amountRange.value=this.value" readonly id="cusrange-reader"/>
+								</form>
+							</div>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<ul class="nav nav-tabs wow_srch_tabs wo_job_search_tabs">
+			<li class="round_check">
+				<input type="radio" id="search_type_all" name="search_type" value="all" checked>
+				<label for="search_type_all">
+					<a class="btn btn-mat"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z" /></svg> <?php echo $wo['lang']['all'];?></a>
+				</label>
+			</li>
+			<li class="round_check">
+				<input type="radio" id="search_type_users" name="search_type" value="users">
+				<label for="search_type_users">
+					<a class="btn btn-mat"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z" /></svg> <?php echo $wo['lang']['users'];?></a>
+				</label>
+			</li>
+			<li class="round_check">
+				<input type="radio" id="search_type_pages" name="search_type" value="pages">
+				<label for="search_type_pages">
+					<a class="btn btn-mat"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M14.4,6L14,4H5V21H7V14H12.6L13,16H20V6H14.4Z" /></svg> <?php echo $wo['lang']['pages'];?></a>
+				</label>
+			</li>
+			<li class="round_check">
+				<input type="radio" id="search_type_groups" name="search_type" value="groups">
+				<label for="search_type_groups">
+					<a class="btn btn-mat"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5 3A2 2 0 0 0 3 5H5M7 3V5H9V3M11 3V5H13V3M15 3V5H17V3M19 3V5H21A2 2 0 0 0 19 3M3 7V9H5V7M7 7V11H11V7M13 7V11H17V7M19 7V9H21V7M3 11V13H5V11M19 11V13H21V11M7 13V17H11V13M13 13V17H17V13M3 15V17H5V15M19 15V17H21V15M3 19A2 2 0 0 0 5 21V19M7 19V21H9V19M11 19V21H13V19M15 19V21H17V19M19 19V21A2 2 0 0 0 21 19Z" /></svg> <?php echo $wo['lang']['groups'];?></a>
+				</label>
+			</li>
+			<li class="round_check">
+				<input type="radio" id="search_type_service" name="search_type" value="service">
+				<label for="search_type_service">
+					<a class="btn btn-mat"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M11,13.5V21.5H3V13.5H11M12,2L17.5,11H6.5L12,2M17.5,13C20,13 22,15 22,17.5C22,20 20,22 17.5,22C15,22 13,20 13,17.5C13,15 15,13 17.5,13Z" /></svg> <?php echo $wo['lang']['services'];?></a>
+				</label>
+			</li>
+		</ul>
+	</div>
 	
 	<div class="wo_search_page wo_job_search_page">
 		<?php

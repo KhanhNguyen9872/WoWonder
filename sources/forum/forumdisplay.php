@@ -19,7 +19,7 @@ if (isset($_GET['fid']) && is_numeric($_GET['fid'])) {
 		$wo['active']      = null;
 		$wo['forum_data']  = $forum;
 		$wo['count_thrd']  = Wo_GetTotalThreads(array("forum" => $_GET['fid']));
-		$wo['title']       =  $forum['forum']['name'];
+		$wo['title']       =  $forum['forum']['name_lang'];
 		$wo['content']     =  Wo_LoadPage('forum/forumdisplay');
 	}
 }

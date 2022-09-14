@@ -20,63 +20,120 @@
     font-weight: normal;
 }
 .navbar-default {
-    background: #4d91ea; border: none;
-    height:45px;box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    background: <?php echo $wo['config']['header_background'];?>; border: none;
+    height:45px;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 .navbar-nav.left_part_header .search-container {
-	background: #4d91ea;
+	background: <?php echo $wo['config']['header_background'];?>;
 }
-.round-check input[type="checkbox"]:checked + label:before {
-    background: #4d91ea !important;
+.round-check input[type="checkbox"]:checked + label:before, .round-check input[type="radio"]:checked + label:before {
+    background: <?php echo $wo['config']['btn_background_color'];?> !important;
 }
 .group-messages-wrapper a{
-    color: #4d91ea !important;
+    color: <?php echo $wo['config']['btn_background_color'];?> !important;
 }
 ul.profile-completion-bar li.completion-bar div.completion-bar-status {
-    background: #4d91ea !important;
+    background: <?php echo $wo['config']['btn_background_color'];?> !important;
 }
 .featured-users{
     background: #fff !important;
 }
 .result-bar {
-    background: #4d91ea !important;
+    background: <?php echo $wo['config']['btn_background_color'];?> !important;
 }
 .avtive {
-    border-color: #4d91ea !important;
+    border-color: <?php echo $wo['config']['btn_background_color'];?> !important;
 }
 .left-sidebar ul li a i {
-    color: #4d91ea !important;
+    color: <?php echo $wo['config']['btn_background_color'];?> !important;
 }
 .cs-loader-inner, .main  {
-    color: #4d91ea;
+    color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 .login input:focus, ul.profile-completion-bar li.completion-bar div.completion-bar-wrapper {
-    border-color: #4d91ea !important;
+    border-color: <?php echo $wo['config']['btn_background_color'];?> !important;
 }
 .login:not(.loading) button:hover {
-    background: #2e7be5 !important;
-    color: #ffffff;
+    background: <?php echo $wo['config']['btn_hover_background_color'];?> !important;
+    color: <?php echo $wo['config']['btn_color'];?>;
 }
 
+.sun_comm_addmore > .dropdown-toggle, .btn-add-comm-postt, .ads-navbar-wrapper ul li a.active, .select_radio_btn label > input:checked ~ .sr_btn_lab_innr > span, .sun_user_nav > ul > li .active, .sun_sett_sidebar > ul > li > a span, .sun_sett_sidebar > ul > li.active > a, .sun_sett_sidebar .sun_sett_submenu > ul li.active a {
+	color: <?php echo $wo['config']['btn_background_color'];?>;
+}
+.sun_pub_privacy_menu li label input[type="radio"]:checked+span, .my_pages_header ul li.active a, .wo_load_more > span, .sun_pop_games .sun_pop_gam_list .btn-link, .wo_game_style .btn-link, .sun_user_nav > ul > li.dropdown-submenu > ul li a:hover, .sun_sett_sidebar > ul > li.active > a span, body .green-audio-player .holder .play-pause-btn {
+    background: <?php echo $wo['config']['btn_background_color'];?>;
+    color: <?php echo $wo['config']['btn_color'];?>;
+}
+
+.movies .movies-film-wrapper figure .play_hover_btn svg {
+	background: <?php echo $wo['config']['btn_color'];?>;
+}
+.movies .movies-film-wrapper figure .play_hover_btn svg path {
+	fill: <?php echo $wo['config']['btn_background_color'];?>;
+}
+.movies-top-breadcrumb > li.active > a {
+    border-bottom-color: <?php echo $wo['config']['btn_background_color'];?>;
+    color: <?php echo $wo['config']['btn_background_color'];?>;
+}
+.c-share__toggler, .sun_head_onboard, .sun_setting_header {
+	background: <?php echo $wo['config']['btn_background_color'];?>;
+}
+.c-share__icon, .sun_setting_header .ss_innr > h3, .sun_setting_header .ss_innr > .sun_set_avatr a {
+    color: <?php echo $wo['config']['btn_color'];?>;
+}
+.select_radio_btn label > input:checked ~ .sr_btn_lab_innr {
+	border-color: <?php echo $wo['config']['btn_background_color'];?>;
+}
+
+.green-audio-player svg path {
+	fill: <?php echo $wo['config']['btn_background_color'];?>;
+}
+.green-audio-player .slider .gap-progress, .green-audio-player .slider .gap-progress .pin {
+	background-color: <?php echo $wo['config']['btn_background_color'];?> !important;
+}
+
+.order_by ul li.active a, .sun_pic_info .info .opt_buttons .btn.wo_following_btn, .sun_side_widget .nearby_user_wrapper .btn.wo_following_btn {
+    background: <?php echo $wo['config']['btn_background_color'];?> !important;
+    color: <?php echo $wo['config']['btn_color'];?> !important;
+}
+
+.sun_pic_info .info .opt_buttons .btn.wo_follow_btn, .sun_side_widget .nearby_user_wrapper .btn.wo_follow_btn {
+	color: <?php echo $wo['config']['btn_background_color'];?> !important;
+}
+
+.sun_sett_page .select_radio_btn.setting_down_info_btns .select_radio_btn_innr .sr_btn_lab_innr:hover, .sun_sett_page .select_radio_btn.setting_down_info_btns .select_radio_btn_innr label > input:checked ~ .sr_btn_lab_innr {
+	box-shadow: 0px 0px 0px 3px <?php echo $wo['config']['btn_background_color'];?>;
+}
+
+.lang_select_modal .language_info {
+    background: <?php echo $wo['config']['btn_background_color'];?>
+}
+.lang_select_modal .language_info h3 {
+	color: <?php echo $wo['config']['btn_color'];?>;
+}
+
+
 #search-nearby-users .nearby-users-relationship-collapse li.active .friends_toggle{
-    border-color: #4d91ea;
+    border-color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 #search-nearby-users .nearby-users-relationship-collapse li.active .friends_toggle:after{
-    background: #4d91ea;
+    background: <?php echo $wo['config']['btn_background_color'];?>;
 }
 .login button, .wo_search_page .nav-tabs li.active a {
-    background: #4d91ea !important;
-    color: #ffffff !important;
+    background: <?php echo $wo['config']['btn_background_color'];?> !important;
+    color: <?php echo $wo['config']['btn_color'];?> !important;
 }
 
 .mejs-controls .mejs-time-rail .mejs-time-current, .mejs-controls .mejs-horizontal-volume-slider .mejs-horizontal-volume-current, .mejs-controls .mejs-volume-button .mejs-volume-slider .mejs-volume-current {
-    background-color: #4d91ea !important;
-    background: #4d91ea !important;
-    background-image: #4d91ea !important;
+    background-color: <?php echo $wo['config']['btn_background_color'];?> !important;
+    background: <?php echo $wo['config']['btn_background_color'];?> !important;
+    background-image: <?php echo $wo['config']['btn_background_color'];?> !important;
 }
 .navbar-default .navbar-nav>.open>a, .navbar-default .navbar-nav>.open>a:focus, .navbar-default .navbar-nav>.open>a:hover {
     color: <?php echo $wo['config']['header_color'];?> !important;
-    background-color: #2e7be5 !important;
+    background-color: <?php echo $wo['config']['btn_hover_background_color'];?> !important;
 }
 .navbar-default .navbar-nav>.active>a, .navbar-default .navbar-nav>.active>a:focus, .navbar-default .navbar-nav>.active>a:hover, .nav-names li:hover {
     color: <?php echo $wo['config']['header_color'];?> !important;
@@ -93,17 +150,17 @@ a.unread-update, .head_clos_srch {
     color: <?php echo $wo['config']['header_color'];?> !important;
 }
 .btn-main {
-    color: #ffffff;
-    background-color: #4d91ea;
-    border-color: #4d91ea;
+    color: <?php echo $wo['config']['btn_color'];?>;
+    background-color: <?php echo $wo['config']['btn_background_color'];?>;
+    border-color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 .btn-main:hover {
     color: <?php echo $wo['config']['btn_hover_color'];?>;
-    background-color: #2e7be5;
-    border-color: #2e7be5;
+    background-color: <?php echo $wo['config']['btn_hover_background_color'];?>;
+    border-color: <?php echo $wo['config']['btn_hover_background_color'];?>;
 }
 .active-wonder {
-    color: #4d91ea;
+    color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 .admin-panel .col-md-9 .list-group-item:first-child, .setting-panel .col-md-8 .list-group-item:first-child, .profile-lists .list-group-item:first-child, .col-md-8 .list-group-item:first-child, .col-md-3.custom .list-group-item:first-child, .col-sm-4 .list-group-item:first-child, .col-md-7 .list-group-item:first-child, .col-md-9 .list-group-item:first-child, .red-list .list-group-item:first-child, .active.list-group-item:first-child {
      color: #444;
@@ -115,81 +172,81 @@ a.unread-update, .head_clos_srch {
     color: #444 !important;
 }
 .list-group-item.black-list.active-list, .red-list.active-list {
-    color: #ffffff;
-    background-color: #4d91ea;
+    color: <?php echo $wo['config']['btn_color'];?>;
+    background-color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 .list-group-item.black-list {
-    background: #4d91ea;
+    background: <?php echo $wo['config']['btn_background_color'];?>;
 }
 .profile-top-line {
-    background-color: #4d91ea;
+    background-color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 #bar {
-    background-color: #4d91ea;
+    background-color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 .list-group-item.black-list a{
     color: #ffffff;
 }
 .list-group-item.black-list.active-list a{
-    color: #4d91ea;
+    color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 .main-color, .small-text a {
-    color: #4d91ea !important;
+    color: <?php echo $wo['config']['btn_background_color'];?> !important;
 }
 .nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {
-    color: #ffffff;
+    color: <?php echo $wo['config']['btn_background_color'];?>;
     cursor: default;
-    color: #4d91ea;
-    border-bottom: 1px solid #4d91ea;
+    color: <?php echo $wo['config']['btn_background_color'];?>;
+    border-bottom: 1px solid <?php echo $wo['config']['btn_background_color'];?>;
     background-color: transparent
 }
 .btn-active {
-    color: #ffffff;
-    background: #4d91ea;
+    color: <?php echo $wo['config']['btn_color'];?>;
+    background: <?php echo $wo['config']['btn_background_color'];?>;
     outline: none;
-    border: 1px solid #4d91ea
+    border: 1px solid <?php echo $wo['config']['btn_background_color'];?>
 }
 .btn-active:hover, .btn-active:focus {
-    border: 1px solid #2e7be5;
+    border: 1px solid <?php echo $wo['config']['btn_hover_background_color'];?>;
     color: <?php echo $wo['config']['btn_hover_color'];?>;
-    background: #2e7be5;
+    background: <?php echo $wo['config']['btn_hover_background_color'];?>;
 }
 .btn-active-color:hover {
-    background: #2e7be5;
+    background: <?php echo $wo['config']['btn_hover_background_color'];?>;
 }
 .chat-tab .online-toggle {
     background: <?php echo $wo['config']['btn_background_color'];?> !important;
 }
 .profile-style .user-follow-button button.btn-active, .btn-login, .btn-register {
-    background: #4d91ea;
-    color: #ffffff;
+    background: <?php echo $wo['config']['btn_background_color'];?>;
+    color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 .profile-style .user-follow-button button.btn-active:hover, .btn-login:hover, .btn-login:focus, .btn-register:hover, .btn-register:focus {
     color: <?php echo $wo['config']['btn_hover_color'];?>;
-    background: #2e7be5;
+    background: <?php echo $wo['config']['btn_hover_background_color'];?>;
 }
 .panel-login>.panel-heading a.active {
-    color: #4d91ea;
+    color: <?php echo $wo['config']['btn_background_color'];?>;
     font-size: 18px;
 }
 .hash {
-    color: #4d91ea;
+    color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 .message-text .hash {
     color: #fff !important;
 }
 .search-container .search-input {
-    color: #fff!important;
-    background: #0147a9 !important;
+    color: <?php echo $wo['config']['header_color'];?> !important;
+    background: <?php echo $wo['config']['header_search_color'];?> !important;
 }
 .chat-messages-wrapper .outgoing {
-    background: #4d91ea;
+    background: <?php echo $wo['config']['btn_background_color'];?>;
 }
 .message p {
     color: #fff;
 }
 .text-sender-container .outgoing .message-model .message {
-    background: #4d91ea;color: #fff;
+    background: <?php echo $wo['config']['btn_background_color'];?>;color: <?php echo $wo['config']['btn_background_color'];?>;
 }
  
 .incoming .message. p {
@@ -207,36 +264,36 @@ a.unread-update, .head_clos_srch {
     margin-top: 15px;
 }
 .active.fa-thumbs-up {
-    color: #4d91ea;
+    color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 .api-ex-urls {
-    background-color: #4d91ea; color: #ffffff;
+    background-color: <?php echo $wo['config']['btn_background_color'];?>; color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 .user-username {
-    color: #4d91ea;
+    color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 .upload-image {
-    border: 3px dashed #4d91ea;
+    border: 3px dashed <?php echo $wo['config']['btn_background_color'];?>;
 }
-.events-tab-list li { background-color: #4d91ea; }
-.events-tab-list li:hover { background-color: #4d91ea; }
-.active-e-tab { background-color: #4d91ea !important; }
-.main { color: #4d91ea !important; }
-.events-list-dropup-menu ul li a:hover { background: #4d91ea; }
-.usr-offline { color: #4d91ea; }
-.blog-dd-ul li span:hover, .blog-dd-ul li a:hover { background: #4d91ea !important; }
-.blog_publ {background: #4d91ea ; border: 1px solid #4d91ea ; }
+.events-tab-list li { background-color: <?php echo $wo['config']['btn_background_color'];?>; }
+.events-tab-list li:hover { background-color: <?php echo $wo['config']['btn_background_color'];?>; }
+.active-e-tab { background-color: <?php echo $wo['config']['btn_background_color'];?> !important; }
+.main { color: <?php echo $wo['config']['btn_background_color'];?> !important; }
+.events-list-dropup-menu ul li a:hover { background: <?php echo $wo['config']['btn_background_color'];?>; }
+.usr-offline { color: <?php echo $wo['config']['btn_background_color'];?>; }
+.blog-dd-ul li span:hover, .blog-dd-ul li a:hover { background: <?php echo $wo['config']['btn_background_color'];?> !important; }
+.blog_publ {background: <?php echo $wo['config']['btn_background_color'];?> ; border: 1px solid <?php echo $wo['config']['btn_background_color'];?> ; }
 
 .slide-film-desc:hover, .movies-top-breadcrumb li:hover, .movies-top-breadcrumb li a:hover{
-    color: #4d91ea !important;
+    color: <?php echo $wo['config']['btn_background_color'];?> !important;
 }
 .movies h3.latest-movies, h3.recommended-movies {
-    border-left: 3px solid  #4d91ea;
+    border-left: 3px solid  <?php echo $wo['config']['btn_background_color'];?>;
 }
 
 .wo_user_profile .user-bottom-nav li .menuactive {
-    border-bottom: 2px solid #4d91ea;
-    color:#4d91ea;
+    border-bottom: 2px solid <?php echo $wo['config']['btn_background_color'];?>;
+    color:<?php echo $wo['config']['btn_background_color'];?>;
 }
 
 
@@ -256,11 +313,11 @@ body, .navbar-default, .wo_about_wrapper_parent{padding-left: 205px;padding-righ
 <?php } ?>
 
 .post .panel.active_shadow {
-    box-shadow: 0 0 0 1.5px #4d91ea !important;
+    box-shadow: 0 0 0 1.5px <?php echo $wo['config']['btn_background_color'];?> !important;
 }
 
 .ui-widget-header .ui-state-default {
-    background-color: #4d91ea;
+    background-color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 
 <?php
@@ -291,12 +348,12 @@ if (!empty($wo['reactions_types'])) {
 }*/
 
 .navbar-default .dropdown-menu.ani-acc-menu >li>a:hover {
-    color: #ffffff;background-color: #4d91ea;
+    color: <?php echo $wo['config']['btn_color'];?>;background-color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 
 @media (min-width: 992px){
 #wo_msg_right_prt .text-sender-container .outgoing .message-model .message div.message-text {
-    color: #ffffff;background-color: #4d91ea;
+    color: <?php echo $wo['config']['btn_background_color'];?>;background-color: <?php echo $wo['config']['btn_background_color'];?>;
 }
 
 #wo_nw_msg_page .messages-recipients-list .msg_ava_name {
@@ -313,8 +370,8 @@ if (!empty($wo['reactions_types'])) {
 <?php }?>
 
 
-.sun_input input:focus, .sun_input textarea:focus, .sun_input select:focus{border-color:#4d91ea}
-.loading::before {background-color: #4d91ea;}
+.sun_input input:focus, .sun_input textarea:focus, .sun_input select:focus{border-color:<?php echo $wo['config']['btn_background_color'];?>}
+.loading::before {background-color: <?php echo $wo['config']['btn_background_color'];?>;}
 
 <?php if($wo['page'] == 'home') { ?>
 #wo_post_stat_button > .stat-item:nth-child(2) svg {

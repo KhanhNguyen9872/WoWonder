@@ -79,13 +79,18 @@ function Wo_GetSessionDataFromUserID($user_id = 0) {
     }
     return false;
 }
-function Wo_GetAllSessionsFromUserID($user_id = 0) {
+function Wo_GetAllSessionsFromUserID($user_id = 0,$limit = 10,$offset = array()) {
     global $sqlConnect;
     if (empty($user_id)) {
         return false;
     }
+    $offset_text = "";
+    if (!empty($offset)) {
+        $offset_text = implode(',', $offset);
+        $offset_text = " AND `id` NOT IN (".$offset_text.") ";
+    }
     $user_id = Wo_Secure($user_id);
-    $query   = mysqli_query($sqlConnect, "SELECT * FROM " . T_APP_SESSIONS . " WHERE `user_id` = '{$user_id}' ORDER by time DESC");
+    $query   = mysqli_query($sqlConnect, "SELECT * FROM " . T_APP_SESSIONS . " WHERE `user_id` = '{$user_id}' ".$offset_text." ORDER by time DESC LIMIT " . $limit);
     $data    = array();
     if (mysqli_num_rows($query)) {
         while ($row = mysqli_fetch_assoc($query)) {
@@ -201,6 +206,9 @@ function Wo_LangsFromDB($lang = 'english') {
     }
     return $data;
 }
+function sort_alphabetically($a,$b) {
+    return $a['name'] > $b['name'];
+}
 function Wo_LangsNamesFromDB($lang = 'english') {
     global $sqlConnect, $wo;
     $data  = array();
@@ -213,6 +221,7 @@ function Wo_LangsNamesFromDB($lang = 'english') {
         unset($data[1]);
         unset($data[2]);
     }
+    asort($data);
     return $data;
 }
 function Wo_SaveConfig($update_name, $value) {
@@ -1254,6 +1263,7 @@ function Wo_DeleteUser($user_id) {
     $query_ones = mysqli_query($sqlConnect, "DELETE FROM " . T_PURCHAES . " WHERE `user_id` = '{$user_id}' OR `owner_id` = '{$user_id}'");
     $query_ones = mysqli_query($sqlConnect, "DELETE FROM " . T_EMAILS . " WHERE `email_to` = '" . $user_data['email'] . "' OR `user_id` = '{$user_id}'");
     if ($query_one) {
+        $wo['user'] = $user_data;
         $send_message_data = array(
             'from_email' => $wo['config']['siteEmail'],
             'from_name' => $wo['config']['siteName'],
@@ -1376,21 +1386,38 @@ function Wo_GetMedia($media) {
         if (empty($wo['config']['amazone_s3_key']) || empty($wo['config']['amazone_s3_s_key']) || empty($wo['config']['region']) || empty($wo['config']['bucket_name'])) {
             return $wo['config']['site_url'] . '/' . $media;
         }
+        if (!empty($wo['config']['amazon_endpoint']) && filter_var($wo['config']['amazon_endpoint'], FILTER_VALIDATE_URL)) {
+            return $wo['config']['amazon_endpoint'] . "/" . $media;
+        }
         return $wo['config']['s3_site_url'] . '/' . $media;
     } elseif ($wo['config']['wasabi_storage'] == 1) {
         if (empty($wo['config']['wasabi_bucket_name']) || empty($wo['config']['wasabi_access_key']) || empty($wo['config']['wasabi_secret_key']) || empty($wo['config']['wasabi_bucket_region'])) {
             return $wo['config']['site_url'] . '/' . $media;
+        }
+        if (!empty($wo['config']['wasabi_endpoint']) && filter_var($wo['config']['wasabi_endpoint'], FILTER_VALIDATE_URL)) {
+            return $wo['config']['wasabi_endpoint'] . "/" . $media;
         }
         return $wo['config']['wasabi_site_url'] . '/' . $media;
     } else if ($wo['config']['spaces'] == 1) {
         if (empty($wo['config']['spaces_key']) || empty($wo['config']['spaces_secret']) || empty($wo['config']['space_region']) || empty($wo['config']['space_name'])) {
             return $wo['config']['site_url'] . '/' . $media;
         }
+        if (!empty($wo['config']['spaces_endpoint']) && filter_var($wo['config']['spaces_endpoint'], FILTER_VALIDATE_URL)) {
+            return $wo['config']['spaces_endpoint'] . "/" . $media;
+        }
         return 'https://' . $wo['config']['space_name'] . '.' . $wo['config']['space_region'] . '.digitaloceanspaces.com/' . $media;
     } else if ($wo['config']['ftp_upload'] == 1) {
         return addhttp($wo['config']['ftp_endpoint']) . '/' . $media;
     } else if ($wo['config']['cloud_upload'] == 1) {
+        if (!empty($wo['config']['cloud_endpoint']) && filter_var($wo['config']['cloud_endpoint'], FILTER_VALIDATE_URL)) {
+            return $wo['config']['cloud_endpoint'] . "/" . $media;
+        }
         return 'https://storage.googleapis.com/' . $wo['config']['cloud_bucket_name'] . '/' . $media;
+    } else if ($wo['config']['backblaze_storage'] == 1) {
+        if (!empty($wo['config']['backblaze_endpoint']) && filter_var($wo['config']['backblaze_endpoint'], FILTER_VALIDATE_URL)) {
+            return $wo['config']['backblaze_endpoint'] . "/" . $media;
+        }
+        return 'https://'.$wo['config']['backblaze_bucket_name'].'.s3.'.$wo['config']['backblaze_bucket_region'].'.backblazeb2.com/' . $media;
     }
     return $wo['config']['site_url'] . '/' . $media;
 }
@@ -2038,8 +2065,8 @@ function Wo_ImportImageFromUrl($media, $custom_name = '_url_image') {
         $importImage = @file_put_contents($file_dir, $fileget);
     }
     if (file_exists($file_dir)) {
-        $upload_s3   = Wo_UploadToS3($file_dir);
         $check_image = getimagesize($file_dir);
+        $upload_s3   = Wo_UploadToS3($file_dir);
         if (!$check_image) {
             unlink($file_dir);
         }
@@ -3780,7 +3807,7 @@ function Wo_GetPageMessages($args = array()) {
     return $message_data;
 }
 function Wo_GetGroupMessagesAPP($args = array()) {
-    global $wo, $sqlConnect;
+    global $wo, $sqlConnect,$db;
     if ($wo['loggedin'] == false) {
         return false;
     }
@@ -3832,6 +3859,7 @@ function Wo_GetGroupMessagesAPP($args = array()) {
             if (!empty($fetched_data['reply_id'])) {
                 $fetched_data['reply'] = GetMessageById($fetched_data['reply_id']);
             }
+            $fetched_data['chat_data'] = $db->where('user_id', $wo['user']['user_id'])->where('group_id',$group_id)->ArrayBuilder()->getOne(T_GROUP_CHAT_USERS);
             $message_data[] = $fetched_data;
         }
     }
@@ -4674,7 +4702,7 @@ function Wo_EmoPhone($string = '') {
 function Wo_UploadLogo($data = array()) {
     global $wo, $sqlConnect;
     if (isset($data['file']) && !empty($data['file'])) {
-        $data['file'] = Wo_Secure($data['file']);
+        $data['file'] = $data['file'];
     }
     if (isset($data['name']) && !empty($data['name'])) {
         $data['name'] = Wo_Secure($data['name']);
@@ -4700,7 +4728,7 @@ function Wo_UploadLogo($data = array()) {
             unlink($filename);
             return false;
         }
-        if (Wo_SaveConfig('logo_extension', $file_extension)) {
+        if (Wo_SaveConfig('logo_extension', $file_extension.'?cache='.rand(100,999))) {
             return true;
         }
     }
@@ -4708,7 +4736,7 @@ function Wo_UploadLogo($data = array()) {
 function Wo_UploadBackground($data = array()) {
     global $wo, $sqlConnect;
     if (isset($data['file']) && !empty($data['file'])) {
-        $data['file'] = Wo_Secure($data['file']);
+        $data['file'] = $data['file'];
     }
     if (isset($data['name']) && !empty($data['name'])) {
         $data['name'] = Wo_Secure($data['name']);
@@ -4742,7 +4770,7 @@ function Wo_UploadBackground($data = array()) {
 function Wo_UploadFavicon($data = array()) {
     global $wo, $sqlConnect;
     if (isset($data['file']) && !empty($data['file'])) {
-        $data['file'] = Wo_Secure($data['file']);
+        $data['file'] = $data['file'];
     }
     if (isset($data['name']) && !empty($data['name'])) {
         $data['name'] = Wo_Secure($data['name']);
@@ -4883,7 +4911,7 @@ function Wo_ShareFile($data = array(), $type = 0, $crop = true) {
                             watermark_image($last_file);
                         }
                         if (empty($data['local_upload'])) {
-                            if (($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1) && !empty($last_file)) {
+                            if (($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) && !empty($last_file)) {
                                 $upload_s3 = Wo_UploadToS3($last_file);
                             }
                         }
@@ -4902,7 +4930,7 @@ function Wo_ShareFile($data = array(), $type = 0, $crop = true) {
             $crop_image = Wo_Resize_Crop_Image($data['crop']['width'], $data['crop']['height'], $filename, $filename, 60);
         }
         if (empty($data['local_upload'])) {
-            if (($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1) && !empty($filename)) {
+            if (($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) && !empty($filename)) {
                 $upload_s3 = Wo_UploadToS3($filename);
             }
         }
@@ -4945,7 +4973,7 @@ function Wo_DisplaySharedFile($media, $placement = '', $cache = false, $is_video
             if ($placement == 'api') {
                 $media_file .= "<img src='" . $wo['media']['filename'] . "' alt='image' class='image-file pointer' onclick=\"InjectAPI('{&quot;type&quot; : &quot;lightbox&quot;, &quot;image_url&quot;:&quot;" . $wo['media']['filename'] . "&quot;}');\">";
             } else {
-                if ($placement != 'chat' && $media['type'] != 'message') {
+                if ($placement != 'chat' && $placement != 'message') {
                     if (!empty($wo['story']) && $wo['story']['blur'] == 1) {
                         $media_file .= "<button class='btn btn-main image_blur_btn remover_blur_btn_" . $wo['story']['id'] . "' onclick='Wo_RemoveBlur(this," . $wo['story']['id'] . ")'>" . $wo['lang']['view_image'] . "</button>
                         <img src='" . $wo['media']['filename'] . "' alt='image' class='image-file pointer image_blur remover_blur_" . $wo['story']['id'] . "' onclick='Wo_OpenLightBox(" . $media['storyId'] . ");'>";
@@ -5156,7 +5184,7 @@ function Wo_RegisterPost($re_data = array('recipient_id' => 0)) {
             header("Content-type: application/json");
             echo json_encode(array(
                 'status' => 400,
-                'errors' => $wo['lang']['please_select_a_file_to_upload'],
+                'errors' => $wo['lang']['please_select_a_media_file'],
                 'invalid_file' => false
             ));
             exit();
@@ -5839,7 +5867,7 @@ function Wo_PostData($post_id, $placement = '', $limited = '', $comments_limit =
     }
     $story['is_still_live']  = false;
     $story['live_sub_users'] = 0;
-    if (!empty($story['stream_name']) && !empty($story['live_time']) && $story['live_time'] >= (time() - 10) && $story['live_ended'] == 0) {
+    if (!empty($story['stream_name']) && !empty($story['live_time']) &&$story['live_ended'] == 0) {
         $story['is_still_live']  = true;
         $story['live_sub_users'] = $db->where('post_id', $story['id'])->where('time', time() - 6, '>=')->getValue(T_LIVE_SUB, 'COUNT(*)');
     }
@@ -6485,14 +6513,14 @@ function Wo_DeletePost($post_id = 0, $type = '') {
         if (!empty($fetched_data['postFileThumb']) && !$is_post_shared && !$is_this_post_shared) {
             if (file_exists($fetched_data['postFileThumb'])) {
                 @unlink(trim($fetched_data['postFileThumb']));
-            } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+            } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                 @Wo_DeleteFromToS3($fetched_data['postFileThumb']);
             }
         }
         if (!empty($fetched_data['postRecord']) && !$is_post_shared && !$is_this_post_shared) {
             if (file_exists($fetched_data['postRecord'])) {
                 @unlink(trim($fetched_data['postRecord']));
-            } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1) {
+            } else if ($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['backblaze_storage'] == 1) {
                 @Wo_DeleteFromToS3($fetched_data['postRecord']);
             }
         }
@@ -7294,118 +7322,30 @@ function Wo_GetReactedTextIcon($object_id, $user_id, $col = "post") {
             $reaction_icon  = "";
             $reaction_color = "";
             $reaction_type = "";
-            if (!file_exists('./themes/' . $wo['config']['theme'] . '/reaction/like-sm.png')) {
-                if ($wo['reactions_types'][$sql_fetch_one['reaction']]['is_html'] == 1) {
-                    switch (strtolower($sql_fetch_one['reaction'])) {
-                        case 1:
-                            $reaction_type = "-1";
-                            $reaction_icon = "<div class='inline_post_count_emoji no_anim'><div class='emoji emoji--like'><div class='emoji__hand'><div class='emoji__thumb'></div></div></div></div>";
-                            break;
-                        case 2:
-                            $reaction_type = "-2";
-                            $reaction_icon = "<div class='inline_post_count_emoji no_anim'><div class='emoji emoji--love'><div class='emoji__heart'></div></div></div>";
-                            break;
-                        case 3:
-                            $reaction_type = "-3";
-                            $reaction_icon = "<div class='inline_post_count_emoji no_anim'><div class='emoji emoji--haha'><div class='emoji__face'><div class='emoji__eyes'></div><div class='emoji__mouth'><div class='emoji__tongue'></div></div></div></div></div>";
-                            break;
-                        case 4:
-                            $reaction_type = "-4";
-                            $reaction_icon = "<div class='inline_post_count_emoji no_anim'><div class='emoji emoji--wow'><div class='emoji__face'><div class='emoji__eyebrows'></div><div class='emoji__eyes'></div><div class='emoji__mouth'></div></div></div></div>";
-                            break;
-                        case 5:
-                            $reaction_type = "-5";
-                            $reaction_icon = "<div class='inline_post_count_emoji no_anim'><div class='emoji emoji--sad'><div class='emoji__face'><div class='emoji__eyebrows'></div><div class='emoji__eyes'></div><div class='emoji__mouth'></div></div></div></div>";
-                            break;
-                        case 6:
-                            $reaction_type = "-6";
-                            $reaction_icon = "<div class='inline_post_count_emoji no_anim'><div class='emoji emoji--angry'><div class='emoji__face'><div class='emoji__eyebrows'></div><div class='emoji__eyes'></div><div class='emoji__mouth'></div></div></div></div>";
-                            break;
-                    }
-                } else {
-                    if (!empty($wo['reactions_types'][$sql_fetch_one['reaction']]['wowonder_small_icon'])) {
-                        $reaction_icon = "<div class='inline_post_count_emoji reaction'><img src='{$wo['reactions_types'][$sql_fetch_one['reaction']]['wowonder_small_icon']}' alt=\"" . $wo['reactions_types'][$sql_fetch_one['reaction']]['name'] . "\"></div>";
-                    }
-                }
-                return '<span class="status-reaction-' . $object_id . ' rea active-like'.$reaction_type.' active-like">' . $reaction_icon . ' &nbsp;' . $wo['reactions_types'][strtolower($sql_fetch_one['reaction'])]['name'] . '</span>';
-                // switch ($sql_fetch_one['reaction']) {
-                //     case 1:
-                //         $reaction_icon = '<div class="inline_post_emoji no_anim"><div class="emoji emoji--like"><div class="emoji__hand"><div class="emoji__thumb"></div></div></div></div>';
-                //         $reaction_color = '#1da1f2';
-                //         break;
-                //     case 2:
-                //         $reaction_icon = '<div class="inline_post_emoji no_anim"><div class="emoji emoji--love"><div class="emoji__heart"></div></div></div>';
-                //         $reaction_color = '#f25268';
-                //         break;
-                //     case 3:
-                //         $reaction_icon = '<div class="inline_post_emoji no_anim"><div class="emoji emoji--haha"><div class="emoji__face"><div class="emoji__eyes"></div><div class="emoji__mouth"><div class="emoji__tongue"></div></div></div></div></div>';
-                //         $reaction_color = '#f3b715';
-                //         break;
-                //     case 4:
-                //         $reaction_icon = '<div class="inline_post_emoji no_anim"><div class="emoji emoji--wow"><div class="emoji__face"><div class="emoji__eyebrows"></div><div class="emoji__eyes"></div><div class="emoji__mouth"></div></div></div></div>';
-                //         $reaction_color = '#f3b715';
-                //         break;
-                //     case 5:
-                //         $reaction_icon = '<div class="inline_post_emoji no_anim"><div class="emoji emoji--sad"><div class="emoji__face"><div class="emoji__eyebrows"></div><div class="emoji__eyes"></div><div class="emoji__mouth"></div></div></div></div>';
-                //         $reaction_color = '#f3b715';
-                //         break;
-                //     case 6:
-                //         $reaction_icon = '<div class="inline_post_emoji no_anim"><div class="emoji emoji--angry"><div class="emoji__face"><div class="emoji__eyebrows"></div><div class="emoji__eyes"></div><div class="emoji__mouth"></div></div></div></div>';
-                //         $reaction_color = '#f7806c';
-                //         break;
-                // }
-            } else {
-                if (!empty($wo['reactions_types'][$sql_fetch_one['reaction']]['sunshine_small_icon'])) {
-                    $reaction_icon = '<div class="inline_post_emoji"><img class="" src="' . $wo['reactions_types'][$sql_fetch_one['reaction']]['sunshine_small_icon'] . '" alt="' . $wo['reactions_types'][$sql_fetch_one['reaction']]['name'] . '"></div>';
-                    switch (strtolower($sql_fetch_one['reaction'])) {
-                        case 1:
-                            $reaction_type = "-1";
-                            break;
-                        case 2:
-                            $reaction_type = "-2";
-                            break;
-                        case 3:
-                            $reaction_type = "-3";
-                            break;
-                        case 4:
-                            $reaction_type = "-4";
-                            break;
-                        case 5:
-                            $reaction_type = "-5";
-                            break;
-                        case 6:
-                            $reaction_type = "-6";
-                            break;
-                    }
-                }
-                // switch ($sql_fetch_one['reaction']) {
-                //     case 'Like':
-                //         $reaction_icon = '<div class="inline_post_emoji"><img class="" src="' . $wo['config']['theme_url'] . '/reaction/like-sm.png" alt="' . $wo['lang']['like'] . '"></div>';
-                //         $reaction_color = '#1da1f2';
-                //         break;
-                //     case 'Love':
-                //         $reaction_icon = '<div class="inline_post_emoji"><img class="" src="' . $wo['config']['theme_url'] . '/reaction/love-sm.png" alt="' . $wo['lang']['love'] . '"></div>';
-                //         $reaction_color = '#f25268';
-                //         break;
-                //     case 'HaHa':
-                //         $reaction_icon = '<div class="inline_post_emoji"><img class="" src="' . $wo['config']['theme_url'] . '/reaction/haha-sm.png" alt="' . $wo['lang']['haha'] . '"></div>';
-                //         $reaction_color = '#f3b715';
-                //         break;
-                //     case 'Wow':
-                //         $reaction_icon = '<div class="inline_post_emoji"><img class="" src="' . $wo['config']['theme_url'] . '/reaction/wow-sm.png" alt="' . $wo['lang']['wow'] . '"></div>';
-                //         $reaction_color = '#f3b715';
-                //         break;
-                //     case 'Sad':
-                //         $reaction_icon = '<div class="inline_post_emoji"><img class="" src="' . $wo['config']['theme_url'] . '/reaction/sad-sm.png" alt="' . $wo['lang']['sad'] . '"></div>';
-                //         $reaction_color = '#f3b715';
-                //         break;
-                //     case 'Angry':
-                //         $reaction_icon = '<div class="inline_post_emoji"><img class="" src="' . $wo['config']['theme_url'] . '/reaction/angry-sm.png" alt="' . $wo['lang']['angry'] . '"></div>';
-                //         $reaction_color = '#f7806c';
-                //         break;
-                // }
+            switch (strtolower($sql_fetch_one['reaction'])) {
+                case 1:
+                    $reaction_type = "-1";
+                    break;
+                case 2:
+                    $reaction_type = "-2";
+                    break;
+                case 3:
+                    $reaction_type = "-3";
+                    break;
+                case 4:
+                    $reaction_type = "-4";
+                    break;
+                case 5:
+                    $reaction_type = "-5";
+                    break;
+                case 6:
+                    $reaction_type = "-6";
+                    break;
             }
-            return '<span class="status-reaction-' . $object_id . ' rea active-like'.$reaction_type.' active-like">' . $reaction_icon . '<span style="color: ' . $reaction_color . ';"> ' . $wo['reactions_types'][strtolower($sql_fetch_one['reaction'])]['name'] . '</span></span>';
+            if (!empty($wo['reactions_types'][$sql_fetch_one['reaction']]['wowonder_small_icon'])) {
+                $reaction_icon = "<div class='inline_post_count_emoji reaction'><img src='{$wo['reactions_types'][$sql_fetch_one['reaction']]['wowonder_small_icon']}' alt=\"" . $wo['reactions_types'][$sql_fetch_one['reaction']]['name'] . "\"></div>";
+            }
+            return '<span class="status-reaction-' . $object_id . ' rea active-like'.$reaction_type.' active-like">' . $reaction_icon . ' &nbsp;' . $wo['reactions_types'][strtolower($sql_fetch_one['reaction'])]['name'] . '</span>';
         }
     }
 }
@@ -8624,7 +8564,7 @@ function Wo_UpdateComment($data = array()) {
     }
     $user_id      = Wo_Secure($wo['user']['user_id']);
     $comment_id   = Wo_Secure($data['comment_id']);
-    $comment_text = Wo_Secure($data['text']);
+    $comment_text = Wo_Secure($data['text'],1);
     $query        = mysqli_query($sqlConnect, "SELECT `id`, `user_id` FROM " . T_COMMENTS . " WHERE `id` = {$comment_id} AND `user_id` = {$user_id}");
     if (mysqli_num_rows($query) > 0) {
         if (!empty($comment_text)) {
@@ -8740,7 +8680,7 @@ function Wo_UpdatePost($data = array()) {
     if (!empty($data['page_id'])) {
         $page_id = Wo_Secure($data['page_id']);
     }
-    $post_text = Wo_Secure($data['text']);
+    $post_text = Wo_Secure($data['text'],1);
     $user_id   = Wo_Secure($wo['user']['user_id']);
     $post_id   = Wo_Secure($data['post_id']);
     if (Wo_IsPostOnwer($post_id, $user_id) === false) {
@@ -9359,4 +9299,403 @@ function coinpayments_api_call($req = array()) {
         $result['message'] = 'cURL error: '.curl_error($ch);
     }
     return $result;
+}
+function FilterStripTags($string='')
+{
+    return filter_var(strip_tags($string), FILTER_SANITIZE_STRING);
+}
+function GetIso()
+{
+    global $wo,$db,$all_langs;
+    $iso = array();
+    foreach ($all_langs as $key => $value) {
+        try {
+            $info = $db->where('lang_name',$value)->getOne(T_LANG_ISO);
+            if (!empty($info) && !empty($info->iso)) {
+                $iso[$value] = $info->iso;
+            }
+        } catch (Exception $e) {
+            
+        }
+    }
+    return $iso;
+}
+function BackblazeConnect($args=[])
+{
+    global $wo,$db;
+
+    $session = curl_init($args['apiUrl'] . $args['uri']);
+    $content_type = '';
+
+    if ($args['uri'] == '/b2api/v2/b2_list_buckets') {
+        $data = array("accountId" => $args['accountId']);
+        $post_fields = json_encode($data);
+        curl_setopt($session, CURLOPT_POSTFIELDS, $post_fields); 
+        curl_setopt($session, CURLOPT_POST, true); // HTTP POST
+    }
+    else if ($args['uri'] == '/b2api/v2/b2_get_upload_url' || $args['uri'] == '/b2api/v2/b2_list_file_names') {
+        $data = array("bucketId" => $wo['config']['backblaze_bucket_id']);
+        $post_fields = json_encode($data);
+        curl_setopt($session, CURLOPT_POSTFIELDS, $post_fields); 
+        curl_setopt($session, CURLOPT_POST, true); // HTTP POST
+    }
+    else if ($args['uri'] == '/b2api/v2/b2_delete_file_version') {
+        $data = array("fileId" => $args['fileId'], "fileName" => $args['fileName']);
+        $post_fields = json_encode($data);
+        curl_setopt($session, CURLOPT_POSTFIELDS, $post_fields); 
+        curl_setopt($session, CURLOPT_POST, true); // HTTP POST
+    }
+    elseif (isset($args['file']) && !empty($args['file'])) {
+        $handle = fopen($args['file'], 'r');
+        $read_file = fread($handle,filesize($args['file']));
+        curl_setopt($session, CURLOPT_POSTFIELDS, $read_file); 
+    }
+
+    // Add post fields
+    
+    
+
+    // Add headers
+    $headers = array();
+    
+    if ($args['uri'] == '/b2api/v2/b2_authorize_account') {
+        $credentials = base64_encode($wo['config']['backblaze_access_key_id'] . ":" . $wo['config']['backblaze_access_key']);
+        $headers[] = "Accept: application/json";
+        $headers[] = "Authorization: Basic " . $credentials;
+        curl_setopt($session, CURLOPT_HTTPGET, true);
+    }
+    else if (isset($args['file']) && !empty($args['file'])) {
+        $headers[] = "X-Bz-File-Name: " . $args['file'];
+        $headers[] = "Content-Type: " . mime_content_type($args['file']);
+        $headers[] = "X-Bz-Content-Sha1: " . sha1_file($args['file']);
+        $headers[] = "X-Bz-Info-Author: " . "unknown";
+        $headers[] = "X-Bz-Server-Side-Encryption: " . "AES256";
+        $headers[] = "Authorization: " . $args['authorizationToken'];
+    }
+    else{
+        $headers[] = "Authorization: " . $args['authorizationToken'];
+    }
+
+    curl_setopt($session, CURLOPT_HTTPHEADER, $headers); 
+
+    
+    curl_setopt($session, CURLOPT_RETURNTRANSFER, true);  // Receive server response
+    $server_output = curl_exec($session); // Let's do this!
+    curl_close ($session); // Clean up
+    
+    return $server_output;
+}
+
+function file_upload_max_size() {
+  static $max_size = -1;
+
+  if ($max_size < 0) {
+    // Start with post_max_size.
+    $post_max_size = parse_size(ini_get('post_max_size'));
+    if ($post_max_size > 0) {
+      $max_size = $post_max_size;
+    }
+
+    // If upload_max_size is less, then reduce. Except if upload_max_size is
+    // zero, which indicates no limit.
+    $upload_max = parse_size(ini_get('upload_max_filesize'));
+    if ($upload_max > 0 && $upload_max < $max_size) {
+      $max_size = $upload_max;
+    }
+  }
+  return $max_size;
+}
+
+function formatBytes($size, $precision = 2)
+{
+    $base = log($size, 1024);
+    $suffixes = array('', 'K', 'M', 'G', 'T');   
+
+    return round(pow(1024, $base - floor($base)), $precision) .$suffixes[floor($base)];
+}
+function parse_size($size) {
+  $unit = preg_replace('/[^bkmgtpezy]/i', '', $size); // Remove the non-unit characters from the size.
+  $size = preg_replace('/[^0-9\.]/', '', $size); // Remove the non-numeric characters from the size.
+  if ($unit) {
+    // Find the position of the unit in the ordered string which is the power of magnitude to multiply a kilobyte by.
+    return round($size * pow(1024, stripos('bkmgtpezy', $unit[0])));
+  }
+  else {
+    return round($size);
+  }
+}
+
+function getDirContents($dir, &$results = array()) {
+    global $db;
+    $files = @scandir($dir);
+    $forbiddenArray = ['.htaccess', 'index.html', 'step2.png', 'thumbnail.jpg', 'speed.jpg', 'parts.jpg', 'f-avatar.png', 'd-cover.jpg', 'd-avatar.jpg', 'step1.png'];
+    if (!empty($files)) {
+        foreach ($files as $key => $value) {
+            $path = $dir . "/" . $value;
+            if (!is_dir($path) && !in_array($value, $forbiddenArray)) {
+                $results[] = $path;
+            } else if ($value != "." && $value != "..") {
+                getDirContents($path, $results);
+                if (!is_dir($path) && !in_array($path, $forbiddenArray)) {
+                    $results[] = $path;
+                }
+            }
+        }
+    }
+    return $results;
+}
+
+function filterFiles($results, $storage) {
+    global $db;
+    $fianlToAdd = [];
+    foreach ($results as $key => $fileName) {
+        $checkIfFileExistsInUpload = $db->where('filename', Wo_Secure($fileName))->where('storage', $storage)->getOne(T_UPLOADED_MEDIA);
+        
+        if (empty($checkIfFileExistsInUpload)) {
+            $fianlToAdd[] = $fileName;
+        }
+    }
+    return $fianlToAdd;
+}
+
+function getStatus($config = array()) {
+    global $wo,$db;
+
+    $errors = [];
+
+    if (!is_writable('./nodejs/models/wo_langs.js')) {
+        $errors[] = ["type" => "error", "message" => "The file: <strong>nodejs/models/wo_langs.js</strong> is not writable, file permission should be <strong>777</strong>."];
+    }
+    if(!ini_get('allow_url_fopen') ) {
+        $errors[] = ["type" => "error", "message" => "PHP function <strong>allow_url_fopen</strong> is disabled on your server, it is required to be enabled."];
+    }
+    if(!function_exists('mime_content_type')) {
+        $errors[] = ["type" => "error", "message" => "PHP <strong>FileInfo</strong> extension is disabled on your server, it is required to be enabled."];
+    }
+    if (!class_exists('DOMDocument')) {
+        $errors[] = ["type" => "error", "message" => "PHP <strong>dom & xml</strong> extensions are disabled on your server, they are required to be enabled."];
+    }
+    if (!is_writable('./upload')) {
+        $errors[] = ["type" => "error", "message" => "The folder: <strong>/upload</strong> is not writable, upload folder and all subfolder(s) permission should be set to <strong>777</strong>."];
+    }
+    if (!is_writable('./xml')) {
+        $errors[] = ["type" => "error", "message" => "The folder: <strong>/xml</strong> is not writable, xml folder  permission should be set to <strong>777</strong>."];
+    }
+    if ($wo['config']['amazone_s3'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['backblaze_storage'] == 1) {
+        if (!is_writable('./upload/photos/d-avatar.jpg')) {
+            $errors[] = ["type" => "error", "message" => "The file: <strong>./upload/photos/d-avatar.jpg</strong> is not writable, the file permission should be set to <strong>777</strong>.<br> Also make sure the file exists."];
+        }
+        if (!is_writable('./upload/photos/app-default-icon.png')) {
+            $errors[] = ["type" => "error", "message" => "The file: <strong>./upload/photos/app-default-icon.png</strong> is not writable, the file permission should be set to <strong>777</strong>. <br> Also make sure the file exists."];
+        }
+        if (!is_writable('./upload/photos/d-blog.jpg')) {
+            $errors[] = ["type" => "error", "message" => "The file: <strong>./upload/photos/d-blog.jpg</strong> is not writable, the file permission should be set to <strong>777</strong>.<br> Also make sure the file exists."];
+        }
+        if (!is_writable('./upload/photos/d-cover.jpg')) {
+            $errors[] = ["type" => "error", "message" => "The file: <strong>./upload/photos/d-cover.jpg</strong> is not writable, the file permission should be set to <strong>777</strong>.<br> Also make sure the file exists."];
+        }
+        if (!is_writable('./upload/photos/d-film.jpg')) {
+            $errors[] = ["type" => "error", "message" => "The file: <strong>./upload/photos/d-film.jpg</strong> is not writable, the file permission should be set to <strong>777</strong>.<br> Also make sure the file exists."];
+        }
+        if (!is_writable('./upload/photos/d-group.jpg')) {
+            $errors[] = ["type" => "error", "message" => "The file: <strong>./upload/photos/d-group.jpg</strong> is not writable, the file permission should be set to <strong>777</strong>.<br> Also make sure the file exists."];
+        }
+        if (!is_writable('./upload/photos/d-page.jpg')) {
+            $errors[] = ["type" => "error", "message" => "The file: <strong>./upload/photos/d-page.jpg</strong> is not writable, the file permission should be set to <strong>777</strong>.<br> Also make sure the file exists."];
+        }
+        if (!is_writable('./upload/photos/game-icon.png')) {
+            $errors[] = ["type" => "error", "message" => "The file: <strong>./upload/photos/game-icon.png</strong> is not writable, the file permission should be set to <strong>777</strong>.<br> Also make sure the file exists."];
+        }
+        if (!is_writable('./upload/photos/incognito.png')) {
+            $errors[] = ["type" => "error", "message" => "The file: <strong>./upload/photos/incognito.png</strong> is not writable, the file permission should be set to <strong>777</strong>.<br> Also make sure the file exists."];
+        }
+    }
+
+    if ($wo['config']['ffmpeg_system'] == 'on') {
+        if (!isfuncEnabled("shell_exec")) {
+            $errors[] = ["type" => "error", "message" => "The function: <strong>shell_exec</strong> is not enabled, please contact your hosting provider to enable it, it's required for <strong>FFMPEG</strong>."];
+        }
+        if (!is_writable('./ffmpeg/ffmpeg')) {
+            $errors[] = ["type" => "error", "message" => "The file: <strong>/ffmpeg/ffmpeg</strong> is not writable, file permission should be <strong>777</strong>."];
+        }
+    }
+    
+
+    if (!is_writable('./sitemap.xml')) {
+        $errors[] = ["type" => "error", "message" => "The file: <strong>./sitemap.xml</strong> is not writable, the file permission should be set to <strong>777</strong>."];
+    }
+    if (!is_writable('./sitemap-index.xml')) {
+        $errors[] = ["type" => "error", "message" => "The file: <strong>./sitemap-index.xml</strong> is not writable, the file permission should be set to <strong>777</strong>."];
+    }
+
+
+    if (session_status() == PHP_SESSION_NONE) {
+        $errors[] = ["type" => "error", "message" => "PHP Session can't start, please check the session settings on your server, the session path should be writable, contact your server for more Information."];
+    }
+
+    if (!empty($config['curl'])) {
+        $ch = curl_init ();
+        $timeout = 10; 
+        $myHITurl = "https://www.google.com";
+        curl_setopt ( $ch, CURLOPT_URL, $myHITurl );
+        curl_setopt ( $ch, CURLOPT_HEADER, 0 );
+        curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
+        curl_setopt ( $ch, CURLOPT_CONNECTTIMEOUT, $timeout );
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        $file_contents = curl_exec ( $ch );
+        if (curl_errno ( $ch )) {
+            $errors[] = ["type" => "error", "message" => "<strong>cURL</strong> is not functioning, can't connect to the outside world, error found: <strong>" . curl_error ( $ch ) . "</strong>, please contact your hosting provider to fix it."];
+        }
+        curl_close ( $ch );
+    }
+
+    if (!empty($config['htaccess'])) {
+        if (!file_exists('./.htaccess')) {
+            $errors[] = ["type" => "error", "message" => "The file: <strong>.htaccess</strong> is not uploaded to your server, make sure the file <strong>.htaccess</strong> is uploaded to your server."];
+        } else {
+            $file_gethtaccess = file_get_contents("./.htaccess");
+            if (strpos($file_gethtaccess, "index.php?link1") === false) {
+                $errors[] = ["type" => "error", "message" => "The file: <strong>.htaccess</strong> is not updated, please re-upload the original .htaccess file."];
+            }
+        }
+    }
+
+
+    if (!empty($config['nodejsport']) && $wo['config']['node_socket_flow'] == "1") {
+        $parse = parse_url($wo['config']['site_url']);
+        $host = $parse['host'];
+        $ports = array($wo['config']['nodejs_port']);
+        if ($wo['config']['nodejs_ssl'] == "1") { 
+            $ports = array($wo['config']['nodejs_ssl_port']);
+        }
+
+        foreach ($ports as $port)
+        {
+            $connection = @fsockopen($host, $port);
+
+            if (!is_resource($connection))
+            {
+                $errors[] = ["type" => "error", "message" => "<strong>NodeJS</strong>is enabled, but the system can't connect to NodeJS server, <strong> " . $host . ':' . $port . " </strong>is down or port <strong>$port</strong> is blocked."];
+            } 
+        }
+    }
+
+    $list_ofFiles = [
+        'upload/files/2022/09/EAufYfaIkYQEsYzwvZha_01_4bafb7db09656e1ecb54d195b26be5c3_file.svg',
+        'upload/files/2022/09/2MRRkhb7rDhUNuClfOfc_01_76c3c700064cfaef049d0bb983655cd4_file.svg',
+        'upload/files/2022/09/D91CP5YFfv74GVAbYtT7_01_288940ae12acf0198d590acbf11efae0_file.svg',
+        'upload/files/2022/09/cFNOXZB1XeWRSdXXEdlx_01_7d9c4adcbe750bfc8e864c69cbed3daf_file.svg',
+        'upload/files/2022/09/yKmDaNA7DpA7RkCRdoM6_01_eb391ca40102606b78fef1eb70ce3c0f_file.svg',
+        'upload/files/2022/09/iZcVfFlay3gkABhEhtVC_01_771d67d0b8ae8720f7775be3a0cfb51a_file.svg'
+    ];
+
+    foreach ($list_ofFiles as $key => $file) {
+        if(!file_exists($file)) {
+            $errors[] = ["type" => "error", "message" => "The file: <strong>{$file}</strong> is required and not uploaded, please upload the 'upload/files/09' folder again."];
+            
+        }
+        if ($wo['config']['amazone_s3'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['backblaze_storage'] == 1) {
+            if(!is_readable($file)) {
+                $errors[] = ["type" => "error", "message" => "The file: <strong>{$file}</strong> is not readable, make sure the permission of this file is set to 777."];
+            }
+        }
+    }
+
+
+    $dirs = array_filter(glob('upload/*'), 'is_dir');
+    foreach ($dirs as $key => $value) {
+        if (!is_writable($value)) {
+            $errors[] = ["type" => "error", "message" => "The folder: <strong>{$value}</strong> is not writable, folder permission should be set to <strong>777</strong>."];
+        }
+    }
+
+    if (empty($wo['config']['smtp_host']) && empty($wo['config']['smtp_username'])) {
+        $errors[] = ["type" => "error", "message" => "<strong>SMTP</strong> is not configured, it's recommended to setup <strong>SMTP</strong>, so the system can send e-mails from the server. <br> <a href=" . Wo_LoadAdminLinkSettings('email-settings') . ">Click Here To Setup SMTP</a>"];
+    }
+
+
+
+    if (!is_writable('./themes/' . $wo['config']['theme'] . '/img')) {
+        $errors[] = ["type" => "error", "message" => "The folder: <strong>/themes/{$wo['config']['theme']}/img</strong> is not writable, the path and all subfolder(s) permission should be set to <strong>777</strong>, including <strong>logo.png</strong>"];
+    }
+    
+
+    if (file_exists('./install')) {
+        $errors[] = ["type" => "error", "message" => "The folder: <strong>./install</strong> is not deleted or renamed, make sure the folder <strong>./install</strong> is deleted."];
+    }
+    
+
+    if (!empty($wo['config']['filesVersion'])) {
+        if ($wo['config']['filesVersion'] > $wo['config']['version']) {
+            $errors[] = ["type" => "error", "message" => "There is a conflict in database version and files version, your database version is: <strong>v{$wo['config']['version']}</strong>, but script version is: <strong>v{$wo['config']['filesVersion']}</strong>. <br> Please run <strong><a href='{$wo['config']['site_url']}/update.php'>{$wo['config']['site_url']}/update.php</a></strong> of <strong>v{$wo['config']['filesVersion']}</strong>. <br><br><a href='https://docs.wowonder.com/#updates'>Click Here For More Information.</a>"];
+        } else if ($wo['config']['filesVersion'] < $wo['config']['version']) {
+            $errors[] = ["type" => "error", "message" => "There is a conflict in database version and files version, your database version is: <strong>v{$wo['config']['version']}</strong>, but script version is: <strong>v{$wo['config']['filesVersion']}</strong>. <br>Please upload the files of <strong>v{$wo['config']['filesVersion']}</strong> using FTP or SFTP, file managers are not recommended."];
+        }
+    } else {
+        $errors[] = ["type" => "error", "message" => "There is a conflict in database version and files version, your database version is: <strong>v{$wo['config']['version']}</strong>, but script version is: <strong>v{$wo['config']['filesVersion']}</strong>, <br>Please upload the files of <strong>v{$wo['config']['filesVersion']}</strong> using FTP or SFTP, file managers are not recommended."];
+    }
+
+    if (!empty($wo['config']['cronjob_last_run'])) {
+        $now = strtotime("-15 minutes");
+        if ($wo['config']['cronjob_last_run'] < $now) {
+            $errors[] = ["type" => "error", "message" => "File <strong>cron-job.php</strong> last run exceeded 15 minutes, make sure it's added to cronjob list. <br> <a href=" . Wo_LoadAdminLinkSettings('cronjob_settings') . ">CronJob Settings</a>"];
+        }
+    }
+    
+
+    $getSqlModes = $db->rawQuery("SELECT @@sql_mode as modes;");
+      if (!empty($getSqlModes[0]->modes)) {
+         $results = @explode(',', strtolower($getSqlModes[0]->modes));
+         if (in_array('strict_trans_tables', $results)) {
+           $errors[] = ["type" => "error", "message" => "The sql-mode <b>strict_trans_tables</b> is enabled in your mysql server, please contact your host provider to disable it."];
+         }
+         if (in_array('only_full_group_by', $results)) {
+           $errors[] = ["type" => "error", "message" => "The sql-mode <b>only_full_group_by</b> is enabled in your mysql server, this can cause some issues on your website, please contact your host provider to disable it."];
+         }
+      }
+
+    $getUploadSize = file_upload_max_size();
+
+    if ($getUploadSize < 1000000000) {
+        $errors[] = ["type" => "warning", "message" => "Your server max upload size is less than 100MB, Current: <strong>" . formatBytes($getUploadSize). "</strong> Recommended is <strong>1024MB</strong>. You should update both: upload_max_filesize, post_max_size."];
+    }
+
+    if (ini_get('max_execution_time') < 100 && ini_get('max_execution_time') > 0) {
+        $errors[] = ["type" => "warning", "message" => "Your server max_execution_time is less than 100 seconds, Current: <strong>" . ini_get('max_execution_time'). "</strong> Recommended is <strong>3000</strong>."];
+    }
+
+    if ($wo['config']['developer_mode'] == "1") {
+        $errors[] = ["type" => "warning", "message" => "<strong>Developer Mode</strong> is enabled in <strong>Settings -> General Configuration</strong>, it's not recommended to enable <strong>Developer Mode</strong> if your website is live, some errors may show."];
+    }
+
+    if(!function_exists('exif_read_data')) {
+        $errors[] = ["type" => "warning", "message" => "PHP <strong>exif</strong> extension is disabled on your server, it is recommended to be enabled."];
+    }
+
+    try {
+        $getSqlWait = $db->rawQuery("show variables where Variable_name='wait_timeout';");
+        if (!empty($getSqlWait[0]->Value)) {
+            if ($getSqlWait[0]->Value < 1000) {
+              $errors[] = ["type" => "warning", "message" => "The MySQL variable <b>wait_timeout</b> is {$getSqlWait[0]->Value}, minumum required is <strong>1000</strong>, please contact your host provider to update it."];
+            }
+        }
+    } catch (Exception $e) {
+        
+    }
+
+    return $errors;
+}
+
+function checkIfThereIsError($object) {
+    foreach ($object as $key => $value) {
+        if ($value['type'] == "error") {
+            return true;
+        }
+    }
+    return false;
+}
+
+function isfuncEnabled($func) {
+    return is_callable($func) && false === stripos(ini_get('disable_functions'), $func);
 }

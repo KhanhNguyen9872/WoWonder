@@ -39,6 +39,6 @@ if (!empty($_POST)) {
         $_POST[$key] = strip_tags($value);
     }
 }
-
+$wo['script_root'] = dirname(__FILE__);
 // autoload admin panel files
 require 'admin-panel/autoload.php';

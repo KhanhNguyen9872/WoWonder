@@ -20,13 +20,15 @@ let chatVideoTemplate;
 
 function getAudioTemplate(mediaFileName) {
     return audioTemplate({
-        fileName: mediaFileName
+        fileName: mediaFileName,
+        rand: Math.floor(Math.random() * 100000),
     })
 }
 
 function getChatAudioTemplate(mediaFileName) {
     return chatAudioTemplate({
-        fileName: mediaFileName
+        fileName: mediaFileName,
+        rand: Math.floor(Math.random() * 100000),
     })
 }
 
@@ -46,6 +48,15 @@ class FunctionsUtils {
         audioTemplate = Handlebars.compile(audio.toString());
         chatAudioTemplate = Handlebars.compile(chat_audio.toString());
         chatVideoTemplate = Handlebars.compile(chat_video.toString());
+    }
+    async Wo_CensoredWords(ctx, text) {
+        if (text && typeof(text) != 'undefined' && text != '' && ctx.globalconfig.censored_words.length > 0) {
+            let ar = ctx.globalconfig.censored_words.split(",");
+            ar.map(word => {
+                text = text.replace(word,'****');
+            });
+        }
+        return text;
     }
     async Wo_Markup(ctx, text) {
         let link = true, hashtag = true, mention = true, post_id = 0, comment_id = 0, reply_id = 0
@@ -100,6 +111,7 @@ class FunctionsUtils {
                 }
             }
         }
+        text = await this.Wo_CensoredWords(ctx,text);
         return text;
     }
     async updateOrCreate(model, where, newItem) {
@@ -386,7 +398,7 @@ class FunctionsUtils {
 
         let video_thumb = message['postFileThumb'] && message['postFileThumb'] != "" ? await Wo_GetMedia(message['postFileThumb']) : '';
         let media_name = message['mediaFileName'];
-        if (isSticker || message['stickers'] != '') {
+        if (isSticker && message['stickers'] != '' && message['stickers'] != null) {
             if (message['stickers'] != '') {
                 return '<img src="' + message['stickers'] + '" alt="GIF"></img>'
             }
@@ -453,7 +465,7 @@ class FunctionsUtils {
             }
             if (file_extension == '.mp3' || file_extension == '.wav') {
                 if (placement == 'chat') {
-                    file += '<i class="fa ' + icon_size + ' fa-music"></i> ' + media_name;
+                    media_file += getAudioTemplate(filename);
                 }
                 else if (placement == 'message') {
                     media_file += getChatAudioTemplate(filename);
@@ -525,6 +537,8 @@ class FunctionsUtils {
             return 'https://' + ctx.globalconfig['ftp_endpoint'] + '/' + media;
         } else if (ctx.globalconfig['cloud_upload'] == 1) {
             return 'https://storage.googleapis.com/' + ctx.globalconfig['cloud_bucket_name'] + '/' + media;
+        } else if (ctx.globalconfig['backblaze_storage'] == 1) {
+            return 'https://'+ctx.globalconfig['backblaze_bucket_name']+'.s3.'+ctx.globalconfig['backblaze_bucket_region']+'.backblazeb2.com/' + $media;
         }
         return ctx.globalconfig['site_url'] + '/' + media;
     }
@@ -1033,13 +1047,6 @@ class FunctionsUtils {
         result.forEach(element => {
             element.name = ctx.globallangs[element.name];
             if (type == 'page') {
-                // console.log(path.resolve('../themes/',ctx.globalconfig["theme"]+'/reaction/like-sm.png'))
-                // if (fs.existsSync(path.resolve('../themes/',ctx.globalconfig["theme"]+'/reaction/like-sm.png'))) {
-                //     console.log('dddddddddd')
-                //     console.log(fs.existsSync('./themes/'))
-                // }
-
-
                 if (element.wowonder_icon && element.wowonder_icon != '' && element.wowonder_icon !== undefined) {
                     (async () => {
                     element.wowonder_icon = element.wowonder_small_icon = await this.Wo_GetMedia(ctx,element.wowonder_icon);
@@ -1169,6 +1176,9 @@ class FunctionsUtils {
        var reactions     = [];
        var reactions_count = 0;
        var name = col+'_id';
+        if (object_id == false) {
+            return "";
+        }
        if (type == 'blog') {
             var result = await ctx.wo_blog_reaction.findAll({
                 where: {
@@ -1204,45 +1214,8 @@ class FunctionsUtils {
                 else{
                     var first = "<span class=\"how_reacted like-btn-"+element.toLowerCase()+"\" id=\"_"+col+object_id+"\" onclick=\"Wo_OpenPostReactedUsers("+object_id+",'"+element.toLowerCase()+"','"+col+"');\">";
                 }
-
-                if (ctx.reactions_types[element].is_html == 1) {
-
-
-                    if (ctx.reactions_types[element].is_html == 1) {
-
-
-                        switch (parseInt(element)) {
-                           case 1:
-                               reactions_html += first+"<div class='inline_post_count_emoji no_anim'><div class='emoji emoji--like'><div class='emoji__hand'><div class='emoji__thumb'></div></div></div></div></span>";
-                               break;
-                           case 2:
-                               reactions_html += first+"<div class='inline_post_count_emoji no_anim'><div class='emoji emoji--love'><div class='emoji__heart'></div></div></div></span>";
-                               break;
-                           case 3:
-                              reactions_html += first+"<div class='inline_post_count_emoji no_anim'><div class='emoji emoji--haha'><div class='emoji__face'><div class='emoji__eyes'></div><div class='emoji__mouth'><div class='emoji__tongue'></div></div></div></div></div></span>";
-                               break;
-                           case 4:
-                               reactions_html += first+"<div class='inline_post_count_emoji no_anim'><div class='emoji emoji--wow'><div class='emoji__face'><div class='emoji__eyebrows'></div><div class='emoji__eyes'></div><div class='emoji__mouth'></div></div></div></div></span>";
-                               break;
-                           case 5:
-                               reactions_html += first+"<div class='inline_post_count_emoji no_anim'><div class='emoji emoji--sad'><div class='emoji__face'><div class='emoji__eyebrows'></div><div class='emoji__eyes'></div><div class='emoji__mouth'></div></div></div></div></span>";
-                               break;
-                           case 6:
-                               reactions_html += first+"<div class='inline_post_count_emoji no_anim'><div class='emoji emoji--angry'><div class='emoji__face'><div class='emoji__eyebrows'></div><div class='emoji__eyes'></div><div class='emoji__mouth'></div></div></div></div></span>";
-                               break;
-                       }
-                    }
-                    else{
-                        if (ctx.reactions_types[element].wowonder_small_icon && ctx.reactions_types[element].wowonder_small_icon !== undefined && ctx.reactions_types[element].wowonder_small_icon != '') {
-                            reactions_html += first+"<div class='inline_post_count_emoji reaction'><img src='"+ctx.reactions_types[element].wowonder_small_icon+"' alt=\""+ctx.reactions_types[element].name+"\"></div></span>";
-                        }
-                    }
-                }
-                else{
-
-                    if (ctx.reactions_types[element].sunshine_small_icon && ctx.reactions_types[element].sunshine_small_icon !== undefined && ctx.reactions_types[element].sunshine_small_icon != '') {
-                        reactions_html += first+"<div class='inline_post_count_emoji'><img src='"+ctx.reactions_types[element].sunshine_small_icon+"' alt=\""+ctx.reactions_types[element].name+"\"></div></span>";
-                    }
+                if (ctx.reactions_types[element].wowonder_small_icon && ctx.reactions_types[element].wowonder_small_icon !== undefined && ctx.reactions_types[element].wowonder_small_icon != '') {
+                    reactions_html += first+"<div class='inline_post_count_emoji reaction'><img src='"+ctx.reactions_types[element].wowonder_small_icon+"' alt=\""+ctx.reactions_types[element].name+"\"></div></span>";
                 }
 
             });

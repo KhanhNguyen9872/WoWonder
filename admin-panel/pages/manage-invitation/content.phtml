@@ -521,6 +521,6 @@ function Wo_DeleteCode(id,type = 'show') {
   $("tr[data-invitation='"+id+"']").fadeOut(300, function() {
     $(this).remove();
   });
-  $.get(Wo_Ajax_Requests_File() + '?f=admincp&s=rm-user-invitation', {id: id}, function(data, textStatus, xhr) {});
+  $.get(Wo_Ajax_Requests_File() + '?f=admin_setting&s=rm-user-invitation', {id: id}, function(data, textStatus, xhr) {});
 }
 </script>

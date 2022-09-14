@@ -14,9 +14,27 @@
 			<?php if ($wo['config']['order_posts_by'] == 0) { ?>
 				<div class="dropdown order_by">
 					<svg class="dropdown-toggle" data-toggle="dropdown" role="button" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M7,10L12,15L17,10H7Z" opacity="0.7"/></svg>
-					<ul class="dropdown-menu dropdown-menu-right" role="button">
-						<li class="order_all <?php echo ($wo['user']['order_posts_by'] == 0) ? 'active' : ''; ?>"><a href="javascript:void(0);" onclick="Wo_StorePosts(0);"><?php echo $wo['lang']['all'] ?></a></li>
-						<li class="order_people <?php echo ($wo['user']['order_posts_by'] == 1) ? 'active' : ''; ?>"><a href="javascript:void(0);" onclick="Wo_StorePosts(1);"><?php echo $wo['lang']['people_i_follow'] ?></a></li>
+					<ul class="dropdown-menu dropdown-menu-right post_order_feed" role="button">
+						<li class="order_all <?php echo ($wo['user']['order_posts_by'] == 0) ? 'active' : ''; ?>">
+							<a href="javascript:void(0);" onclick="Wo_StorePosts(0);">
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M2 14H8V20H2M16 8H10V10H16M2 10H8V4H2M10 4V6H22V4M10 20H16V18H10M10 16H22V14H10"></path></svg>
+								&nbsp;&nbsp;&nbsp;
+								<div>
+									<b><?php echo $wo['lang']['all'] ?></b>
+									<p><?php echo $wo['lang']['all_tx'] ?></p>
+								</div>
+							</a>
+						</li>
+						<li class="order_people <?php echo ($wo['user']['order_posts_by'] == 1) ? 'active' : ''; ?>">
+							<a href="javascript:void(0);" onclick="Wo_StorePosts(1);">
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z"></path></svg>
+								&nbsp;&nbsp;&nbsp;
+								<div>
+									<b><?php echo $wo['lang']['people_i_follow'] ?></b>
+									<p><?php echo $wo['lang']['people_i_follow_tx'] ?></p>
+								</div>
+							</a>
+						</li>
 					</ul>
 				</div>
 			<?php } ?>

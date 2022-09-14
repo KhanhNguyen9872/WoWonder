@@ -38,7 +38,7 @@ if ($wo['chatMessage']['from_id'] != $wo['user']['user_id']) {
          <?php  
          if(isset($wo['chatMessage']['media']) && !empty($wo['chatMessage']['media'])) {
             $media = array('type' => 'chatMessage', 'storyId' => $wo['chatMessage']['id'], 'filename' => $wo['chatMessage']['media'], 'name' => $wo['chatMessage']['mediaFileName']); 
-            echo Wo_DisplaySharedFile($media, 'chat');   
+            echo Wo_DisplaySharedFile($media, 'message');   
          } 
          ?>
          <?php if (!empty($wo['chatMessage']['stickers'])): ?>

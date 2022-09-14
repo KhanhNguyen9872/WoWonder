@@ -1,5 +1,5 @@
 <?php
-if (Wo_IsUserPro() === true || $wo['loggedin'] == false || $wo['config']['pro'] == 0) {
+if ($wo['loggedin'] == false || $wo['config']['pro'] == 0) {
 		Wo_RedirectSmooth(Wo_SeoLink('index.php?link1=welcome'));
 }
 if ($wo['config']['pro'] == 0) {

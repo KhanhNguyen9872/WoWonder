@@ -269,6 +269,7 @@ if (($page > $db->totalPages) && !empty($_GET['page-id'])) {
                              <?php foreach ($posts as $value): 
                               $value->user_data  = Wo_UserData($value->user);
                               $thread = ToArray($value);
+                              $thread['url']              = Wo_SeoLink("index.php?link1=showthread&tid=" . $thread['id']);
                               ?>
                                 <tr data-thread-ident="<?php echo $thread['id']; ?>" data_selected="<?php echo $thread['id'] ?>">
                                   <td><input type="checkbox" id="check-data-<?php echo $thread['id']?>" class="delete-checkbox filled-in"><label for="check-data-<?php echo $thread['id']?>"></label></td>

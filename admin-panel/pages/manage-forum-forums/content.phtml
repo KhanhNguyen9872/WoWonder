@@ -95,13 +95,16 @@ if (($page > $db->totalPages) && !empty($_GET['page-id'])) {
                             <tbody>
                             <?php foreach ($posts as $value):
                               $forum = ToArray($value);
+                              $forum['name_lang'] = Wo_ReplaceText($forum['name']);
+                              $forum['description_lang'] = Wo_ReplaceText($forum['description']);
                              ?>
 						        <tr class="forum-list" id="<?php echo $forum['id']; ?>" data-rmd-forum-ident="<?php echo $forum['id']; ?>" data_selected="<?php echo $forum['id'] ?>">
                       <td><input type="checkbox" id="check-data-<?php echo $forum['id']?>" class="delete-checkbox filled-in"><label for="check-data-<?php echo $forum['id']?>"></label></td>
 						            <td><?php echo $forum['id']; ?></td>
-						            <td><?php echo $forum['name']; ?></td>
-						            <td><?php echo $forum['description']; ?></td>
+						            <td><?php echo $forum['name_lang']; ?></td>
+						            <td><?php echo $forum['description_lang']; ?></td>
 						            <td>
+                                        <a target = "_blank" class="btn bg-info admn_table_btn" href="<?php echo Wo_LoadAdminLinkSettings('edit-forum?id='.$forum['id']) ?>">Edit</a>
 						                <button class="btn main bg-danger admn_table_btn delete-forum" id="<?php echo $forum['id']; ?>" onclick="Wo_DelForum(<?php echo $forum['id'];?>,'hide')">
 						                    Delete
 						                </button>

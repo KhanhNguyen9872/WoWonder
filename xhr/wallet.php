@@ -21,25 +21,48 @@ if ($f == 'wallet') {
         }
     }
     if ($s == 'get-paid') {
-        if (isset($_GET['success']) && $_GET['success'] == 1 && isset($_GET['paymentId']) && isset($_GET['PayerID'])) {
-            if (!is_array(Wo_GetWalletReplenishingDone($_GET['paymentId'], $_GET['PayerID']))) {
-                if (Wo_ReplenishingUserBalance($_GET['amount'])) {
-                    $_GET['amount']                 = Wo_Secure($_GET['amount']);
-                    $create_payment_log             = mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ('" . $wo['user']['id'] . "', 'WALLET', '" . $_GET['amount'] . "', 'PayPal')");
-                    $_SESSION['replenished_amount'] = $_GET['amount'];
-                    if (!empty($_COOKIE['redirect_page'])) {
-                        $redirect_page = preg_replace('/on[^<>=]+=[^<>]*/m', '', $_COOKIE['redirect_page']);
-                        $redirect_page = preg_replace('/\((.*?)\)/m', '', $redirect_page);
-                        header("Location: " . $redirect_page);
+        if (isset($_GET['success']) && $_GET['success'] == 1 && isset($_GET['token']) && !empty($_GET['token'])) {
+            include_once "assets/includes/paypal_config.php";
+            $token = Wo_Secure($_GET['token']);
+            $ch = curl_init();
+
+            curl_setopt($ch, CURLOPT_URL, $url . '/v2/checkout/orders/'.$token.'/capture');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_POST, 1);
+
+            $headers = array();
+            $headers[] = 'Content-Type: application/json';
+            $headers[] = 'Authorization: Bearer '.$wo['paypal_access_token'];
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+            $result = curl_exec($ch);
+            if (curl_errno($ch)) {
+                header("Location: $site_url/payment-error?reason=invalid-payment");
+                exit();
+            }
+            curl_close($ch);
+            if (!empty($result)) {
+                $result = json_decode($result);
+                if (!empty($result->status) && $result->status == 'COMPLETED') {
+                    if (Wo_ReplenishingUserBalance($_GET['amount'])) {
+                        $_GET['amount']                 = Wo_Secure($_GET['amount']);
+                        $create_payment_log             = mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ('" . $wo['user']['id'] . "', 'WALLET', '" . $_GET['amount'] . "', 'PayPal')");
+                        $_SESSION['replenished_amount'] = $_GET['amount'];
+                        if (!empty($_COOKIE['redirect_page'])) {
+                            $redirect_page = preg_replace('/on[^<>=]+=[^<>]*/m', '', $_COOKIE['redirect_page']);
+                            $redirect_page = preg_replace('/\((.*?)\)/m', '', $redirect_page);
+                            header("Location: " . $redirect_page);
+                        } else {
+                            header("Location: " . Wo_SeoLink('index.php?link1=wallet'));
+                        }
+                        exit();
                     } else {
                         header("Location: " . Wo_SeoLink('index.php?link1=wallet'));
+                        exit();
                     }
-                    exit();
-                } else {
-                    header("Location: " . Wo_SeoLink('index.php?link1=wallet'));
-                    exit();
                 }
-            } else {
+            }
+            else{
                 header("Location: " . Wo_SeoLink('index.php?link1=wallet'));
                 exit();
             }
@@ -86,8 +109,10 @@ if ($f == 'wallet') {
             $notif_msg       = $wo['lang']['sent_you'];
             $data['status']  = 200;
             $data['message'] = "$success_msg@ $recipient_name";
-            $note1           = $success_msg . " " . $userdata['name'];
-            $note2           = $wo['lang']['successfully_received_from'] . " " . $wo['user']['name'];
+            //$note1           = $success_msg . " " . $userdata['name'];
+            $note1           = $userdata['name'];
+            //$note2           = $wo['lang']['successfully_received_from'] . " " . $wo['user']['name'];
+            $note2           = $wo['user']['name'];
             $db->where('user_id', $user_id)->update(T_USERS, $up_data1);
             mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ({$user_id}, 'RECEIVED', {$amount}, '{$note2}')");
             $db->where('user_id', $wo['user']['id'])->update(T_USERS, $up_data2);
@@ -149,40 +174,34 @@ if ($f == 'wallet') {
                 if ($_GET['type'] == 'pro') {
                     $is_pro = 0;
                     $stop   = 0;
-                    $user   = Wo_UserData($wo['user']['user_id']);
-                    if ($user['is_pro'] == 1) {
-                        $stop = 1;
-                        if ($user['pro_type'] == 1) {
-                            $time_ = time() - $star_package_duration;
-                            if ($user['pro_time'] > $time_) {
-                                $stop = 1;
-                            }
-                        } else if ($user['pro_type'] == 2) {
-                            $time_ = time() - $hot_package_duration;
-                            if ($user['pro_time'] > $time_) {
-                                $stop = 1;
-                            }
-                        } else if ($user['pro_type'] == 3) {
-                            $time_ = time() - $ultima_package_duration;
-                            if ($user['pro_time'] > $time_) {
-                                $stop = 1;
-                            }
-                        } else if ($user['pro_type'] == 4) {
-                            if ($vip_package_duration > 0) {
-                                $time_ = time() - $vip_package_duration;
-                                if ($user['pro_time'] > $time_) {
-                                    $stop = 1;
-                                }
-                            }
-                        }
-                    }
+                    // $user   = Wo_UserData($wo['user']['user_id']);
+                    // if ($user['is_pro'] == 1) {
+                    //     $stop = 1;
+                    //     if ($user['pro_type'] == 1) {
+                    //         $time_ = time() - $star_package_duration;
+                    //         if ($user['pro_time'] > $time_) {
+                    //             $stop = 1;
+                    //         }
+                    //     } else if ($user['pro_type'] == 2) {
+                    //         $time_ = time() - $hot_package_duration;
+                    //         if ($user['pro_time'] > $time_) {
+                    //             $stop = 1;
+                    //         }
+                    //     } else if ($user['pro_type'] == 3) {
+                    //         $time_ = time() - $ultima_package_duration;
+                    //         if ($user['pro_time'] > $time_) {
+                    //             $stop = 1;
+                    //         }
+                    //     } else if ($user['pro_type'] == 4) {
+                    //         if ($vip_package_duration > 0) {
+                    //             $time_ = time() - $vip_package_duration;
+                    //             if ($user['pro_time'] > $time_) {
+                    //                 $stop = 1;
+                    //             }
+                    //         }
+                    //     }
+                    // }
                     if ($stop == 0) {
-                        $pro_types_array = array(
-                            1,
-                            2,
-                            3,
-                            4
-                        );
                         $pro_type        = $_GET['pro_type'];
                         $is_pro          = 1;
                     }
@@ -199,7 +218,14 @@ if ($f == 'wallet') {
                                 $update_array['verified'] = 1;
                             }
                             $mysqli             = Wo_UpdateUserData($wo['user']['user_id'], $update_array);
-                            $notes              = $wo['lang']['upgrade_to_pro'] . " " . $img . " : Wallet";
+                            //$notes              = $wo['lang']['upgrade_to_pro'] . " " . $img . " : Wallet";
+                            //$notes              = $img . " : Wallet";
+                            //$notes              = str_replace('{text}', $img . " : Wallet", $wo['lang']['trans_upgrade_to_pro']);
+                            $notes = json_encode([
+                                'pro_type' => $pro_type,
+                                'method_type' => 'wallet'
+                            ]);
+
                             $create_payment_log = mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ({$wo['user']['user_id']}, 'PRO', {$price}, '{$notes}')");
                             $create_payment     = Wo_CreatePayment($pro_type);
                             if ($mysqli) {
@@ -258,7 +284,9 @@ if ($f == 'wallet') {
                     }
                 } elseif ($_GET['type'] == 'fund') {
                     $amount             = $price;
-                    $notes              = "Doanted to " . mb_substr($fund->title, 0, 100, "UTF-8");
+                    //$notes              = "Doanted to " . mb_substr($fund->title, 0, 100, "UTF-8");
+                    $notes              = mb_substr($fund->title, 0, 100, "UTF-8");
+                    //$notes              = str_replace('{text}', mb_substr($fund->title, 0, 100, "UTF-8"), $wo['lang']['trans_doanted_to']);
                     $create_payment_log = mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ({$wo['user']['user_id']}, 'DONATE', {$amount}, '{$notes}')");
                     $wallet_amount      = ($wo["user"]['wallet'] - $price);
                     $query_one          = mysqli_query($sqlConnect, "UPDATE " . T_USERS . " SET `wallet` = '{$wallet_amount}' WHERE `user_id` = {$wo['user']['user_id']} ");

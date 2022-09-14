@@ -20,7 +20,7 @@ $group_limit = (!empty($_POST['group_limit']) && is_numeric($_POST['group_limit'
 $page_offset = (!empty($_POST['page_offset']) && is_numeric($_POST['page_offset']) && $_POST['page_offset'] > 0 ? Wo_Secure($_POST['page_offset']) : 0);
 $page_limit = (!empty($_POST['page_limit']) && is_numeric($_POST['page_limit']) && $_POST['page_limit'] > 0 && $_POST['page_limit'] <= 50 ? Wo_Secure($_POST['page_limit']) : 20);
 $data_type = array('all');
-if (!empty($_POST['data_type'])) {
+if (!empty($_POST['data_type']) && $_POST['data_type'] != 'all') {
     $get_types = explode(',', $_POST['data_type']);
     if (!empty($get_types)) {
         $data_type = array();
@@ -87,7 +87,7 @@ if (!empty($messages)) {
         }
         $message['time_text'] = Wo_Time_Elapsed_String($message['time']);
         $message_po  = 'left';
-        if ($message['from_id'] == $user_id) {
+        if ($message['from_id'] == $wo['user']['id']) {
             $message_po  = 'right';
         }
         
@@ -179,7 +179,7 @@ if (!empty($groups)) {
             }
             $message['time_text'] = Wo_Time_Elapsed_String($message['time']);
             $message_po  = 'left';
-            if ($message['from_id'] == $user_id) {
+            if ($message['from_id'] == $wo['user']['id']) {
                 $message_po  = 'right';
             }
             

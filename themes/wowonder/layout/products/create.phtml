@@ -137,6 +137,7 @@
 					<input type="hidden" name="hash_id" value="<?php echo Wo_CreateSession();?>">
 					<input type="hidden" name="lat-product" id="lat-product" class="form-control input-md" value="">
 					<input type="hidden" name="lng-product" id="lng-product" class="form-control input-md" value="">
+					<input type="hidden" name="page_id" id="page_id_product" class="form-control input-md" value="<?php echo(!empty($wo['page_profile']) && !empty($wo['page_profile']['page_id']) ? $wo['page_profile']['page_id'] : 0) ?>">
 				</div>
 				<div class="modal-footer">
 					<button type="submit" class="btn btn-main btn-mat btn-mat-raised add_wow_loader"><?php echo $wo['lang']['publish']; ?></button>
@@ -146,6 +147,7 @@
 	</div>
 </div>
 <script type="text/javascript">
+	var imgArray = [];
 	<?php 
 $js_array = json_encode($wo['products_sub_categories']);
 echo "var sub_categories_array = ". $js_array . ";\n";
@@ -165,36 +167,71 @@ echo "var sub_categories_array = ". $js_array . ";\n";
 		    $('#product_sub_category').html(text);
 		}
 	}
+	function DeleteUploadedImageByIdP(id,self) {
+		$('#delete_uploaded_image_by_id_'+id).remove();
+		imgArray.splice(id, 1);
+		var image_holder = $(self).parents('#create-product-modal').find("#productimage-holder");
+		image_holder.empty();
+
+		for (var i = 0; i < imgArray.length; i++){
+
+			var reader = new FileReader();
+			var ii = 0;
+			reader.onload = function (e) {
+			  image_holder.append('<span class="thumb-image-delete" id="image_to_'+ii+'"><span onclick="DeleteUploadedImageByIdP('+ii+',this)" class="pointer thumb-image-delete-btn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg></span><img src="'+e.target.result+'" class="thumb-image"></span>')
+			  ii = ii +1;
+
+			}
+			image_holder.show();
+	    reader.readAsDataURL(imgArray[i]);
+		}
+		$("#product-photos")[0].files = new FileListItems(imgArray);
+	}
 $(document).ready(function() {
 	$("#product-photos").on('change', function() {
+		let self = this;
 	//Get count of selected files
 	var product_countFiles = $(this)[0].files.length;
 	var product_imgPath = $(this)[0].value;
 	var extn = product_imgPath.substring(product_imgPath.lastIndexOf('.') + 1).toLowerCase();
-	var product_image_holder = $("#productimage-holder");
-	product_image_holder.empty();
+	var product_image_holder = $(self).parents('#create-product-modal').find("#productimage-holder");
+	//product_image_holder.empty();
 	if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
 		if (typeof(FileReader) != "undefined") {
 		//loop for each file selected for uploaded.
 		for (var i = 0; i < product_countFiles; i++) 
 		{
-			var product_reader = new FileReader();
-			product_reader.onload = function(e) {
-				$("<img />", {
-                    "src": e.target.result,
-                    "class": "thumb-image"
-                  }).appendTo(product_image_holder);
-                }
-                product_image_holder.show();
-                product_reader.readAsDataURL($(this)[0].files[i]);
+			var reader = new FileReader();
+					
+			imgArray.push($(self)[0].files[i]);
+			
+			
+			reader.onload = function (e) {
+				if ($(self).parents('#create-product-modal').find("#productimage-holder .thumb-image-delete").length == 0) {
+					var ii = 0;
+				}
+				else{
+					var ii = $(self).parents('#create-product-modal').find("#productimage-holder .thumb-image-delete").length;
+				}
+			  $(product_image_holder).append('<span class="thumb-image thumb-image-delete" id="delete_uploaded_image_by_id_'+ii+'"><span class="pointer thumb-image-delete-btn" onclick="DeleteUploadedImageByIdP('+ii+',this)"><i class="fa fa-remove"></i></span><div class="background_image_product" style="background-image: url('+e.target.result+');"></div></span>');
+			  ii = ii +1;
+
+			}
+			product_image_holder.show();
+      reader.readAsDataURL($(this)[0].files[i]);
               }
+              $(this)[0].files = new FileListItemsP(imgArray);
             } else {
               product_image_holder.html("<p>This browser does not support FileReader.</p>");
             }
          }
 	});
 });
-
+function FileListItemsP (files) {
+  var b = new ClipboardEvent("").clipboardData || new DataTransfer()
+  for (var i = 0, len = files.length; i<len; i++) b.items.add(files[i])
+  return b.files
+}
 $(function() {
    	if (navigator.geolocation) {
         var location = navigator.geolocation.getCurrentPosition(function (position) {
@@ -223,6 +260,8 @@ $(function() {
       },
        success: function(data) {
          if (data.status == 200) {
+         	$("#productimage-holder").empty();
+      		imgArray = [];
          	if (data.message) {
          		$('.app-general-alert').html('<div class="alert alert-success">' + data.message + '</div>');
          		setTimeout(function (){

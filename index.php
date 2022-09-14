@@ -9,6 +9,33 @@
 // | Copyright (c) 2017 WoWonder. All rights reserved.
 // +------------------------------------------------------------------------+
 require_once('assets/init.php');
+if (!empty($auto_redirect)) {
+    $checkHTTPS = checkHTTPS();
+    $isURLSSL = strpos($site_url, 'https');
+    if ($isURLSSL !== false) {
+        if (empty($checkHTTPS)) {
+            header("Location: https://" . full_url($_SERVER));
+            exit();
+        }
+    } else if ($checkHTTPS) {
+        header("Location: http://" . full_url($_SERVER));
+        exit();
+    }
+    if (strpos($site_url, 'www') !== false) {
+        if (!preg_match('/www/', $_SERVER['HTTP_HOST'])) {
+            $protocol = ($isURLSSL !== false) ? "https://" : "http://";
+            header("Location: $protocol" . full_url($_SERVER));
+            exit();
+        }
+    }
+    if (preg_match('/www/', $_SERVER['HTTP_HOST'])) {
+        if (strpos($site_url, 'www') === false) {
+            $protocol = ($isURLSSL !== false) ? "https://" : "http://";
+            header("Location: $protocol" . str_replace("www.", "", full_url($_SERVER)));
+            exit();
+        }
+    }
+}
 if ($wo['loggedin'] == true) {
     $update_last_seen = Wo_LastSeen($wo['user']['user_id']);
 } else if (!empty($_SERVER['HTTP_HOST'])) {
@@ -38,17 +65,12 @@ if (!empty($_POST)) {
         }
     }
 }
-if (!empty($_GET['ref']) && $wo['loggedin'] == false && !isset($_COOKIE['src'])) {
-    $get_ip = get_ip_address();
-    if (!isset($_SESSION['ref']) && !empty($get_ip)) {
-        $_GET['ref'] = Wo_Secure($_GET['ref']);
-        $ref_user_id = Wo_UserIdFromUsername($_GET['ref']);
-        $user_date   = Wo_UserData($ref_user_id);
-        if (!empty($user_date)) {
-            if (ip_in_range($user_date['ip_address'], '/24') === false && $user_date['ip_address'] != $get_ip) {
-                $_SESSION['ref'] = $user_date['username'];
-            }
-        }
+if (!empty($_GET['ref']) && $wo['loggedin'] == false) {
+    $_GET['ref'] = Wo_Secure($_GET['ref']);
+    $ref_user_id = Wo_UserIdFromUsername($_GET['ref']);
+    $user_date   = Wo_UserData($ref_user_id);
+    if (!empty($user_date)) {
+        $_SESSION['ref'] = $user_date['username'];
     }
 }
 if (!isset($_COOKIE['src'])) {
@@ -68,7 +90,9 @@ if ($wo['config']['maintenance_mode'] == 1) {
         if ($page == 'admincp' || $page == 'admin-cp') {
             $page = 'welcome';
         } else {
-            $page = 'maintenance';
+            if (empty($_COOKIE['maintenance_access']) || (!empty($_COOKIE['maintenance_access']) && $_COOKIE['maintenance_access'] != 1)) {
+                $page = 'maintenance';
+            }
         }
     } else {
         if (Wo_IsAdmin() === false) {
@@ -78,6 +102,24 @@ if ($wo['config']['maintenance_mode'] == 1) {
 }
 if (!empty($_GET['m'])) {
     $page = 'welcome';
+    setcookie('maintenance_access','1', time() + 31556926, '/');
+}
+if ($page != 'admincp' && $page != 'admin-cp') {
+    if ($wo["loggedin"] && !empty($wo['user']) && $wo['user']['is_pro'] && !empty($wo["pro_packages"][$wo['user']['pro_type']]) && !empty($wo["pro_packages"][$wo['user']['pro_type']]['max_upload'])) {
+        $wo['config']['maxUpload'] = $wo["pro_packages"][$wo['user']['pro_type']]['max_upload'];
+    }
+}
+$wo['lang_attr'] = 'en';
+$wo['lang_og_meta'] = '';
+if (!empty($wo["language"]) && !empty($wo['iso']) && in_array($wo["language"], array_keys($wo['iso'])) && !empty($wo['iso'][$wo["language"]])) {
+    $wo['lang_attr'] = $wo['iso'][$wo["language"]];
+}
+foreach ($all_langs as $key => $value) {
+    $iso = '';
+    if (!empty($wo['iso'][$value])) {
+        $iso = $wo['iso'][$value];
+    }
+    $wo['lang_og_meta'] .= '<link rel="alternate" href="'.$wo['config']['site_url'].'?lang='.$value.'" hreflang="'.$iso.'" />';
 }
 if ((!$wo['loggedin'] || ($wo['loggedin'] && $wo['user']['banned'] != 1))) {
     if ($wo['config']['membership_system'] == 1) {

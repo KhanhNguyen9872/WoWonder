@@ -113,7 +113,7 @@ if ($type == 'timeline' && $wo['loggedin'] == true) {
 $can_                           = 0;
 $wo['nodejs_send_notification'] = false;
 if ($wo['loggedin'] == true && $wo['config']['profileVisit'] == 1 && $type == 'timeline' && $con2 == 1) {
-    if ($wo['user_profile']['user_id'] != $wo['user']['user_id'] && $wo['user']['visit_privacy'] == 0) {
+    if ($wo['user_profile']['user_id'] != $wo['user']['user_id'] && $wo['user_profile']['visit_privacy'] == 0) {
         if ($wo['config']['pro'] == 1) {
             if ($wo['user_profile']['is_pro'] == 1 && in_array($wo['user_profile']['pro_type'], array_keys($wo['pro_packages'])) && $wo['pro_packages'][$wo['user_profile']['pro_type']]['profile_visitors'] == 1) {
                 $can_ = 1;

@@ -336,7 +336,7 @@ $(function() {
               }, 2000);
           });
       });
-    $('input[type=text], input[type=number]').on('keyup', delay(function() {
+    $('input[type=text], input[type=number]').on('input', delay(function() {
             clearTimeout(setTimeOutColor);
             var thisElement = $(this);
             var configName = thisElement.attr('name');

@@ -134,7 +134,7 @@
         <!-- embed -->
 
         <!-- postMap -->
-        <?php if(!empty($wo['story']['postMap']) && empty($wo['story']['postVine']) && empty($wo['story']['postSoundCloud']) && empty($wo['story']['postVimeo']) && empty($wo['story']['postDailymotion']) && empty($wo['story']['postYoutube']) && empty($wo['story']['postPlaytube']) && empty($wo['story']['postDeepsound']) && empty($wo['story']['postFile']) && ($wo['config']['google_map'] == 1 || $wo['config']['yandex_map'] == 1)) { ?>
+        <?php if(!empty($wo['story']['postMap']) && empty($wo['story']['postVine']) && empty($wo['story']['postSoundCloud']) && empty($wo['story']['postVimeo']) && empty($wo['story']['postDailymotion']) && empty($wo['story']['postYoutube']) && empty($wo['story']['postPlaytube']) && empty($wo['story']['postDeepsound']) && empty($wo['story']['postFile']) && ($wo['config']['google_map'] == 1 || $wo['config']['yandex_map'] == 1) && (empty($wo['story']['photo_album']) || (!empty($wo['story']['photo_album']) && count($wo['story']['photo_album']) < 2)) && $wo['story']['multi_image'] != 1) { ?>
         <div class="post-map">
           <?php if ($wo['config']['google_map'] == 1) { ?>
            <img src="https://maps.googleapis.com/maps/api/staticmap?center=<?php echo $wo['story']['postMap'];?>&zoom=13&size=600x250&maptype=roadmap&markers=color:red%7C<?php echo $wo['story']['postMap'];?>&key=<?php echo $wo['config']['google_map_api'];?>" width="100%">
@@ -246,7 +246,7 @@
          <!-- postRecord -->
 
          <!-- Live Video -->
-         <?php if (!empty($wo['story']['stream_name']) && empty($wo['story']['agora_resource_id']) && !$wo['story']['is_still_live']) { ?>
+         <?php if (!empty($wo['story']['stream_name']) && empty($wo['story']['agora_resource_id']) && empty($wo['story']['agora_token']) && empty($wo['story']['agora_sid']) && !$wo['story']['is_still_live']) { ?>
           <div class="post-file" <?php echo $wo['story']['is_still_live'] ? 'style="/*height: 440px;*/"' : ''; ?> id="fullsizeimg">
             <?php
             $wo['media'] = array('filename' => 'https://viewer.millicast.com/v2?streamId='.$wo['config']['live_account_id'].'/'.$wo['story']['stream_name']);

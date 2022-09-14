@@ -25,6 +25,11 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                 session_id: data.user_id
             }
         })
+        if (user_id == null) {
+            console.log("User is not found! Please check if you are logged in, or you are using the same database as written in config.php. You can edit MySQL settings in nodejs/config.json")
+            socket.disconnect(true)
+            return;
+        }
         user_id = user_id.user_id;
 
         let user_status = await ctx.wo_users.findOne({
@@ -56,7 +61,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
             }
         }
 
-        await socketEvents.emitUserStatus(ctx, socket, data)
+        await socketEvents.emitUserStatus(ctx, socket, ctx.userHashUserId[data.user_id])
         if (user_status == 0) {
             let followers = await ctx.wo_followers.findAll({
                 attributes: ["following_id"],
@@ -120,6 +125,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
     socket.on("is_chat_on", async (data) => {
         
         let last_message = {}
+
         if (data.message_id) {
             last_message = await ctx.wo_messages.findOne({
                 where: {
@@ -134,6 +140,9 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                 }
             }
         })
+        if (toUser == null) {
+            return;
+        }
         if (data.isGroup) {
             ctx.userIdGroupChatOpen[ctx.userHashUserId[data.user_id]] && ctx.userIdGroupChatOpen[ctx.userHashUserId[data.user_id]].length ? ctx.userIdGroupChatOpen[ctx.userHashUserId[data.user_id]].push(data.recipient_id) : ctx.userIdGroupChatOpen[ctx.userHashUserId[data.user_id]] = [data.recipient_id]
         }
@@ -234,10 +243,10 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                     [Op.or]: [
                         {
                             from_id: {
-                                [Op.or]: [ ctx.userHashUserId[data.from_id], data.to_id]
+                                [Op.or]: [ ctx.userHashUserId[data.from_id], parseInt(data.to_id)]
                             },
                             to_id: {
-                                [Op.or]: [ ctx.userHashUserId[data.from_id], data.to_id]
+                                [Op.or]: [ ctx.userHashUserId[data.from_id], parseInt(data.to_id)]
                             }
                         }
                     ],
@@ -253,7 +262,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                 from_id: ctx.userHashUserId[data.from_id],
                 page_id: data.page_id,
                 to_id: to_id,
-                text: data.msg,
+                text: await funcs.Wo_CensoredWords(ctx, data.msg),
                 seen: 0,
                 time: Math.floor(Date.now() / 1000),
                 reply_id: parseInt(data.message_reply_id),
@@ -265,7 +274,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                 from_id: ctx.userHashUserId[data.from_id],
                 page_id: data.page_id,
                 to_id: to_id,
-                text: data.msg,
+                text: await funcs.Wo_CensoredWords(ctx, data.msg),
                 seen: 0,
                 time: Math.floor(Date.now() / 1000),
                 reply_id: parseInt(data.message_reply_id),
@@ -439,7 +448,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
             var m_sent = await ctx.wo_messages.create({
                 from_id: ctx.userHashUserId[data.from_id],
                 group_id: data.group_id,
-                text: data.msg,
+                text: await funcs.Wo_CensoredWords(ctx, data.msg),
                 seen: 0,
                 time: Math.floor(Date.now() / 1000)
             })
@@ -449,7 +458,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
             var m_sent = await ctx.wo_messages.create({
                 from_id: ctx.userHashUserId[data.from_id],
                 group_id: data.group_id,
-                text: data.msg,
+                text: await funcs.Wo_CensoredWords(ctx, data.msg),
                 seen: 0,
                 time: Math.floor(Date.now() / 1000)
             })
@@ -688,7 +697,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                 var m_sent = await ctx.wo_messages.create({
                     from_id: ctx.userHashUserId[data.from_id],
                     group_id: data.group_id,
-                    text: data.msg,
+                    text: await funcs.Wo_CensoredWords(ctx, data.msg),
                     seen: 0,
                     time: Math.floor(Date.now() / 1000),
                     reply_id: parseInt(data.message_reply_id)
@@ -720,7 +729,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                 var m_sent = await ctx.wo_messages.create({
                     from_id: ctx.userHashUserId[data.from_id],
                     group_id: data.group_id,
-                    text: data.msg,
+                    text: await funcs.Wo_CensoredWords(ctx, data.msg),
                     seen: 0,
                     time: Math.floor(Date.now() / 1000),
                     reply_id: parseInt(data.message_reply_id)
@@ -784,12 +793,12 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                             [Op.eq]: ctx.userHashUserId[data.from_id]
                         },
                         to_id: {
-                            [Op.eq]: data.to_id
+                            [Op.eq]: parseInt(data.to_id)
                         }
                     },
                     {
                         from_id: {
-                            [Op.eq]: data.to_id
+                            [Op.eq]: parseInt(data.to_id)
                         },
                         to_id: {
                             [Op.eq]: ctx.userHashUserId[data.from_id]
@@ -810,7 +819,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
         let toUser = await ctx.wo_users.findOne({
             where: {
                 user_id: {
-                    [Op.eq]: data.to_id
+                    [Op.eq]: parseInt(data.to_id)
                 }
             }
         })
@@ -825,6 +834,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
             lat = data.lat;
         }
         let hasHTML = false;
+        let record_data = '';
         if (data.record) {
             if (data.message_reply_id > 0) {
                 let cansendreplyID = await ctx.wo_messages.findOne({
@@ -833,10 +843,10 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                         [Op.or]: [
                             {
                                 from_id: {
-                                    [Op.or]: [ ctx.userHashUserId[data.from_id], data.to_id]
+                                    [Op.or]: [ ctx.userHashUserId[data.from_id], parseInt(data.to_id)]
                                 },
                                 to_id: {
-                                    [Op.or]: [ ctx.userHashUserId[data.from_id], data.to_id]
+                                    [Op.or]: [ ctx.userHashUserId[data.from_id], parseInt(data.to_id)]
                                 }
                             }
                         ],
@@ -859,6 +869,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                 lng: lng,
                 lat: lat,
             })
+            record_data = ret;
             data.mediaId = ret.id;
             data.sent_message = ret;
             await socket.emit('private_message_page', {
@@ -941,10 +952,10 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                             [Op.or]: [
                                 {
                                     from_id: {
-                                        [Op.or]: [ ctx.userHashUserId[data.from_id], data.to_id]
+                                        [Op.or]: [ ctx.userHashUserId[data.from_id], parseInt(data.to_id)]
                                     },
                                     to_id: {
-                                        [Op.or]: [ ctx.userHashUserId[data.from_id], data.to_id]
+                                        [Op.or]: [ ctx.userHashUserId[data.from_id], parseInt(data.to_id)]
                                     }
                                 }
                             ],
@@ -957,7 +968,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                 var m_sent = await ctx.wo_messages.create({
                     from_id: ctx.userHashUserId[data.from_id],
                     to_id: data.to_id,
-                    text: data.msg,
+                    text: await funcs.Wo_CensoredWords(ctx, data.msg),
                     seen: 0,
                     time: Math.floor(Date.now() / 1000),
                     reply_id: parseInt(data.message_reply_id),
@@ -976,10 +987,10 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                         [Op.or]: [
                             {
                                 from_id: {
-                                    [Op.or]: [ ctx.userHashUserId[data.from_id], data.to_id]
+                                    [Op.or]: [ ctx.userHashUserId[data.from_id], parseInt(data.to_id)]
                                 },
                                 to_id: {
-                                    [Op.or]: [ ctx.userHashUserId[data.from_id], data.to_id]
+                                    [Op.or]: [ ctx.userHashUserId[data.from_id], parseInt(data.to_id)]
                                 }
                             }
                         ],
@@ -993,7 +1004,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                 var m_sent = await ctx.wo_messages.create({
                     from_id: ctx.userHashUserId[data.from_id],
                     to_id: data.to_id,
-                    text: data.msg,
+                    text: await funcs.Wo_CensoredWords(ctx, data.msg),
                     seen: 0,
                     time: Math.floor(Date.now() / 1000),
                     reply_id: parseInt(data.message_reply_id),
@@ -1072,17 +1083,23 @@ module.exports.registerListeners = async (socket, io, ctx) => {
             })
         }
         else {
-            var m_sent = await ctx.wo_messages.create({
-                from_id: ctx.userHashUserId[data.from_id],
-                to_id: data.to_id,
-                text: data.msg,
-                seen: 0,
-                time: Math.floor(Date.now() / 1000),
-                reply_id: parseInt(data.message_reply_id),
-                story_id: story_id,
-                lng: lng,
-                lat: lat,
-            })
+            if (data.record) {
+                var m_sent = record_data;
+            }
+            else{
+                var m_sent = await ctx.wo_messages.create({
+                    from_id: ctx.userHashUserId[data.from_id],
+                    to_id: data.to_id,
+                    text: await funcs.Wo_CensoredWords(ctx, data.msg),
+                    seen: 0,
+                    time: Math.floor(Date.now() / 1000),
+                    reply_id: parseInt(data.message_reply_id),
+                    story_id: story_id,
+                    lng: lng,
+                    lat: lat,
+                })
+            }
+                
             data.sent_message = m_sent;
             for (userSocket of remainingSameUserSockets) {
                 await userSocket.emit('private_message', {
@@ -1346,12 +1363,12 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                             [Op.eq]: ctx.userHashUserId[data.from_id]
                         },
                         to_id: {
-                            [Op.eq]: data.to_id
+                            [Op.eq]: parseInt(data.to_id)
                         }
                     },
                     {
                         from_id: {
-                            [Op.eq]: data.to_id
+                            [Op.eq]: parseInt(data.to_id)
                         },
                         to_id: {
                             [Op.eq]: ctx.userHashUserId[data.from_id]
@@ -1361,7 +1378,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
             },
             order: [['id', 'DESC']]
         })
-        let nextId = (lastId && lastId.id) ? (+lastId.id + 1) : 1
+        let nextId = (lastId && lastId.id) ? (+lastId.id + 1) : 1;
         let fromUser = await ctx.wo_users.findOne({
             where: {
                 user_id: {
@@ -1372,7 +1389,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
         let toUser = await ctx.wo_users.findOne({
             where: {
                 user_id: {
-                    [Op.eq]: data.to_id
+                    [Op.eq]: parseInt(data.to_id)
                 }
             }
         })
@@ -1397,10 +1414,10 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                     [Op.or]: [
                         {
                             from_id: {
-                                [Op.or]: [ ctx.userHashUserId[data.from_id], data.to_id]
+                                [Op.or]: [ ctx.userHashUserId[data.from_id], parseInt(data.to_id)]
                             },
                             to_id: {
-                                [Op.or]: [ ctx.userHashUserId[data.from_id], data.to_id]
+                                [Op.or]: [ ctx.userHashUserId[data.from_id], parseInt(data.to_id)]
                             }
                         }
                     ],
@@ -1508,10 +1525,10 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                         [Op.or]: [
                             {
                                 from_id: {
-                                    [Op.or]: [ ctx.userHashUserId[data.from_id], data.to_id]
+                                    [Op.or]: [ ctx.userHashUserId[data.from_id], parseInt(data.to_id)]
                                 },
                                 to_id: {
-                                    [Op.or]: [ ctx.userHashUserId[data.from_id], data.to_id]
+                                    [Op.or]: [ ctx.userHashUserId[data.from_id], parseInt(data.to_id)]
                                 }
                             }
                         ],
@@ -1525,7 +1542,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                 var m_sent = await ctx.wo_messages.create({
                     from_id: ctx.userHashUserId[data.from_id],
                     to_id: data.to_id,
-                    text: data.msg,
+                    text: await funcs.Wo_CensoredWords(ctx, data.msg),
                     seen: 0,
                     time: Math.floor(Date.now() / 1000),
                     reply_id: parseInt(data.message_reply_id),
@@ -1544,10 +1561,10 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                             [Op.or]: [
                                 {
                                     from_id: {
-                                        [Op.or]: [ ctx.userHashUserId[data.from_id], data.to_id]
+                                        [Op.or]: [ ctx.userHashUserId[data.from_id], parseInt(data.to_id)]
                                     },
                                     to_id: {
-                                        [Op.or]: [ ctx.userHashUserId[data.from_id], data.to_id]
+                                        [Op.or]: [ ctx.userHashUserId[data.from_id], parseInt(data.to_id)]
                                     }
                                 }
                             ],
@@ -1560,7 +1577,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                 var m_sent = await ctx.wo_messages.create({
                     from_id: ctx.userHashUserId[data.from_id],
                     to_id: data.to_id,
-                    text: data.msg,
+                    text: await funcs.Wo_CensoredWords(ctx, data.msg),
                     seen: 0,
                     time: Math.floor(Date.now() / 1000),
                     reply_id: parseInt(data.message_reply_id),
@@ -1725,12 +1742,12 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                             [Op.eq]: ctx.userHashUserId[data.from_id]
                         },
                         to_id: {
-                            [Op.eq]: data.to_id
+                            [Op.eq]: parseInt(data.to_id)
                         }
                     },
                     {
                         from_id: {
-                            [Op.eq]: data.to_id
+                            [Op.eq]: parseInt(data.to_id)
                         },
                         to_id: {
                             [Op.eq]: ctx.userHashUserId[data.from_id]
@@ -1752,12 +1769,12 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                             [Op.eq]: ctx.userHashUserId[data.from_id]
                         },
                         to_id: {
-                            [Op.eq]: data.to_id
+                            [Op.eq]: parseInt(data.to_id)
                         }
                     },
                     {
                         from_id: {
-                            [Op.eq]: data.to_id
+                            [Op.eq]: parseInt(data.to_id)
                         },
                         to_id: {
                             [Op.eq]: ctx.userHashUserId[data.from_id]
@@ -1880,12 +1897,12 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                             [Op.eq]: ctx.userHashUserId[data.from_id]
                         },
                         to_id: {
-                            [Op.eq]: data.to_id
+                            [Op.eq]: parseInt(data.to_id)
                         }
                     },
                     {
                         from_id: {
-                            [Op.eq]: data.to_id
+                            [Op.eq]: parseInt(data.to_id)
                         },
                         to_id: {
                             [Op.eq]: ctx.userHashUserId[data.from_id]
@@ -1907,12 +1924,12 @@ module.exports.registerListeners = async (socket, io, ctx) => {
                             [Op.eq]: ctx.userHashUserId[data.from_id]
                         },
                         to_id: {
-                            [Op.eq]: data.to_id
+                            [Op.eq]: parseInt(data.to_id)
                         }
                     },
                     {
                         from_id: {
-                            [Op.eq]: data.to_id
+                            [Op.eq]: parseInt(data.to_id)
                         },
                         to_id: {
                             [Op.eq]: ctx.userHashUserId[data.from_id]
@@ -2319,7 +2336,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
         let groupData = await ctx.wo_groups.findOne({
             attributes: ["user_id"],
             where: {
-                id: to_id
+                id: parseInt(to_id)
             },
             raw: true
         });
@@ -2343,7 +2360,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
         let pageData = await ctx.wo_pages.findOne({
             attributes: ["user_id"],
             where: {
-                page_id: to_id
+                page_id: parseInt(to_id)
             },
             raw: true
         });
@@ -2383,6 +2400,11 @@ module.exports.registerListeners = async (socket, io, ctx) => {
         await io.emit("update_new_posts");
     })
 
+    socket.on("decline_call", async (data) => {
+        let user_id = ctx.userHashUserId[data.user_id];
+        await io.to(user_id).emit('decline_call', {});
+    })
+
     socket.on("user_notification", async (data) => {
         let user_id = ctx.userHashUserId[data.user_id]
         if (!data.to_id) {
@@ -2392,7 +2414,7 @@ module.exports.registerListeners = async (socket, io, ctx) => {
         let userData = await ctx.wo_users.findOne({
             attributes: ["user_id"],
             where: {
-                user_id: to_id
+                user_id: parseInt(to_id)
             },
             raw: true
         });

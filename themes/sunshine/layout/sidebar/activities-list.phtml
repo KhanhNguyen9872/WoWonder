@@ -11,6 +11,18 @@ if ($wo['activity']['activity_type'] == 'following' || $wo['activity']['activity
    $wo['activity']['following']  = Wo_UserData($wo['activity']['follow_id']);
    $post_publisher              = '<a class="second-user-color" data-ajax="?link1=timeline&u=' . $wo['activity']['following']['username'] . '" href="' . $wo['activity']['following']['url'] . '">' . $wo['activity']['following']['name'] . '</a>';
 }
+if (!empty($wo['activity']['postData'])) {
+    if ($wo['config']['shout_box_system'] == 1 && $wo['activity']['postData']['postPrivacy'] == 4) {
+        $post_publisher              = '<a class="second-user-color" href="javascript:void(0)">' . $wo['lang']['anonymous'] . '</a>';
+    }
+    else{
+        $post_publisher              = '<a class="second-user-color" data-ajax="?link1=timeline&u=' . $wo['activity']['postData']['publisher']['username'] . '" href="' . $wo['activity']['postData']['publisher']['url'] . '">' . $wo['activity']['postData']['publisher']['name'] . '</a>';
+    }
+    $replaced_txt                = array(
+    $post_publisher,
+    $wo['activity']['postData']['url']
+);
+}
 $replaced_txt                = array(
     $post_publisher,
     $wo['activity']['postData']['url']

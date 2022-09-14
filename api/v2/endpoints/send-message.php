@@ -169,12 +169,15 @@ if (empty($error_code)) {
                     }
                 }
                 $message['message_hash_id'] = $_POST['message_hash_id'];
+                $message['text'] = openssl_encrypt($message['text'], "AES-128-ECB", $message['time']);
+                unset($message['or_text']);
                 if (!empty($message['reply'])) {
                     foreach ($non_allowed as $key => $value) {
                        unset($message['reply']['messageUser'][$value]);
                     }
 
                     $message['reply']['text'] = Wo_Markup($message['reply']['or_text']);
+                    unset($message['reply']['or_text']);
                     $message['reply']['time_text'] = Wo_Time_Elapsed_String($message['reply']['time']);
                     $message_po           = 'left';
                     if ($message['reply']['from_id'] == $wo['user']['user_id']) {

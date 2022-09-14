@@ -18,33 +18,82 @@ if (!empty($wo['story']['parent_id'])) {
          <ul class="dropdown-menu post-privacy-menu post-options" role="menu">
             <?php if ($wo['loggedin'] == true && !empty($wo['story']['offer_id']) && (Wo_IsModerator() || Wo_IsAdmin() || $wo['story']['offer']['user_id'] == $wo['user']['id'])) { ?>
                <li>
-                  <div class="pointer" onclick="Wo_OpenOfferEditBox(<?php echo $wo['story']['offer_id']; ?>);"><?php echo $wo['lang']['edit_offer'];?></div>
+                  <div class="pointer" onclick="Wo_OpenOfferEditBox(<?php echo $wo['story']['offer_id']; ?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['edit_offer'];?></b>
+						<p><?php echo $wo['lang']['edit_offer_tx'];?></p>
+					</div>
+				  </div>
                </li>
             <?php } ?>
             <?php if ($wo['story']['admin'] === true && empty($wo['story']['product_id']) && empty($wo['story']['shared_from'])) { ?>
             <li>
-               <div class="pointer" onclick="Wo_OpenPostEditBox(<?php echo $wo['story']['id']; ?>);"><?php echo $wo['lang']['edit_post'];?></div>
+               <div class="pointer" onclick="Wo_OpenPostEditBox(<?php echo $wo['story']['id']; ?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['edit_post'];?></b>
+						<p><?php echo $wo['lang']['edit_post_tx'];?></p>
+					</div>
+			   </div>
             </li>
             <?php } else if (!empty($wo['story']['product_id']) && empty($wo['story']['parent_id'])) { 
                if ($wo['story']['product']['status'] == 0) { ?>
             <li>
-               <div class="pointer mark-as-sold-post" onclick="Wo_MarkAsSold(<?php echo $wo['story']['id']; ?>, <?php echo $wo['story']['product_id']; ?>);"><?php echo $wo['lang']['mark_as_sold']?></div>
+               <div class="pointer mark-as-sold-post" onclick="Wo_MarkAsSold(<?php echo $wo['story']['id']; ?>, <?php echo $wo['story']['product_id']; ?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 13C19.34 13 19.67 13.04 20 13.09V8H4V21H13.35C13.13 20.37 13 19.7 13 19C13 15.69 15.69 13 19 13M9 13V11.5C9 11.22 9.22 11 9.5 11H14.5C14.78 11 15 11.22 15 11.5V13H9M21 7H3V3H21V7M22.5 17.25L17.75 22L15 19L16.16 17.84L17.75 19.43L21.34 15.84L22.5 17.25Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['mark_as_sold'];?></b>
+						<p><?php echo $wo['lang']['mark_as_sold_tx'];?></p>
+					</div>
+			   </div>
             </li>
             <li>
-               <a class="pointer" href="<?php echo Wo_SeoLink('index.php?link1=edit-product&id=' . $wo['story']['product_id']);?>"><?php echo $wo['lang']['edit_product']?></a>
+               <a class="pointer" href="<?php echo Wo_SeoLink('index.php?link1=edit-product&id=' . $wo['story']['product_id']);?>">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['edit_product'];?></b>
+						<p><?php echo $wo['lang']['edit_product_tx'];?></p>
+					</div>
+			   </a>
             </li>
             <?php } } ?>
             <li>
-               <div class="pointer" onclick="Wo_OpenPostDeleteBox(<?php echo $wo['story']['id']; ?>);"><?php echo $wo['lang']['delete_post'];?></div>
+               <div class="pointer" onclick="Wo_OpenPostDeleteBox(<?php echo $wo['story']['id']; ?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['delete_post'];?></b>
+						<p><?php echo $wo['lang']['delete_post_tx'];?></p>
+					</div>
+			   </div>
             </li>
             <li>
-               <div class="pointer disable-comments" onclick="Wo_DisableComment(<?php echo $wo['story']['id']; ?>, <?php echo $wo['story']['comments_status']; ?>);"><?php echo ($wo['story']['comments_status'] == 1) ? $wo['lang']['disable_comments'] : $wo['lang']['enable_comments'];?></div>
+               <div class="pointer disable-comments" onclick="Wo_DisableComment(<?php echo $wo['story']['id']; ?>, <?php echo $wo['story']['comments_status']; ?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M9,22A1,1 0 0,1 8,21V18H4A2,2 0 0,1 2,16V4C2,2.89 2.9,2 4,2H20A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H13.9L10.2,21.71C10,21.9 9.75,22 9.5,22V22H9M5,5V7H19V5H5M5,9V11H13V9H5M5,13V15H15V13H5Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo ($wo['story']['comments_status'] == 1) ? $wo['lang']['disable_comments'] : $wo['lang']['enable_comments'];?></b>
+						<p><?php echo $wo['lang']['comments_status_tx'];?></p>
+					</div>
+			   </div>
             </li>
             <li>
                <hr>
             </li>
             <li>
-               <a href="<?php echo $wo['story']['url'];?>" target="_blank"><?php echo $wo['lang']['open_post_in_new_tab'];?></a>
+               <a href="<?php echo $wo['story']['url'];?>" target="_blank">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['open_post_in_new_tab'];?></b>
+						<p><?php echo $wo['lang']['open_post_in_new_tab_tx'];?></p>
+					</div>
+			   </a>
             </li>
             <li>
                <hr>
@@ -67,30 +116,65 @@ if (!empty($wo['story']['parent_id'])) {
                   }
                   ?>
                <div class="pin-post pointer" onclick="Wo_PinPost(<?php echo $wo['story']['id']; ?>, <?php echo $pin_post_id;?>, '<?php echo $pin_post_text; ?>');">
-                  <?php if($wo['story']['is_post_pinned'] === true) { ?>
-                  <?php echo $wo['lang']['unpin_post'];?>
-                  <?php } else { ?>
-                  <?php echo $wo['lang']['pin_post'];?>
-                  <?php } ?>
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b>
+							<?php if($wo['story']['is_post_pinned'] === true) { ?>
+								<?php echo $wo['lang']['unpin_post'];?>
+							<?php } else { ?>
+								<?php echo $wo['lang']['pin_post'];?>
+							<?php } ?>
+						</b>
+						<p><?php echo $wo['lang']['pin_post_tx'];?></p>
+					</div>
                </div>
             </li>
             <?php } } ?>
             <?php if (!empty($wo['story']['album_name']) && ($wo['story']['group_admin'] === false || $wo['story']['admin'] === true)) {?>
             <li>
-               <a href="<?php echo Wo_SeoLink('index.php?link1=create-album&album=' . $wo['story']['id']);?>"><?php echo $wo['lang']['add_photos'];?></a>
+               <a href="<?php echo Wo_SeoLink('index.php?link1=create-album&album=' . $wo['story']['id']);?>">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['add_photos'];?></b>
+						<p><?php echo $wo['lang']['add_photos_tx'];?></p>
+					</div>
+			   </a>
             </li>
             <?php } ?>
             <?php $hr = 0; if ($wo['config']['pro'] == 1 && ($wo['story']['group_admin'] === false || $wo['story']['admin'] === true)) { ?>
             <li>
                <?php if ($wo['user']['is_pro'] == 0) {  ?>
-               <a href="<?php echo Wo_SeoLink('index.php?link1=go-pro');?>" data-ajax="?link1=go-pro"><?php echo $wo['lang']['boost_post']; ?></a>
-               <?php } else if ($wo['user']['is_pro'] == 1 && in_array($wo['user']['pro_type'], array_keys($wo['pro_packages'])) && $wo['pro_packages'][$wo['user']['pro_type']]['posts_promotion'] > 0) {?>
-               <?php if ($wo['story']['is_post_boosted'] == 0) { ?>
-               <div class="boost-post pointer" onclick="Wo_BoostPost(<?php echo $wo['story']['id']; ?>)"><?php echo $wo['lang']['boost_post']; ?></div>
-               <?php } else { ?>
-               <div class="boost-post pointer" onclick="Wo_BoostPost(<?php echo $wo['story']['id']; ?>)"><?php echo $wo['lang']['unboost_post']; ?></div>
-               <?php } ?>
-               <?php } else if ($wo['user']['is_pro'] == 1 && $wo['user']['pro_type'] == 1) { $hr = 1; ?>
+					<a href="<?php echo Wo_SeoLink('index.php?link1=go-pro');?>" data-ajax="?link1=go-pro">
+						<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7,2V13H10V22L17,10H13L17,2H7Z" /></svg>
+						&nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['boost_post'];?></b>
+							<p><?php echo $wo['lang']['boost_post_tx'];?></p>
+						</div>
+					</a>
+				<?php } else if ($wo['user']['is_pro'] == 1 && in_array($wo['user']['pro_type'], array_keys($wo['pro_packages'])) && $wo['pro_packages'][$wo['user']['pro_type']]['posts_promotion'] > 0) {?>
+					<?php if ($wo['story']['is_post_boosted'] == 0) { ?>
+						<div class="boost-post pointer" onclick="Wo_BoostPost(<?php echo $wo['story']['id']; ?>)">
+							<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7,2V13H10V22L17,10H13L17,2H7Z" /></svg>
+							&nbsp;&nbsp;&nbsp;
+							<div>
+								<b><?php echo $wo['lang']['boost_post'];?></b>
+								<p><?php echo $wo['lang']['boost_post_tx'];?></p>
+							</div>
+						</div>
+					<?php } else { ?>
+						<div class="boost-post pointer" onclick="Wo_BoostPost(<?php echo $wo['story']['id']; ?>)">
+							<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7,2V13H10V22L17,10H13L17,2H7Z" /></svg>
+							&nbsp;&nbsp;&nbsp;
+							<div>
+								<b><?php echo $wo['lang']['unboost_post'];?></b>
+								<p><?php echo $wo['lang']['unboost_post_tx'];?></p>
+							</div>
+						</div>
+					<?php } ?>
+				<?php } else if ($wo['user']['is_pro'] == 1 && $wo['user']['pro_type'] == 1) { $hr = 1; ?>
                <?php } ?>
             </li>
             <?php if ($hr == 0) { ?>
@@ -109,32 +193,67 @@ if (!empty($wo['story']['parent_id'])) {
          <ul class="dropdown-menu post-privacy-menu post-options post-recipient" role="menu"  >
             <?php if (Wo_IsAdmin()): ?>
             <li>
-               <div class="pointer" onclick="Wo_OpenPostDeleteBox(<?php echo $wo['story']['id']; ?>);"><?php echo $wo['lang']['delete_post'];?></div>
+				<div class="pointer" onclick="Wo_OpenPostDeleteBox(<?php echo $wo['story']['id']; ?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['delete_post'];?></b>
+						<p><?php echo $wo['lang']['delete_post_tx'];?></p>
+					</div>
+				</div>
             </li>
             <?php endif; ?>
             <li>
-               <div class="save-post pointer" class="save-post" onclick="Wo_SavePost(<?php echo $wo['story']['id']; ?>);">
-                  <?php if($wo['story']['is_post_saved'] === true) { ?>
-                  <?php echo $wo['lang']['unsave_post'];?>
-                  <?php } else { ?>
-                  <?php echo $wo['lang']['save_post'];?>
-                  <?php } ?>
-               </div>
+				<div class="save-post pointer" class="save-post" onclick="Wo_SavePost(<?php echo $wo['story']['id']; ?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M17,3H7A2,2 0 0,0 5,5V21L12,18L19,21V5C19,3.89 18.1,3 17,3Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b>
+							<?php if($wo['story']['is_post_saved'] === true) { ?>
+								<?php echo $wo['lang']['unsave_post'];?>
+							<?php } else { ?>
+								<?php echo $wo['lang']['save_post'];?>
+							<?php } ?>
+						</b>
+						<p><?php echo $wo['lang']['save_post_tx'];?></p>
+					</div>
+				</div>
             </li>
             <li>
-               <div  class="report-post pointer" onclick="Wo_ReportPost(<?php echo $wo['story']['id']; ?>);">
-                  <?php if($wo['story']['is_post_reported'] === true) { ?>
-                  <?php echo $wo['lang']['unreport_post'];?>
-                  <?php } else { ?>
-                  <?php echo $wo['lang']['report_post'];?>
-                  <?php } ?>
-               </div>
+				<div  class="report-post pointer" onclick="Wo_ReportPost(<?php echo $wo['story']['id']; ?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M13 13H11V7H13M11 15H13V17H11M15.73 3H8.27L3 8.27V15.73L8.27 21H15.73L21 15.73V8.27L15.73 3Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b>
+							<?php if($wo['story']['is_post_reported'] === true) { ?>
+								<?php echo $wo['lang']['unreport_post'];?>
+							<?php } else { ?>
+								<?php echo $wo['lang']['report_post'];?>
+							<?php } ?>
+						</b>
+						<p><?php echo $wo['lang']['report_post_tx'];?></p>
+					</div>
+				</div>
             </li>
             <li>
-               <a href="<?php echo $wo['story']['url'];?>" target="_blank"><?php echo $wo['lang']['open_post_in_new_tab'];?></a>
+				<a href="<?php echo $wo['story']['url'];?>" target="_blank">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['open_post_in_new_tab'];?></b>
+						<p><?php echo $wo['lang']['open_post_in_new_tab_tx'];?></p>
+					</div>
+				</a>
             </li>
             <li>
-               <a class="pointer" onclick="Wo_HidePost(<?php echo $wo['story']['id'];?>);"><?php echo $wo['lang']['hide_post'];?></a>    
+				<a class="pointer" onclick="Wo_HidePost(<?php echo $wo['story']['id'];?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.74,7.13 11.35,7 12,7Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['hide_post'];?></b>
+						<p><?php echo $wo['lang']['hide_post_tx'];?></p>
+					</div>
+				</a>    
             </li>
          </ul>
       </span>
@@ -162,7 +281,7 @@ if (!empty($wo['story']['parent_id'])) {
          <?php 
             $user_pro_type = Wo_GetUserProType($wo['story']['publisher']['pro_type']);
             ?>
-         <span style="color:<?php echo $user_pro_type['color_name'];?>">
+         <span class="wo_post_pro_ico" style="background:<?php echo $user_pro_type['color_name'];?>">
          <?php 
             if (!empty(in_array($wo['story']['publisher']['pro_type'], array_keys($wo['pro_packages'])) && !empty($wo['pro_packages'][$wo['story']['publisher']['pro_type']]['image'])) && $_COOKIE['mode'] == 'day') { ?>
          <img src="<?php echo($wo['pro_packages'][$wo['story']['publisher']['pro_type']]['image']) ?>" class="pro_packages_icon_inline">
@@ -348,7 +467,7 @@ if (!empty($wo['story']['parent_id'])) {
             ?>
       </div>
       <h6>
-         <?php if (strlen($wo['story']['postText']) >= 2): ?>
+         <?php if (strlen($wo['story']['postText']) >= 2 && ($wo['config']['google_translate'] == 1 || $wo['config']['yandex_translate'] == 1)): ?>
          <span onclick="Wo_Translate($(this).attr('id'),$(this).attr('data-language'))" title="<?php echo $wo['lang']['translate'];?>" class="pointer time" id="<?php echo $wo['story']['id']; ?>" data-language="<?php echo DetermineUserLang(); ?>" data-trans-btn="<?php echo $wo['story']['id']; ?>"><?php echo $wo['lang']['translate'];?></span>
          <?php endif ?>
          <?php  if ($wo['story']['admin'] === true && $wo['story']['group_recipient_exists'] == false && empty($wo['story']['product_id'])) { ?>
@@ -379,13 +498,17 @@ if (!empty($wo['story']['parent_id'])) {
                </span>
                <span class="caret" style="color:#9197a3"></span>
             </span>
-            <ul class="dropdown-menu post-privacy-menu post-privacy-options" role="menu">
+            <ul class="dropdown-menu post-privacy-menu post-privacy-options priv" role="menu">
                <li>
                   <div class="pointer" onclick="Wo_UpdatePostPrivacy(<?php echo $wo['story']['id']; ?>,3,event);">
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z"></path>
                      </svg>
-                     <?php echo $wo['lang']['only_me'];?>
+                     &nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['only_me'];?></b>
+							<p><?php echo $wo['lang']['only_me_tx'];?></p>
+						</div>
                   </div>
                </li>
                <li>
@@ -393,7 +516,11 @@ if (!empty($wo['story']['parent_id'])) {
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path>
                      </svg>
-                     <?php echo $wo['lang']['everyone'];?>
+                     &nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['everyone'];?></b>
+							<p><?php echo $wo['lang']['everyone_tx'];?></p>
+						</div>
                   </div>
                </li>
                <?php if ($wo['config']['connectivitySystem'] == 1) { ?>
@@ -402,7 +529,11 @@ if (!empty($wo['story']['parent_id'])) {
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M16,13C15.71,13 15.38,13 15.03,13.05C16.19,13.89 17,15 17,16.5V19H23V16.5C23,14.17 18.33,13 16,13M8,13C5.67,13 1,14.17 1,16.5V19H15V16.5C15,14.17 10.33,13 8,13M8,11A3,3 0 0,0 11,8A3,3 0 0,0 8,5A3,3 0 0,0 5,8A3,3 0 0,0 8,11M16,11A3,3 0 0,0 19,8A3,3 0 0,0 16,5A3,3 0 0,0 13,8A3,3 0 0,0 16,11Z"></path>
                      </svg>
-                     <?php echo $wo['lang']['my_friends'];?>
+                     &nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['my_friends'];?></b>
+							<p><?php echo $wo['lang']['my_friends_tx'];?></p>
+						</div>
                   </div>
                </li>
                <?php } else { ?>
@@ -411,7 +542,11 @@ if (!empty($wo['story']['parent_id'])) {
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"></path>
                      </svg>
-                     <?php echo $wo['lang']['people_i_follow'];?>
+                     &nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['people_i_follow'];?></b>
+							<p><?php echo $wo['lang']['people_i_follow_tx'];?></p>
+						</div>
                   </div>
                </li>
                <li>
@@ -419,7 +554,11 @@ if (!empty($wo['story']['parent_id'])) {
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M16,13C15.71,13 15.38,13 15.03,13.05C16.19,13.89 17,15 17,16.5V19H23V16.5C23,14.17 18.33,13 16,13M8,13C5.67,13 1,14.17 1,16.5V19H15V16.5C15,14.17 10.33,13 8,13M8,11A3,3 0 0,0 11,8A3,3 0 0,0 8,5A3,3 0 0,0 5,8A3,3 0 0,0 8,11M16,11A3,3 0 0,0 19,8A3,3 0 0,0 16,5A3,3 0 0,0 13,8A3,3 0 0,0 16,11Z"></path>
                      </svg>
-                     <?php echo $wo['lang']['people_follow_me'];?>
+                     &nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['people_follow_me'];?></b>
+							<p><?php echo $wo['lang']['people_follow_me_tx'];?></p>
+						</div>
                   </div>
                </li>
                <?php } ?>
@@ -448,7 +587,11 @@ if (!empty($wo['story']['parent_id'])) {
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path>
                      </svg>
-                     <?php echo $wo['lang']['everyone'];?>
+                     &nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['everyone'];?></b>
+							<p><?php echo $wo['lang']['everyone_tx'];?></p>
+						</div>
                   </div>
                </li>
                <li>
@@ -456,7 +599,11 @@ if (!empty($wo['story']['parent_id'])) {
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"></path>
                      </svg>
-                     Liked My Page
+                     &nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['liked_my_page'];?></b>
+							<p><?php echo $wo['lang']['liked_my_page_tx'];?></p>
+						</div>
                   </div>
                </li>
             </ul>
@@ -535,35 +682,84 @@ if (!empty($wo['story']['parent_id'])) {
             </svg>
          </a>
          <ul class="dropdown-menu post-privacy-menu post-options" role="menu">
-            <?php if (!empty($wo['story']['offer_id']) && (Wo_IsModerator() || Wo_IsAdmin() || $wo['story']['offer']['user_id'] == $wo['user']['id'])) { ?>
+            <?php if ($wo['loggedin'] == true && !empty($wo['story']['offer_id']) && (Wo_IsModerator() || Wo_IsAdmin() || $wo['story']['offer']['user_id'] == $wo['user']['id'])) { ?>
                <li>
-                  <div class="pointer" onclick="Wo_OpenOfferEditBox(<?php echo $wo['story']['offer_id']; ?>);"><?php echo $wo['lang']['edit_offer'];?></div>
+					<div class="pointer" onclick="Wo_OpenOfferEditBox(<?php echo $wo['story']['offer_id']; ?>);">
+						<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" /></svg>
+						&nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['edit_offer'];?></b>
+							<p><?php echo $wo['lang']['edit_offer_tx'];?></p>
+						</div>
+					</div>
                </li>
             <?php } ?>
             <?php if ($wo['story']['admin'] === true && empty($wo['story']['product_id']) && empty($wo['story']['shared_from'])) { ?>
             <li>
-               <div class="pointer" onclick="Wo_OpenPostEditBox(<?php echo $wo['story']['id']; ?>);"><?php echo $wo['lang']['edit_post'];?></div>
+				<div class="pointer" onclick="Wo_OpenPostEditBox(<?php echo $wo['story']['id']; ?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['edit_post'];?></b>
+						<p><?php echo $wo['lang']['edit_post_tx'];?></p>
+					</div>
+				</div>
             </li>
-            <?php } else if (!empty($wo['story']['product_id']) && empty($wo['story']['parent_id'])) { 
+            <?php } else if (!empty($wo['story']['product_id'])) { 
                if ($wo['story']['product']['status'] == 0) { ?>
             <li>
-               <div class="pointer mark-as-sold-post" onclick="Wo_MarkAsSold(<?php echo $wo['story']['id']; ?>, <?php echo $wo['story']['product_id']; ?>);"><?php echo $wo['lang']['mark_as_sold']?></div>
+				<div class="pointer mark-as-sold-post" onclick="Wo_MarkAsSold(<?php echo $wo['story']['id']; ?>, <?php echo $wo['story']['product_id']; ?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 13C19.34 13 19.67 13.04 20 13.09V8H4V21H13.35C13.13 20.37 13 19.7 13 19C13 15.69 15.69 13 19 13M9 13V11.5C9 11.22 9.22 11 9.5 11H14.5C14.78 11 15 11.22 15 11.5V13H9M21 7H3V3H21V7M22.5 17.25L17.75 22L15 19L16.16 17.84L17.75 19.43L21.34 15.84L22.5 17.25Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['mark_as_sold'];?></b>
+						<p><?php echo $wo['lang']['mark_as_sold_tx'];?></p>
+					</div>
+				</div>
             </li>
             <li>
-               <a class="pointer" href="<?php echo Wo_SeoLink('index.php?link1=edit-product&id=' . $wo['story']['product_id']);?>"><?php echo $wo['lang']['edit_product']?></a>
+				<a class="pointer" href="<?php echo Wo_SeoLink('index.php?link1=edit-product&id=' . $wo['story']['product_id']);?>">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['edit_product'];?></b>
+						<p><?php echo $wo['lang']['edit_product_tx'];?></p>
+					</div>
+				</a>
             </li>
             <?php } } ?>
             <li>
-               <div class="pointer" onclick="Wo_OpenPostDeleteBox(<?php echo $wo['story']['id']; ?>);"><?php echo $wo['lang']['delete_post'];?></div>
+				<div class="pointer" onclick="Wo_OpenPostDeleteBox(<?php echo $wo['story']['id']; ?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['delete_post'];?></b>
+						<p><?php echo $wo['lang']['delete_post_tx'];?></p>
+					</div>
+				</div>
             </li>
             <li>
-               <div class="pointer disable-comments" onclick="Wo_DisableComment(<?php echo $wo['story']['id']; ?>, <?php echo $wo['story']['comments_status']; ?>);"><?php echo ($wo['story']['comments_status'] == 1) ? $wo['lang']['disable_comments'] : $wo['lang']['enable_comments'];?></div>
+				<div class="pointer disable-comments" onclick="Wo_DisableComment(<?php echo $wo['story']['id']; ?>, <?php echo $wo['story']['comments_status']; ?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M9,22A1,1 0 0,1 8,21V18H4A2,2 0 0,1 2,16V4C2,2.89 2.9,2 4,2H20A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H13.9L10.2,21.71C10,21.9 9.75,22 9.5,22V22H9M5,5V7H19V5H5M5,9V11H13V9H5M5,13V15H15V13H5Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo ($wo['story']['comments_status'] == 1) ? $wo['lang']['disable_comments'] : $wo['lang']['enable_comments'];?></b>
+						<p><?php echo $wo['lang']['comments_status_tx'];?></p>
+					</div>
+				</div>
             </li>
             <li>
-               <hr>
+				<hr>
             </li>
             <li>
-               <a href="<?php echo $wo['story']['url'];?>" target="_blank"><?php echo $wo['lang']['open_post_in_new_tab'];?></a>
+				<a href="<?php echo $wo['story']['url'];?>" target="_blank">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['open_post_in_new_tab'];?></b>
+						<p><?php echo $wo['lang']['open_post_in_new_tab_tx'];?></p>
+					</div>
+				</a>
             </li>
             <li>
                <hr>
@@ -585,31 +781,66 @@ if (!empty($wo['story']['parent_id'])) {
                     $pin_post_text = 'event';
                   }
                   ?>
-               <div class="pin-post pointer" onclick="Wo_PinPost(<?php echo $wo['story']['id']; ?>, <?php echo $pin_post_id;?>, '<?php echo $pin_post_text; ?>');">
-                  <?php if($wo['story']['is_post_pinned'] === true) { ?>
-                  <?php echo $wo['lang']['unpin_post'];?>
-                  <?php } else { ?>
-                  <?php echo $wo['lang']['pin_post'];?>
-                  <?php } ?>
-               </div>
+				<div class="pin-post pointer" onclick="Wo_PinPost(<?php echo $wo['story']['id']; ?>, <?php echo $pin_post_id;?>, '<?php echo $pin_post_text; ?>');">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b>
+							<?php if($wo['story']['is_post_pinned'] === true) { ?>
+								<?php echo $wo['lang']['unpin_post'];?>
+							<?php } else { ?>
+								<?php echo $wo['lang']['pin_post'];?>
+							<?php } ?>
+						</b>
+						<p><?php echo $wo['lang']['pin_post_tx'];?></p>
+					</div>
+				</div>
             </li>
             <?php } } ?>
             <?php if (!empty($wo['story']['album_name']) && ($wo['story']['group_admin'] === false || $wo['story']['admin'] === true)) {?>
             <li>
-               <a href="<?php echo Wo_SeoLink('index.php?link1=create-album&album=' . $wo['story']['id']);?>"><?php echo $wo['lang']['add_photos'];?></a>
+				<a href="<?php echo Wo_SeoLink('index.php?link1=create-album&album=' . $wo['story']['id']);?>" >
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['add_photos'];?></b>
+						<p><?php echo $wo['lang']['add_photos_tx'];?></p>
+					</div>
+				</a>
             </li>
             <?php } ?>
             <?php $hr = 0; if ($wo['config']['pro'] == 1 && ($wo['story']['group_admin'] === false || $wo['story']['admin'] === true)) { ?>
             <li>
-               <?php if ($wo['user']['is_pro'] == 0) {  ?>
-               <a href="<?php echo Wo_SeoLink('index.php?link1=go-pro');?>" data-ajax="?link1=go-pro"><?php echo $wo['lang']['boost_post']; ?></a>
-               <?php } else if ($wo['user']['is_pro'] == 1 && in_array($wo['user']['pro_type'], array_keys($wo['pro_packages'])) && $wo['pro_packages'][$wo['user']['pro_type']]['posts_promotion'] > 0) {?>
-               <?php if ($wo['story']['is_post_boosted'] == 0) { ?>
-               <div class="boost-post pointer" onclick="Wo_BoostPost(<?php echo $wo['story']['id']; ?>)"><?php echo $wo['lang']['boost_post']; ?></div>
-               <?php } else { ?>
-               <div class="boost-post pointer" onclick="Wo_BoostPost(<?php echo $wo['story']['id']; ?>)"><?php echo $wo['lang']['unboost_post']; ?></div>
-               <?php } ?>
-               <?php } else if ($wo['user']['is_pro'] == 1 && $wo['user']['pro_type'] == 1) { $hr = 1; ?>
+				<?php if ($wo['user']['is_pro'] == 0) {  ?>
+					<a href="<?php echo Wo_SeoLink('index.php?link1=go-pro');?>" data-ajax="?link1=go-pro">
+						<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7,2V13H10V22L17,10H13L17,2H7Z" /></svg>
+						&nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['boost_post'];?></b>
+							<p><?php echo $wo['lang']['boost_post_tx'];?></p>
+						</div>
+					</a>
+				<?php } else if ($wo['user']['is_pro'] == 1 && in_array($wo['user']['pro_type'], array_keys($wo['pro_packages'])) && $wo['pro_packages'][$wo['user']['pro_type']]['posts_promotion'] > 0) {?>
+					<?php if ($wo['story']['is_post_boosted'] == 0) { ?>
+						<div class="boost-post pointer" onclick="Wo_BoostPost(<?php echo $wo['story']['id']; ?>)">
+							<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7,2V13H10V22L17,10H13L17,2H7Z" /></svg>
+							&nbsp;&nbsp;&nbsp;
+							<div>
+								<b><?php echo $wo['lang']['boost_post'];?></b>
+								<p><?php echo $wo['lang']['boost_post_tx'];?></p>
+							</div>
+						</div>
+					<?php } else { ?>
+						<div class="boost-post pointer" onclick="Wo_BoostPost(<?php echo $wo['story']['id']; ?>)">
+							<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7,2V13H10V22L17,10H13L17,2H7Z" /></svg>
+							&nbsp;&nbsp;&nbsp;
+							<div>
+								<b><?php echo $wo['lang']['unboost_post'];?></b>
+								<p><?php echo $wo['lang']['unboost_post_tx'];?></p>
+							</div>
+						</div>
+					<?php } ?>
+				<?php } else if ($wo['user']['is_pro'] == 1 && $wo['user']['pro_type'] == 1) { $hr = 1; ?>
                <?php } ?>
             </li>
             <?php if ($hr == 0) { ?>
@@ -628,32 +859,67 @@ if (!empty($wo['story']['parent_id'])) {
          <ul class="dropdown-menu post-privacy-menu post-options post-recipient" role="menu"  >
             <?php if (Wo_IsAdmin()): ?>
             <li>
-               <div class="pointer" onclick="Wo_OpenPostDeleteBox(<?php echo $wo['story']['id']; ?>);"><?php echo $wo['lang']['delete_post'];?></div>
+				<div class="pointer" onclick="Wo_OpenPostDeleteBox(<?php echo $wo['story']['id']; ?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['delete_post'];?></b>
+						<p><?php echo $wo['lang']['delete_post_tx'];?></p>
+					</div>
+				</div>
             </li>
             <?php endif; ?>
             <li>
-               <div class="save-post pointer" class="save-post" onclick="Wo_SavePost(<?php echo $wo['story']['id']; ?>);">
-                  <?php if($wo['story']['is_post_saved'] === true) { ?>
-                  <?php echo $wo['lang']['unsave_post'];?>
-                  <?php } else { ?>
-                  <?php echo $wo['lang']['save_post'];?>
-                  <?php } ?>
-               </div>
+				<div class="save-post pointer" class="save-post" onclick="Wo_SavePost(<?php echo $wo['story']['id']; ?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M17,3H7A2,2 0 0,0 5,5V21L12,18L19,21V5C19,3.89 18.1,3 17,3Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b>
+							<?php if($wo['story']['is_post_saved'] === true) { ?>
+								<?php echo $wo['lang']['unsave_post'];?>
+							<?php } else { ?>
+								<?php echo $wo['lang']['save_post'];?>
+							<?php } ?>
+						</b>
+						<p><?php echo $wo['lang']['save_post_tx'];?></p>
+					</div>
+				</div>
             </li>
             <li>
-               <div  class="report-post pointer" onclick="Wo_ReportPost(<?php echo $wo['story']['id']; ?>);">
-                  <?php if($wo['story']['is_post_reported'] === true) { ?>
-                  <?php echo $wo['lang']['unreport_post'];?>
-                  <?php } else { ?>
-                  <?php echo $wo['lang']['report_post'];?>
-                  <?php } ?>
-               </div>
+				<div  class="report-post pointer" onclick="Wo_ReportPost(<?php echo $wo['story']['id']; ?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M13 13H11V7H13M11 15H13V17H11M15.73 3H8.27L3 8.27V15.73L8.27 21H15.73L21 15.73V8.27L15.73 3Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b>
+							<?php if($wo['story']['is_post_reported'] === true) { ?>
+								<?php echo $wo['lang']['unreport_post'];?>
+							<?php } else { ?>
+								<?php echo $wo['lang']['report_post'];?>
+							<?php } ?>
+						</b>
+						<p><?php echo $wo['lang']['report_post_tx'];?></p>
+					</div>
+				</div>
             </li>
             <li>
-               <a href="<?php echo $wo['story']['url'];?>" target="_blank"><?php echo $wo['lang']['open_post_in_new_tab'];?></a>
+				<a href="<?php echo $wo['story']['url'];?>" target="_blank">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['open_post_in_new_tab'];?></b>
+						<p><?php echo $wo['lang']['open_post_in_new_tab_tx'];?></p>
+					</div>
+				</a>
             </li>
             <li>
-               <a class="pointer" onclick="Wo_HidePost(<?php echo $wo['story']['id'];?>);"><?php echo $wo['lang']['hide_post'];?></a>    
+				<a class="pointer" onclick="Wo_HidePost(<?php echo $wo['story']['id'];?>);">
+					<svg viewBox="0 0 24 24"><path fill="currentColor" d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.74,7.13 11.35,7 12,7Z" /></svg>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<b><?php echo $wo['lang']['hide_post'];?></b>
+						<p><?php echo $wo['lang']['hide_post_tx'];?></p>
+					</div>
+				</a>    
             </li>
          </ul>
       </span>
@@ -687,7 +953,7 @@ if (!empty($wo['story']['parent_id'])) {
          <?php 
             $user_pro_type = Wo_GetUserProType($wo['story']['publisher']['pro_type']);
             ?>
-         <span style="color:<?php echo $user_pro_type['color_name'];?>">
+         <span class="wo_post_pro_ico" style="background:<?php echo $user_pro_type['color_name'];?>">
          <?php 
             if (!empty(in_array($wo['story']['publisher']['pro_type'], array_keys($wo['pro_packages'])) && !empty($wo['pro_packages'][$wo['story']['publisher']['pro_type']]['image'])) && $_COOKIE['mode'] == 'day') { ?>
          <img src="<?php echo($wo['pro_packages'][$wo['story']['publisher']['pro_type']]['image']) ?>" class="pro_packages_icon_inline">
@@ -886,7 +1152,7 @@ if (!empty($wo['story']['parent_id'])) {
             ?>
       </div>
       <h6>
-         <?php if (strlen($wo['story']['postText']) >= 2): ?>
+         <?php if (strlen($wo['story']['postText']) >= 2 && ($wo['config']['google_translate'] == 1 || $wo['config']['yandex_translate'] == 1)): ?>
          <span onclick="Wo_Translate($(this).attr('id'),$(this).attr('data-language'))" title="<?php echo $wo['lang']['translate'];?>" class="pointer time" id="<?php echo $wo['story']['id']; ?>" data-language="<?php echo DetermineUserLang(); ?>" data-trans-btn="<?php echo $wo['story']['id']; ?>"><?php echo $wo['lang']['translate'];?></span>
          <?php endif ?>
          <?php  if ($wo['story']['admin'] === true && $wo['story']['group_recipient_exists'] == false && empty($wo['story']['product_id'])) { ?>
@@ -920,13 +1186,17 @@ if (!empty($wo['story']['parent_id'])) {
                </span>
                <span class="caret" style="color:#9197a3"></span>
             </span>
-            <ul class="dropdown-menu post-privacy-menu post-privacy-options" role="menu">
+            <ul class="dropdown-menu post-privacy-menu post-privacy-options priv" role="menu">
                <li>
                   <div class="pointer" onclick="Wo_UpdatePostPrivacy(<?php echo $wo['story']['id']; ?>,3,event);">
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z"></path>
                      </svg>
-                     <?php echo $wo['lang']['only_me'];?>
+                     &nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['only_me'];?></b>
+							<p><?php echo $wo['lang']['only_me_tx'];?></p>
+						</div>
                   </div>
                </li>
                <li>
@@ -934,7 +1204,11 @@ if (!empty($wo['story']['parent_id'])) {
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path>
                      </svg>
-                     <?php echo $wo['lang']['everyone'];?>
+                     &nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['everyone'];?></b>
+							<p><?php echo $wo['lang']['everyone_tx'];?></p>
+						</div>
                   </div>
                </li>
                <?php if ($wo['config']['connectivitySystem'] == 1) { ?>
@@ -943,7 +1217,11 @@ if (!empty($wo['story']['parent_id'])) {
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M16,13C15.71,13 15.38,13 15.03,13.05C16.19,13.89 17,15 17,16.5V19H23V16.5C23,14.17 18.33,13 16,13M8,13C5.67,13 1,14.17 1,16.5V19H15V16.5C15,14.17 10.33,13 8,13M8,11A3,3 0 0,0 11,8A3,3 0 0,0 8,5A3,3 0 0,0 5,8A3,3 0 0,0 8,11M16,11A3,3 0 0,0 19,8A3,3 0 0,0 16,5A3,3 0 0,0 13,8A3,3 0 0,0 16,11Z"></path>
                      </svg>
-                     <?php echo $wo['lang']['my_friends'];?>
+                     &nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['my_friends'];?></b>
+							<p><?php echo $wo['lang']['my_friends_tx'];?></p>
+						</div>
                   </div>
                </li>
                <?php } else { ?>
@@ -952,7 +1230,11 @@ if (!empty($wo['story']['parent_id'])) {
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"></path>
                      </svg>
-                     <?php echo $wo['lang']['people_i_follow'];?>
+                     &nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['people_i_follow'];?></b>
+							<p><?php echo $wo['lang']['people_i_follow_tx'];?></p>
+						</div>
                   </div>
                </li>
                <li>
@@ -960,7 +1242,11 @@ if (!empty($wo['story']['parent_id'])) {
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M16,13C15.71,13 15.38,13 15.03,13.05C16.19,13.89 17,15 17,16.5V19H23V16.5C23,14.17 18.33,13 16,13M8,13C5.67,13 1,14.17 1,16.5V19H15V16.5C15,14.17 10.33,13 8,13M8,11A3,3 0 0,0 11,8A3,3 0 0,0 8,5A3,3 0 0,0 5,8A3,3 0 0,0 8,11M16,11A3,3 0 0,0 19,8A3,3 0 0,0 16,5A3,3 0 0,0 13,8A3,3 0 0,0 16,11Z"></path>
                      </svg>
-                     <?php echo $wo['lang']['people_follow_me'];?>
+                     &nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['people_follow_me'];?></b>
+							<p><?php echo $wo['lang']['people_follow_me_tx'];?></p>
+						</div>
                   </div>
                </li>
                <?php } ?>
@@ -968,7 +1254,11 @@ if (!empty($wo['story']['parent_id'])) {
                   <li>
                      <div class="pointer" onclick="Wo_UpdatePostPrivacy(<?php echo $wo['story']['id']; ?>,5,event);">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                        <?php echo $wo['lang']['hiring'];?>
+                        &nbsp;&nbsp;&nbsp;
+							<div>
+								<b><?php echo $wo['lang']['hiring'];?></b>
+								<p><?php echo $wo['lang']['hiring_tx'];?></p>
+							</div>
                      </div>
                   </li>
                <?php } ?>
@@ -997,7 +1287,11 @@ if (!empty($wo['story']['parent_id'])) {
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path>
                      </svg>
-                     <?php echo $wo['lang']['everyone'];?>
+                     &nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['everyone'];?></b>
+							<p><?php echo $wo['lang']['everyone_tx'];?></p>
+						</div>
                   </div>
                </li>
                <li>
@@ -1005,7 +1299,11 @@ if (!empty($wo['story']['parent_id'])) {
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"></path>
                      </svg>
-                     Liked My Page
+                     &nbsp;&nbsp;&nbsp;
+						<div>
+							<b><?php echo $wo['lang']['liked_my_page'];?></b>
+							<p><?php echo $wo['lang']['liked_my_page_tx'];?></p>
+						</div>
                   </div>
                </li>
             </ul>

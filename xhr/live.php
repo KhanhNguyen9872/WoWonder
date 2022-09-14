@@ -225,6 +225,14 @@ if ($f == 'live') {
                 }
             }
         }
+        $posts = $db->where('stream_name','','<>')->where('postFile','')->get(T_POSTS);
+        if (!empty($posts)) {
+            foreach ($posts as $key => $value) {
+                if ((!empty($value->agora_resource_id) || !empty($value->agora_sid) || !empty($value->agora_token)) && empty($value->postFile)) {
+                    Wo_DeletePost($value->id,'shared');
+                }
+            }
+        }
     }
     if ($s == 'create_thumb') {
         if (!empty($_POST['post_id']) && is_numeric($_POST['post_id']) && $_POST['post_id'] > 0 && !empty($_FILES['thumb'])) {

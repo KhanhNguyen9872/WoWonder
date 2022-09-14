@@ -1,14 +1,4 @@
 <?php
-// Paypal methods
-use PayPal\Api\Payer;
-use PayPal\Api\Item;
-use PayPal\Api\ItemList;
-use PayPal\Api\Details;
-use PayPal\Api\Amount;
-use PayPal\Api\Transaction;
-use PayPal\Api\RedirectUrls;
-use PayPal\Api\Payment;
-use PayPal\Api\PaymentExecution;
 if ($f == 'funding' && $wo['config']['funding_system'] == 1) {
     $data['status'] = 400;
     if ($s == 'insert_funding' && $wo['config']['can_use_funding']) {
@@ -27,8 +17,8 @@ if ($f == 'funding' && $wo['config']['funding_system'] == 1) {
                 $media        = Wo_ShareFile($fileInfo);
                 if (!empty($media) && !empty($media['filename'])) {
                     $insert_array    = array(
-                        'title' => Wo_Secure($_POST['title']),
-                        'description' => Wo_Secure($_POST['description']),
+                        'title' => Wo_Secure($_POST['title'],1),
+                        'description' => Wo_Secure($_POST['description'],1),
                         'amount' => Wo_Secure($_POST['amount']),
                         'time' => time(),
                         'user_id' => $wo['user']['id'],
@@ -102,8 +92,8 @@ if ($f == 'funding' && $wo['config']['funding_system'] == 1) {
             $fund = $db->where('id', $id)->getOne(T_FUNDING);
             if (!empty($fund) || ($wo['user']['user_id'] != $fund->user_id && Wo_IsAdmin() == false)) {
                 $insert_array = array(
-                    'title' => Wo_Secure($_POST['title']),
-                    'description' => Wo_Secure($_POST['description']),
+                    'title' => Wo_Secure($_POST['title'],1),
+                    'description' => Wo_Secure($_POST['description'],1),
                     'amount' => Wo_Secure($_POST['amount'])
                 );
                 if (!empty($_FILES["image"])) {
@@ -192,118 +182,6 @@ if ($f == 'funding' && $wo['config']['funding_system'] == 1) {
             }
         } else {
             $data['message'] = $error_icon . $wo['lang']['please_check_details'];
-        }
-    }
-    if ($s == 'get_paypal_url' && $wo['config']['paypal'] != 'no') {
-        if (!empty($_POST['amount']) && is_numeric($_POST['amount']) && $_POST['amount'] > 0 && !empty($_POST['fund_id']) && is_numeric($_POST['fund_id']) && $_POST['fund_id'] > 0) {
-            $price = Wo_Secure($_POST['amount']);
-            $id    = Wo_Secure($_POST['fund_id']);
-            $fund  = $db->where('id', $id)->getOne(T_FUNDING);
-            if (!empty($fund)) {
-                include_once('assets/includes/paypal_config.php');
-                $product = "Doante to " . mb_substr($fund->title, 0, 100, "UTF-8");
-                $payer   = new Payer();
-                $payer->setPaymentMethod('paypal');
-                $item = new Item();
-                $item->setName($product)->setQuantity(1)->setPrice($price)->setCurrency($wo['config']['paypal_currency']);
-                $itemList = new ItemList();
-                $itemList->setItems(array(
-                    $item
-                ));
-                $details = new Details();
-                $details->setSubtotal($price);
-                $amount = new Amount();
-                $amount->setCurrency($wo['config']['paypal_currency'])->setTotal($price)->setDetails($details);
-                $transaction = new Transaction();
-                $transaction->setAmount($amount)->setItemList($itemList)->setDescription($product)->setInvoiceNumber(uniqid());
-                $redirectUrls = new RedirectUrls();
-                $redirectUrls->setReturnUrl($wo['config']['site_url'] . "/requests.php?f=funding&s=paypal_paid&fund_id=" . $id . "&amount=" . $price)->setCancelUrl($wo['config']['site_url']);
-                $payment = new Payment();
-                $payment->setIntent('sale')->setPayer($payer)->setRedirectUrls($redirectUrls)->setTransactions(array(
-                    $transaction
-                ));
-                try {
-                    $payment->create($paypal);
-                }
-                catch (Exception $e) {
-                    $data = array(
-                        'type' => 'ERROR',
-                        'details' => json_decode($e->getData())
-                    );
-                    if (empty($data['details'])) {
-                        $data['details'] = json_decode($e->getCode());
-                    }
-                    return $data;
-                }
-                $data = array(
-                    'status' => 200,
-                    'url' => $payment->getApprovalLink()
-                );
-            } else {
-                $data['message'] = $error_icon . $wo['lang']['please_check_details'];
-            }
-        } else {
-            $data['message'] = $error_icon . $wo['lang']['please_check_details'];
-        }
-    }
-    if ($s == 'paypal_paid' && $wo['config']['paypal'] != 'no' && !empty($_GET['fund_id']) && !empty($_GET['amount'])) {
-        if (!isset($_GET['paymentId'], $_GET['PayerID'])) {
-            header("Location: " . Wo_SeoLink('index.php?link1=oops'));
-            exit();
-        }
-        $fund_id = Wo_Secure($_GET['fund_id']);
-        $amount  = Wo_Secure($_GET['amount']);
-        $fund    = $db->where('id', $fund_id)->getOne(T_FUNDING);
-        if (!empty($fund) && !empty($fund_id) && !empty($amount)) {
-            $paymentId = $_GET['paymentId'];
-            $PayerID   = $_GET['PayerID'];
-            include_once 'assets/includes/paypal_config.php';
-            $payment = new Payment();
-            $payment = Payment::get($paymentId, $paypal);
-            $execute = new PaymentExecution();
-            $execute->setPayerId($PayerID);
-            try {
-                $notes              = "Doanted to " . mb_substr($fund->title, 0, 100, "UTF-8");
-                $result             = $payment->execute($execute, $paypal);
-                $create_payment_log = mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ({$wo['user']['user_id']}, 'DONATE', {$amount}, '{$notes}')");
-                $admin_com          = 0;
-                if (!empty($wo['config']['donate_percentage']) && is_numeric($wo['config']['donate_percentage']) && $wo['config']['donate_percentage'] > 0) {
-                    $admin_com = ($wo['config']['donate_percentage'] * $amount) / 100;
-                    $amount    = $amount - $admin_com;
-                }
-                $user_data = Wo_UserData($fund->user_id);
-                $db->where('user_id', $fund->user_id)->update(T_USERS, array(
-                    'balance' => $user_data['balance'] + $amount
-                ));
-                $fund_raise_id           = $db->insert(T_FUNDING_RAISE, array(
-                    'user_id' => $wo['user']['user_id'],
-                    'funding_id' => $fund_id,
-                    'amount' => $amount,
-                    'time' => time()
-                ));
-                $post_data               = array(
-                    'user_id' => Wo_Secure($wo['user']['user_id']),
-                    'fund_raise_id' => $fund_raise_id,
-                    'time' => time(),
-                    'multi_image_post' => 0
-                );
-                $id                      = Wo_RegisterPost($post_data);
-                $notification_data_array = array(
-                    'recipient_id' => $fund->user_id,
-                    'type' => 'fund_donate',
-                    'url' => 'index.php?link1=show_fund&id=' . $fund->hashed_id
-                );
-                Wo_RegisterNotification($notification_data_array);
-                header("Location: " . $config['site_url'] . "/show_fund/" . $fund->hashed_id);
-                exit();
-            }
-            catch (Exception $e) {
-                header("Location: " . Wo_SeoLink('index.php?link1=oops'));
-                exit();
-            }
-        } else {
-            header("Location: " . Wo_SeoLink('index.php?link1=oops'));
-            exit();
         }
     }
     if ($s == 'stripe' && $wo['config']['credit_card'] != 'no' && !empty($_POST['fund_id']) && is_numeric($_POST['fund_id']) && $_POST['fund_id'] > 0 && !empty($_POST['amount']) && is_numeric($_POST['amount']) && $_POST['amount'] > 0) {

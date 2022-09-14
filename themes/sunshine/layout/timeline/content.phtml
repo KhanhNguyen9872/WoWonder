@@ -1708,6 +1708,8 @@
             	echo Wo_LoadPage('timeline/groups-sidebar');
             }
                     if ($wo['config']['store_system'] == 'on') { ?>
+                     <?php $all_products = Wo_GetProducts(array('user_id' => $wo['user_profile']['user_id'] , 'limit' => 6)); ?>
+               <?php if (!empty($all_products)) { ?>
          <ul class="list-group sun_side_widget" id="sidebar-products-list-container">
             <li class="list-group-item text-muted hidden" contenteditable="false"><?php echo $wo['lang']['more_info']; ?></li>
             <h3 class="sun_side_widget_title">
@@ -1730,6 +1732,7 @@
                <div class="clear"></div>
             </li>
          </ul>
+         <?php } ?>
          <?php } ?>
          <?php
             $sidebar_ad = Wo_GetAd('sidebar', false);

@@ -288,6 +288,7 @@ $type_to_find = '<h5 class="search-filter-center-text empty_state"><svg xmlns="h
 						<div id="users" class="tab-pane fade in active">
 							<div id="users-cont" class="row sun_find_friends">
 								<?php
+								$search_query = '';
 								if (!isset($_GET['query'])) {
 									echo $type_to_find;
 								}
@@ -308,18 +309,21 @@ $type_to_find = '<h5 class="search-filter-center-text empty_state"><svg xmlns="h
 								?>
 							</div>
 							<div class="clear"></div>
+							<?php if (!empty($search_query)) { ?>
 							<div class="load-more">
 								<button class="btn btn-default text-center wo_load_more load-more-users">
 									<span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"></path></svg></span>
 									<?php echo $wo['lang']['load_more_users'] ?>
 								</button>
 							</div>
+							<?php } ?>
 						</div>
 						
 						<?php if ($wo['config']['pages'] == 1) { ?>
 						<div id="pages" class="tab-pane fade">
 							<div class="row" id="pages-cont">
 								<?php
+								$search_query = '';
 									if (!isset($_GET['query'])) {
 										echo $type_to_find;
 									}
@@ -336,12 +340,14 @@ $type_to_find = '<h5 class="search-filter-center-text empty_state"><svg xmlns="h
 								?>
 							</div>
 							<div class="clear"></div>
+							<?php if (!empty($search_query)) { ?>
 							<div class="load-more">
 								<button class="btn btn-default text-center wo_load_more load-more-pages">
 									<span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"></path></svg></span>
 									<?php echo $wo['lang']['load_more_pages'] ?>
 								</button>
 							</div>
+							<?php } ?>
 						</div>
 						<?php } ?>
 						
@@ -349,6 +355,7 @@ $type_to_find = '<h5 class="search-filter-center-text empty_state"><svg xmlns="h
 						<div id="groups" class="tab-pane fade">
 							<div class="row" id="groups-cont">
 								<?php
+								$search_query = '';
 									if (!isset($_GET['query'])) {
 										echo $type_to_find;
 									}
@@ -365,12 +372,14 @@ $type_to_find = '<h5 class="search-filter-center-text empty_state"><svg xmlns="h
 								?>
 							</div>
 							<div class="clear"></div>
+							<?php if (!empty($search_query)) { ?>
 							<div class="load-more">
 								<button class="btn btn-default text-center wo_load_more load-more-groups">
 									<span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"></path></svg></span>
 									<?php echo $wo['lang']['load_more_groups'] ?>
 								</button>
 							</div>
+							<?php } ?>
 						</div>
 						<?php } ?>
 						

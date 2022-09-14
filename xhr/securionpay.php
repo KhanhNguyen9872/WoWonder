@@ -9,10 +9,9 @@ if ($f == "securionpay") {
 			require_once 'assets/libraries/securionpay/vendor/autoload.php';
 			$price = Wo_Secure($_POST['amount']);
 			$securionPay = new SecurionPayGateway($wo['config']['securionpay_secret_key']);
-            $user_key = rand(1111,9999).rand(11111,99999);
 
             $checkoutCharge = new CheckoutRequestCharge();
-            $checkoutCharge->amount(($price * 100))->currency('USD')->metadata(array('user_key' => $user_key,
+            $checkoutCharge->amount(($price * 100))->currency('USD')->metadata(array('user_key' => $wo['user']['user_id'],
                                                                                      'type' => 'Top Up Wallet'));
 
             $checkoutRequest = new CheckoutRequest();
@@ -20,7 +19,6 @@ if ($f == "securionpay") {
 
             $signedCheckoutRequest = $securionPay->signCheckoutRequest($checkoutRequest);
             if (!empty($signedCheckoutRequest)) {
-                $db->where('user_id',$wo['user']['user_id'])->update(T_USERS,array('securionpay_key' => $user_key));
                 $data['status'] = 200;
                 $data['token'] = $signedCheckoutRequest;
             }
@@ -54,10 +52,9 @@ if ($f == "securionpay") {
 	            foreach ($resp['list'] as $key => $value) {
 	                if ($value['id'] == $_POST['charge']['id']) {
 	                    if (!empty($value['metadata']) && !empty($value['metadata']['user_key']) && !empty($value['amount'])) {
-	                        if ($wo['user']['securionpay_key'] == $value['metadata']['user_key']) {
+	                        if ($wo['user']['user_id'] == $value['metadata']['user_key']) {
 	                        	$amount = intval(Wo_Secure($value['amount'])) / 100;
 	                        	if (Wo_ReplenishingUserBalance($amount)) {
-	                        		$db->where('user_id',$wo['user']['user_id'])->update(T_USERS,array('securionpay_key' => ''));
 		                            $create_payment_log             = mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ('" . $wo['user']['id'] . "', 'WALLET', '" . $amount . "', 'securionpay')");
 					                $_SESSION['replenished_amount'] = $amount;
 					                $url = Wo_SeoLink('index.php?link1=wallet');

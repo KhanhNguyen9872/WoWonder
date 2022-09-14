@@ -38,6 +38,7 @@ if (empty($_POST['file_type'])) {
 if (empty($error_code)) {
     $amazone_s3                   = $wo['config']['amazone_s3'];
     $wasabi_storage                   = $wo['config']['wasabi_storage'];
+    $backblaze_storage                   = $wo['config']['backblaze_storage'];
     $ftp_upload                   = $wo['config']['ftp_upload'];
     $spaces                       = $wo['config']['spaces'];
     $cloud_upload                 = $wo['config']['cloud_upload'];
@@ -139,6 +140,7 @@ if (empty($error_code)) {
                     $crop_image                   = Wo_Resize_Crop_Image(400, 400, $image_thumb, $image_thumb, 60);
                     $wo['config']['amazone_s3']   = $amazone_s3;
                     $wo['config']['wasabi_storage']   = $wasabi_storage;
+                    $wo['config']['backblaze_storage']   = $backblaze_storage;
                     $wo['config']['ftp_upload']   = $ftp_upload;
                     $wo['config']['spaces']       = $spaces;
                     $wo['config']['cloud_upload'] = $cloud_upload;
@@ -149,6 +151,7 @@ if (empty($error_code)) {
                 }
                 $wo['config']['amazone_s3']   = $amazone_s3;
                 $wo['config']['wasabi_storage']   = $wasabi_storage;
+                $wo['config']['backblaze_storage']   = $backblaze_storage;
                 $wo['config']['ftp_upload']   = $ftp_upload;
                 $wo['config']['spaces']       = $spaces;
                 $wo['config']['cloud_upload'] = $cloud_upload;

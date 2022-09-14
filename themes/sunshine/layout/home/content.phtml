@@ -25,7 +25,7 @@
                                 echo Wo_LoadPage('home/user-status');
                             }
                             }
-                            if (Wo_CountStories() > 8) {
+                            if (!empty($get_user_status) && count($get_user_status) > 3) {
                         ?>
                         <li class="view-more-stories">
                             <a href="<?php echo Wo_SeoLink('index.php?link1=more-status'); ?>">

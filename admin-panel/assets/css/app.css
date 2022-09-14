@@ -10845,3 +10845,48 @@ body.dark .modal-footer .btn.btn-secondary, body.dark .modal-footer .btn.btn-sec
     border: rgb(255 255 255 / 10%) !important;
     color: #d8d8d8 !important;
 }
+
+
+/*System Status List*/
+.server_issues_list {
+	font-family: var(--font-family-sans-serif);padding-top: 13px;
+}
+.server_issues_list .icon {
+	flex: 0 0 auto;
+}
+.server_issues_list > div.info {
+	border-bottom: 1px solid #e6e6e6;
+    flex: 1 1 auto;
+}
+.server_issues_list:last-child > div.info {
+	border: 0;
+}
+.server_issues_list h3 {
+	font-size: 17px;
+    font-weight: 500;
+    margin: 7px 0;
+}
+.server_issues_list.danger h3 {
+	color: #ef4c5d;
+}
+.server_issues_list.warning h3 {
+	color: #faa500;
+}
+.server_issues_list p {
+	    font-size: 15px;
+    margin: 0 0 20px;
+}
+.server_no_issues_list {
+	text-align: center;
+    color: #4caf50;
+    font-family: var(--font-family-sans-serif);
+    font-size: 20px;
+    font-weight: 500;
+    padding: 50px 0;
+}
+.server_no_issues_list svg {
+	display: block;
+	margin: 0 auto 25px;
+	width: 100px;
+	height: auto;
+}

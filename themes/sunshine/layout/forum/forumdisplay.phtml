@@ -3,11 +3,11 @@ $section = Wo_GetForumSec(array('id' => $wo['forum_data']['forum']['sections']))
 ?>
 <div role="tabpanel" class="tab-pane active" id="forumdisplay">
 	<div class="w-100 text-center sun_forum_dis_head">
-		<h4><?php echo($wo['forum_data']['forum']['name']) ?></h4>
+		<h4><?php echo($wo['forum_data']['forum']['name_lang']) ?></h4>
 		<?php if ($wo['config']['can_use_forum']) { ?>
 		<a href="<?php echo Wo_SeoLink('index.php?link1=forumsadd&fid=' . $wo['forum_data']['forum']['id']) ?>" data-ajax="?link1=forumaddthred&fid=<?php echo $wo['forum_data']['forum']['id'];?>" class="btn btn-main"><?php echo $wo['lang']['create_new_topic']; ?></a>
 		<?php } ?>
-		<p><?php echo($wo['forum_data']['forum']['description']) ?></p>
+		<p><?php echo($wo['forum_data']['forum']['description_lang']) ?></p>
 	</div>
 	<div class="w-100">
 		<?php if (count($wo['forum_data']['threads']) > 0): ?>
@@ -68,7 +68,7 @@ $section = Wo_GetForumSec(array('id' => $wo['forum_data']['forum']['sections']))
 						href="<?php echo Wo_SeoLink('index.php?link1=forums&fid='.$jump['id']);?>"
 						class="main <?php if ($jump['name'] == $wo['forum_data']['forum']['name']) echo 'bold'; ?>">
 
-				        <?php echo $jump['name']; ?>
+				        <?php echo $jump['name_lang']; ?>
 				        </a>
 	            	</li>
 	            <?php endforeach ?>

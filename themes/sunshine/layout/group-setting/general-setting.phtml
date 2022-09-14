@@ -24,7 +24,7 @@
 				<label class="plr15" for="group_category"><?php echo $wo['lang']['category'];?></label>
 			</div>
 			<!-- Select Basic -->
-			<div class="sun_input col-lg-6">
+			<div class="sun_input col-lg-6 page_sub_category_c" style="<?php echo (!empty($wo['group_sub_categories'][array_keys($wo['group_categories'])[0]]) ? '' : 'display: none;'); ?>">
 				<select id="group_sub_category" name="group_sub_category" class="form-control">
 					<?php
 						if (!empty($wo['group_sub_categories'][array_keys($wo['group_categories'])[0]])) {
@@ -79,8 +79,10 @@ echo "var sub_categories_array = ". $js_array . ";\n";
 		var text = "";
 		if (typeof(sub_categories_array[id]) == 'undefined') {
 		    $('#group_sub_category').html('');
+		    $('.page_sub_category_c').slideUp();
 		}
 		else{
+			$('.page_sub_category_c').slideDown();
 		   	sub_categories_array[id].forEach(function(entry) {
 				text = text + "<option value='"+entry.id+"'>"+entry.lang+"</option>";
 			});

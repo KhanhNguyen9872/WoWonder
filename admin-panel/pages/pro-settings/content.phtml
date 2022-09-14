@@ -549,7 +549,7 @@ $(function() {
             }, 2000);
         });
     });
-    $('.card-body input[type=text],.card-body input[type=number]').on('keyup', delay(function() {
+    $('.card-body input[type=text],.card-body input[type=number]').on('input', delay(function() {
             clearTimeout(setTimeOutColor);
             var thisElement = $(this);
             var configName = thisElement.attr('name');

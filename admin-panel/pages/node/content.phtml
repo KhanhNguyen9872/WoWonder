@@ -83,7 +83,8 @@
                                 <small class="admin-info">Only required If NodeJS SSL is enabled.</small>
                             </div>
                         </div>
-                        <hr>
+                        <div class="hidden">
+                            <hr>
 
                          <div class="float-left">
                             <label for="redis" class="main-label">Redis Server</label>
@@ -103,6 +104,9 @@
                                 <small class="admin-info">Server Redis port, should not be same as nodejs port.</small>
                             </div>
                         </div>
+                            
+                        </div>
+                        
                         <div class="alert alert-info">If you disable NodeJs system, the default ajax system will be enabled for chat and notifications system.</div>
                         <input type="hidden" name="hash_id" value="<?php echo Wo_CreateSession();?>">
                     </form>
@@ -157,7 +161,7 @@ $(function() {
             }, 2000);
         });
     });
-    $('input[type=text], input[type=number]').on('keyup', delay(function() {
+    $('input[type=text], input[type=number]').on('input', delay(function() {
             clearTimeout(setTimeOutColor);
             var thisElement = $(this);
             var configName = thisElement.attr('name');

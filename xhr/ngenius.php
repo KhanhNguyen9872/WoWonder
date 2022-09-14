@@ -20,8 +20,8 @@ if ($f == 'ngenius') {
 			    $postData->amount->currencyCode = "AED";
 			    $postData->amount->value = $amount;
 			    $postData->merchantAttributes = new \stdClass();
-		        $postData->merchantAttributes->redirectUrl = $wo['config']['site_url'] . "/requests.php?f=ngenius&s=success_ngenius";
-		        // $postData->merchantAttributes->redirectUrl = "http://192.168.1.108/wowonder/requests.php?f=ngenius&s=success_ngenius";
+		        //$postData->merchantAttributes->redirectUrl = $wo['config']['site_url'] . "/requests.php?f=ngenius&s=success_ngenius&user_id=".$wo['user']['user_id'];
+		        $postData->merchantAttributes->redirectUrl = "http://192.168.1.108/wowonder/requests.php?f=ngenius&s=success_ngenius&user_id=".$wo['user']['user_id'];
 			    $order = CreateNgeniusOrder($token->access_token,$postData);
 			    if (!empty($order->message)) {
 	    			$data['status'] = 400;
@@ -32,7 +32,6 @@ if ($f == 'ngenius') {
 			        $data['message'] = $order->errors[0]->message;
 	    		}
 	    		else{
-	    			$db->where('user_id',$wo['user']['user_id'])->update(T_USERS,array('ngenius_ref' => $order->reference));
 	    			$data['status'] = 200;
 			        $data['url'] = $order->_links->payment->href;
 	    		}
@@ -49,8 +48,8 @@ if ($f == 'ngenius') {
 	    exit();
 	}
 	if ($s == 'success_ngenius') {
-		if (!empty($_GET['ref'])) {
-			$user = $db->objectBuilder()->where('ngenius_ref',Wo_Secure($_GET['ref']))->getOne(T_USERS);
+		if (!empty($_GET['ref']) && !empty($_GET['user_id'])) {
+			$user = $db->objectBuilder()->where('user_id',Wo_Secure($_GET['user_id']))->getOne(T_USERS);
 			if (!empty($user)) {
 				$token = GetNgeniusToken();
 	    		if (!empty($token->message)) {
@@ -62,7 +61,7 @@ if ($f == 'ngenius') {
 		        	exit();
 	    		}
 	    		else{
-	    			$order = NgeniusCheckOrder($token->access_token,$user->ngenius_ref);
+	    			$order = NgeniusCheckOrder($token->access_token,$_GET['ref']);
 	    			if (!empty($order->message)) {
 		    			header('Location: ' . Wo_SeoLink('index.php?link1=wallet'));
 			        	exit();
@@ -75,8 +74,7 @@ if ($f == 'ngenius') {
 		    			if ($order->_embedded->payment[0]->state == "CAPTURED") {
 							$amount = Wo_Secure($order->amount->value);
 							$db->where('user_id', $wo['user']['user_id'])->update(T_USERS, array(
-			                    'wallet' => $db->inc($amount),
-			                    'aamarpay_tran_id' => ''
+			                    'wallet' => $db->inc($amount)
 			                ));
 
 			                $create_payment_log = mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ('" . $wo['user']['user_id'] . "', 'WALLET', '" . $amount . "', 'ngenius')");

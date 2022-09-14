@@ -962,13 +962,6 @@ body .wow_usr_steps_cont .btn {
 body .wow_sett_sidebar > ul > li > a svg {
     margin: auto 0 auto 13px;
 }
-.wow_sett_sidebar .wow_sett_submenu > ul {
-	border-left: 0 !important;
-    border-right: 1px solid #e3e3e3;
-    margin-left: 0 !important;
-    margin-right: 23px !important;
-    padding-right: 23px;
-}
 body .wow_side_loggd_usr_hdr .avatar {
     left: auto;
     right: 0;
@@ -1022,13 +1015,6 @@ body .wow_post_prod_infos {
 body .wow_post_prod_infos > svg {
     left: auto;right: 0;
 }
-body .active_sessions .as_list .platform_icon {
-    margin-right: 0;margin-left: 15px;
-    float: right;
-}
-body .active_sessions .as_list .log_out_session {
-    float: left;
-}
 body .earn_points .ep_illus .ep_how_many svg {
     margin: 0 0 0 15px;
 }
@@ -1041,7 +1027,7 @@ body .earn_points .ep_illus .ep_how_many svg {
 }
 
 body .comment-reply .wo_commreply_combo .textarea {
-	padding-left: 80px;
+	padding-left: 120px;
     padding-right: 10px;
 }
 body .comment-reply .wo_commreply_combo .image-comment {
@@ -1276,11 +1262,68 @@ body .insta_post_filter ul > li:last-child {
 }
 body .post .post-description .post-actions .stat-item svg{margin-right: 0;margin-left: 2px;}
 
+body .wo_sett_noti .round-check input+label svg {
+    margin: -1px 0 0 5px;
+}
+body .wo_sett_noti .round-check input+label:after, body .wo_sett_noti .round-check input+label:before {
+	left: 14px !important;
+    right: auto !important;
+    position: absolute !important;margin: 16px 0 !important;
+}
+body .wo_sett_noti .round-check input+label:after {
+	right: auto !important;
+	left: 18px !important;
+}
+body .movies-comment-item-body {
+    margin-left: 0;
+    margin-right: 55px;
+}
+body .movies-com-wrapper .movies-comlist-container .movies-comment-item .movies-comment-item-body div.comment-heading {
+    border-radius: 20px 0 20px 20px;
+}
+
+body .wow_usr_steps .upload-image svg {
+    right: auto;left: 10px;
+}
+
+body .wo_settings_page .avatar-holder::after {left: auto;right: 74px;}
+
+body .wow_usr_steps_cont .btn svg {
+	margin: 0 7px 0 0;
+}
+body .movies-com-wrapper .movies-comlist-container .movies-comment-item .movies-comment-item-body div.comment-heading .del-movies-comment {
+	margin-left: 0;margin-right: 10px;
+}
 
 
+body .lang_select_modal .language_info svg {
+    right: auto;left: 0;
+}
+
+body #wo_msg_right_prt .message-option-btns .btn.messages-rtime {padding: 8px 10px 8px 36px !important;}
+
+body .wow_sett_sidebar > ul > li > a span {
+    margin: auto 0 auto 13px;
+}
+
+
+@media (min-width: 992px) {
+body .wo_new_sett_sidee {
+	padding-left: 15px;padding-right: 15px;
+}
+body .wo_new_sett_pagee {
+	padding-left: 15px;padding-right: 0;
+}
+}
 
 @media (min-width: 1300px) {
 #wo_home_search {
 	margin-right: 20px;margin-left: auto;
+}
+}
+
+@media (max-width: 1320px) {
+body .search-container .search-input {
+    width: 300px;
 }
 }

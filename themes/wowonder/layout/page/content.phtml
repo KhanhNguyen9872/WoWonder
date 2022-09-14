@@ -55,108 +55,108 @@
 						<div class="page_username">
 							@<?php echo $wo['page_profile']['username']; ?>
 						</div>
-						<div class="page_info">
-							<svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M23,10C23,8.89 22.1,8 21,8H14.68L15.64,3.43C15.66,3.33 15.67,3.22 15.67,3.11C15.67,2.7 15.5,2.32 15.23,2.05L14.17,1L7.59,7.58C7.22,7.95 7,8.45 7,9V19A2,2 0 0,0 9,21H18C18.83,21 19.54,20.5 19.84,19.78L22.86,12.73C22.95,12.5 23,12.26 23,12V10M1,21H5V9H1V21Z" /></svg>
-							<?php echo Wo_CountPageLikes($wo['page_profile']['page_id']);?> <?php echo $wo['lang']['people_likes_this']; ?>
+						
+						<div class="options-buttons">
+							<span class="user-follow-button page-like-btn">
+								<?php echo Wo_GetLikeButton($wo['page_profile']['page_id']);?>
+							</span>
+							<span class="user-follow-button page-message-btn"><?php echo Wo_GetPageMessageButton($wo['page_profile']['page_id']);?></span>
+							<?php if ($wo['page_profile']['is_page_onwer'] == true) { ?>
+								<?php if ($wo['config']['job_system'] == 1 && Wo_IsPageOnwer($wo['page_profile']['page_id'],false) && $wo['config']['can_use_jobs']) { ?>
+									<a data-ajax="?link1=timeline&u=<?php echo $wo['page_profile']['page_name'];?>&type=jobs" href="<?php echo Wo_SeoLink('index.php?link1=timeline&u=' . $wo['page_profile']['page_name'] . '&type=jobs');?>" class="btn btn-success btn-sm btn-mat"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-briefcase"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> <?php echo $wo['lang']['create_job']; ?></a>
+								<?php } ?>
+								<?php if ($wo['config']['offer_system'] == 1 && Wo_IsPageOnwer($wo['page_profile']['page_id'],false) && $wo['config']['can_use_offer']) { ?>
+									<a data-ajax="?link1=timeline&u=<?php echo $wo['page_profile']['page_name'];?>&type=offer" href="<?php echo Wo_SeoLink('index.php?link1=timeline&u=' . $wo['page_profile']['page_name'] . '&type=offer');?>" class="btn btn-info btn-sm btn-mat"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-package"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg> <?php echo $wo['lang']['offer']; ?></a>
+								<?php } ?>
+								<a href="<?php echo Wo_SeoLink('index.php?link1=page-setting&page=' .  $wo['page_profile']['page_name']); ?>" data-ajax="?link1=page-setting&page=<?php echo $wo['page_profile']['page_name'];?>" class="btn btn-default btn-sm btn-mat"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2"><polygon points="16 3 21 8 8 21 3 21 3 16 16 3"></polygon></svg> <?php echo $wo['lang']['edit']; ?></a>
+							<?php } ?>
+							<span class="user-follow-button page_info_cta">
+								<?php echo Wo_GetCallInAction($wo['page_profile']['call_action_type'], $wo['page_profile']['call_action_type_url']);?>
+							</span>
 						</div>
-						<?php  if(!empty($wo['page_profile']['phone'])) {  ?>
-							<div class="page_info">
-								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-phone" data-toggle="tooltip" title="<?php echo $wo['lang']['phone_number']; ?>"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-								<span><?php echo $wo['page_profile']['phone']?></span>
-							</div>
-						<?php  }  ?>
 					</div>
 				</div>
 			</div>
 
 			<div class="col-sm-3 col-md-5 last_row">
-				<div class="options-buttons <?php echo Wo_RightToLeft('pull-left');?> ">
-					<span class="user-follow-button page-like-btn">
-						<?php echo Wo_GetLikeButton($wo['page_profile']['page_id']);?>
-					</span>
-					<span class="user-follow-button page-message-btn"><?php echo Wo_GetPageMessageButton($wo['page_profile']['page_id']);?></span>
-					<?php if ($wo['page_profile']['is_page_onwer'] == true) { ?>
-						<?php if ($wo['config']['job_system'] == 1 && Wo_IsPageOnwer($wo['page_profile']['page_id'],false) && $wo['config']['can_use_jobs']) { ?>
-							<a data-ajax="?link1=timeline&u=<?php echo $wo['page_profile']['page_name'];?>&type=jobs" href="<?php echo Wo_SeoLink('index.php?link1=timeline&u=' . $wo['page_profile']['page_name'] . '&type=jobs');?>" class="btn btn-success btn-sm btn-mat wo_page_admn_btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-briefcase"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> <?php echo $wo['lang']['create_job']; ?></a>
-						<?php } ?>
-						<?php if ($wo['config']['offer_system'] == 1 && Wo_IsPageOnwer($wo['page_profile']['page_id'],false) && $wo['config']['can_use_offer']) { ?>
-							<a data-ajax="?link1=timeline&u=<?php echo $wo['page_profile']['page_name'];?>&type=offer" href="<?php echo Wo_SeoLink('index.php?link1=timeline&u=' . $wo['page_profile']['page_name'] . '&type=offer');?>" class="btn btn-info btn-sm btn-mat wo_page_admn_btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-package"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg> <?php echo $wo['lang']['offer']; ?></a>
-						<?php } ?>
-						<a href="<?php echo Wo_SeoLink('index.php?link1=page-setting&page=' .  $wo['page_profile']['page_name']); ?>" data-ajax="?link1=page-setting&page=<?php echo $wo['page_profile']['page_name'];?>" class="btn btn-default btn-sm btn-mat wo_page_admn_btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2"><polygon points="16 3 21 8 8 21 3 21 3 16 16 3"></polygon></svg> <?php echo $wo['lang']['edit']; ?></a>
-					<?php } ?>
-					<span class="user-follow-button page_info_cta" style="display:none">
-						<?php echo Wo_GetCallInAction($wo['page_profile']['call_action_type'], $wo['page_profile']['call_action_type_url']);?>
-					</span>
+				<div class="page_info">
+					<svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M23,10C23,8.89 22.1,8 21,8H14.68L15.64,3.43C15.66,3.33 15.67,3.22 15.67,3.11C15.67,2.7 15.5,2.32 15.23,2.05L14.17,1L7.59,7.58C7.22,7.95 7,8.45 7,9V19A2,2 0 0,0 9,21H18C18.83,21 19.54,20.5 19.84,19.78L22.86,12.73C22.95,12.5 23,12.26 23,12V10M1,21H5V9H1V21Z" /></svg>
+					<?php echo Wo_CountPageLikes($wo['page_profile']['page_id']);?> <?php echo $wo['lang']['people_likes_this']; ?>
 				</div>
+				<?php  if(!empty($wo['page_profile']['phone'])) {  ?>
+					<div class="page_info">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-phone" data-toggle="tooltip" title="<?php echo $wo['lang']['phone_number']; ?>"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+						<span><?php echo $wo['page_profile']['phone']?></span>
+					</div>
+				<?php  }  ?>
 			</div>
-			
-			<div class="page_navbar">
-				<span class="user-follow-button page_menu_cta">
-					<?php echo Wo_GetCallInAction($wo['page_profile']['call_action_type'], $wo['page_profile']['call_action_type_url']);?>
-				</span>
-				<ul class="<?php echo Wo_RightToLeft('pull-right');?>">
-					<li>
-						<?php  if($wo['config']['pro'] == 1 && $wo['page_profile']['is_page_onwer'] == true) {  ?>
-							<?php if ($wo['user']['is_pro'] == 1) { ?>
-							<?php if (in_array($wo['user']['pro_type'], array_keys($wo['pro_packages'])) && $wo['pro_packages'][$wo['user']['pro_type']]['pages_promotion'] > 0) {?>
-							<?php if ($wo['page_profile']['boosted'] == 0) {?>
-								<a href="<?php echo $wo['marker'];?>boosted">
-									<svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="#ff5722" d="M7,2V13H10V22L17,10H13L17,2H7Z" /></svg> <?php echo $wo['lang']['boost_page'];?>
-								</a>
-							<?php } else { ?>
-								<a href="<?php echo $wo['marker'];?>un-boost">
-									<svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="#ff5722" d="M17,10H13L17,2H7V4.18L15.46,12.64M3.27,3L2,4.27L7,9.27V13H10V22L13.58,15.86L17.73,20L19,18.73L3.27,3Z" /></svg> <?php echo $wo['lang']['un_boost_page'];?>
-								</a>
-							<?php } ?>
-							<?php  }  ?>
-							<?php  } else {  ?>
-								<a href="<?php echo Wo_SeoLink('index.php?link1=go-pro');?>">
-									<svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="#ff5722" d="M7,2V13H10V22L17,10H13L17,2H7Z" /></svg> <?php echo $wo['lang']['boost_page'];?>
-								</a>
-							<?php  }  ?>
-						<?php  }  ?>
-					</li>
-					
-					<?php if ($wo['loggedin'] && $wo['page_profile']['user_id'] != $wo['user']['id']) { ?>
+			<div class="col-md-12" style="position: static">
+				
+				<div class="page_navbar">
+					<ul>
 						<li>
-							<a data-ajax="?link1=timeline&u=<?php echo $wo['page_profile']['page_name'];?>&type=rating" href="<?php echo Wo_SeoLink('index.php?link1=timeline&u=' . $wo['page_profile']['page_name'] . '&type=rating');?>">
-								<svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="#FF9800" d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z" /></svg> <?php echo $wo['lang']['rating'] ?>
+							<?php  if($wo['config']['pro'] == 1 && $wo['page_profile']['is_page_onwer'] == true) {  ?>
+								<?php if ($wo['user']['is_pro'] == 1) { ?>
+								<?php if (in_array($wo['user']['pro_type'], array_keys($wo['pro_packages'])) && $wo['pro_packages'][$wo['user']['pro_type']]['pages_promotion'] > 0) {?>
+								<?php if ($wo['page_profile']['boosted'] == 0) {?>
+									<a href="<?php echo $wo['marker'];?>boosted">
+										<svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="#ff5722" d="M7,2V13H10V22L17,10H13L17,2H7Z" /></svg> <?php echo $wo['lang']['boost_page'];?>
+									</a>
+								<?php } else { ?>
+									<a href="<?php echo $wo['marker'];?>un-boost">
+										<svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="#ff5722" d="M17,10H13L17,2H7V4.18L15.46,12.64M3.27,3L2,4.27L7,9.27V13H10V22L13.58,15.86L17.73,20L19,18.73L3.27,3Z" /></svg> <?php echo $wo['lang']['un_boost_page'];?>
+									</a>
+								<?php } ?>
+								<?php  }  ?>
+								<?php  } else {  ?>
+									<a href="<?php echo Wo_SeoLink('index.php?link1=go-pro');?>">
+										<svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="#ff5722" d="M7,2V13H10V22L17,10H13L17,2H7Z" /></svg> <?php echo $wo['lang']['boost_page'];?>
+									</a>
+								<?php  }  ?>
+							<?php  }  ?>
+						</li>
+						
+						<?php if ($wo['loggedin'] && $wo['page_profile']['user_id'] != $wo['user']['id']) { ?>
+							<li>
+								<a data-ajax="?link1=timeline&u=<?php echo $wo['page_profile']['page_name'];?>&type=rating" href="<?php echo Wo_SeoLink('index.php?link1=timeline&u=' . $wo['page_profile']['page_name'] . '&type=rating');?>">
+									<svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="#FF9800" d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z" /></svg> <?php echo $wo['lang']['rating'] ?>
+								</a>
+							</li>
+						<?php  }  ?>
+						
+						<li>
+							<a data-ajax="?link1=timeline&u=<?php echo $wo['page_profile']['page_name'];?>&type=invite" href="<?php echo Wo_SeoLink('index.php?link1=timeline&u=' . $wo['page_profile']['page_name'] . '&type=invite');?>">
+								<svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="#e91e63" d="M19 17V19H7V17S7 13 13 13 19 17 19 17M16 8A3 3 0 1 0 13 11A3 3 0 0 0 16 8M19.2 13.06A5.6 5.6 0 0 1 21 17V19H24V17S24 13.55 19.2 13.06M18 5A2.91 2.91 0 0 0 17.11 5.14A5 5 0 0 1 17.11 10.86A2.91 2.91 0 0 0 18 11A3 3 0 0 0 18 5M8 10H5V7H3V10H0V12H3V15H5V12H8Z" /></svg> <?php echo $wo['lang']['page_inviate_label']; ?>
 							</a>
 						</li>
-					<?php  }  ?>
-					
-					<li>
-						<a data-ajax="?link1=timeline&u=<?php echo $wo['page_profile']['page_name'];?>&type=invite" href="<?php echo Wo_SeoLink('index.php?link1=timeline&u=' . $wo['page_profile']['page_name'] . '&type=invite');?>">
-							<svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="#e91e63" d="M19 17V19H7V17S7 13 13 13 19 17 19 17M16 8A3 3 0 1 0 13 11A3 3 0 0 0 16 8M19.2 13.06A5.6 5.6 0 0 1 21 17V19H24V17S24 13.55 19.2 13.06M18 5A2.91 2.91 0 0 0 17.11 5.14A5 5 0 0 1 17.11 10.86A2.91 2.91 0 0 0 18 11A3 3 0 0 0 18 5M8 10H5V7H3V10H0V12H3V15H5V12H8Z" /></svg> <?php echo $wo['lang']['page_inviate_label']; ?>
-						</a>
-					</li>
-					<?php if ($wo['loggedin'] && !Wo_IsAdmin() && $wo['user']['id'] != $wo['page_profile']['user_id'] && !Wo_IsAdmin($wo['page_profile']['user_id'])): ?>
-					<li>
-						<div class="dropdown">
-							<a href="#" class="dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-								<svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="#673ab7" d="M16,12A2,2 0 0,1 18,10A2,2 0 0,1 20,12A2,2 0 0,1 18,14A2,2 0 0,1 16,12M10,12A2,2 0 0,1 12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12M4,12A2,2 0 0,1 6,10A2,2 0 0,1 8,12A2,2 0 0,1 6,14A2,2 0 0,1 4,12Z" /></svg> <?php echo $wo['lang']['more']; ?>
-							</a>
-							<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
-								<?php if (!Wo_IsReportExists($wo['page_profile']['page_id'],'page')): ?>
-									<li id="report_status" class="pointer" onclick="$('#report_page').modal('show');">
-										<span class="menu-item">
-											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17"></line></svg>
-											<?php echo $wo['lang']['report_page']; ?>
-										</span>
-									</li>
-								<?php else: ?>
-									<li id="report_status" class="pointer" onclick="Wo_ReportPage(<?php echo $wo['page_profile']['page_id']; ?>,false);">
-										<span class="menu-item">
-											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17"></line></svg>
-											<?php echo $wo['lang']['unreport']; ?>
-										</span>
-									</li>
-								<?php endif; ?>
-							</ul>
-						</div>
-					</li>
-					<?php endif; ?>
-				</ul>
+						<?php if ($wo['loggedin'] && !Wo_IsAdmin() && $wo['user']['id'] != $wo['page_profile']['user_id'] && !Wo_IsAdmin($wo['page_profile']['user_id'])): ?>
+						<li>
+							<div class="dropdown">
+								<a href="#" class="dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+									<svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24"><path fill="#673ab7" d="M16,12A2,2 0 0,1 18,10A2,2 0 0,1 20,12A2,2 0 0,1 18,14A2,2 0 0,1 16,12M10,12A2,2 0 0,1 12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12M4,12A2,2 0 0,1 6,10A2,2 0 0,1 8,12A2,2 0 0,1 6,14A2,2 0 0,1 4,12Z" /></svg> <?php echo $wo['lang']['more']; ?>
+								</a>
+								<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+									<?php if (!Wo_IsReportExists($wo['page_profile']['page_id'],'page')): ?>
+										<li id="report_status" class="pointer" onclick="$('#report_page').modal('show');">
+											<span class="menu-item">
+												<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17"></line></svg>
+												<?php echo $wo['lang']['report_page']; ?>
+											</span>
+										</li>
+									<?php else: ?>
+										<li id="report_status" class="pointer" onclick="Wo_ReportPage(<?php echo $wo['page_profile']['page_id']; ?>,false);">
+											<span class="menu-item">
+												<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17"></line></svg>
+												<?php echo $wo['lang']['unreport']; ?>
+											</span>
+										</li>
+									<?php endif; ?>
+								</ul>
+							</div>
+						</li>
+						<?php endif; ?>
+					</ul>
+				</div>
 			</div>
 		</div>  
 	</div>

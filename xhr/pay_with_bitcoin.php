@@ -14,12 +14,16 @@ if ($f == 'pay_with_bitcoin') {
                                                   'currency1' => $wo['config']['currency'],
                                                   'currency2' => $wo['config']['coinpayments_coin'],
                                                   'custom' => $amount,
+                                                  'success_url' => $wo['config']['site_url'] . '/wallet',
                                                   'cancel_url' => $wo['config']['site_url'] . '/requests.php?f=pay_with_bitcoin&s=cancel_coinpayments',
                                                   'buyer_email' => $wo['user']['email']));
 
             
             if (!empty($result) && $result['status'] == 200) {
-                $db->where('user_id',$wo['user']['user_id'])->update(T_USERS,array('coinpayments_txn_id' => $result['data']['txn_id']));
+                $db->insert(T_PENDING_PAYMENTS,array('user_id' => $wo['user']['user_id'],
+                                                     'payment_data' => $result['data']['txn_id'],
+                                                     'method_name' => 'coinpayments',
+                                                     'time' => time()));
                 $data = array(
                     'status' => 200,
                     'url' => $result['data']['checkout_url']
@@ -43,7 +47,7 @@ if ($f == 'pay_with_bitcoin') {
         exit();
     }
     if ($s == 'cancel_coinpayments') {
-        $db->where('user_id',$wo['user']['user_id'])->update(T_USERS,array('coinpayments_txn_id' => ''));
+        $db->where('user_id', $wo['user']['user_id'])->where('method_name', 'coinpayments')->delete(T_PENDING_PAYMENTS);
         header('Location: ' . Wo_SeoLink('index.php?link1=wallet'));
         exit();
     }

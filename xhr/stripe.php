@@ -74,7 +74,7 @@ if ($f == 'stripe') {
 				    'cancel_url' => $domain_url . '?f=stripe&s=cancel&type='.$_POST['type'],
 			    ]);
 			    if (!empty($checkout_session) && !empty($checkout_session['id'])) {
-			    	$db->where('user_id',$wo['user']['id'])->update(T_USERS,array('StripeSessionId' => $checkout_session['id']));
+			    	$_SESSION['stripe_session_payment_intent'] = $checkout_session['id'];
 			    	$data = array(
 		                'status' => 200,
 		                'sessionId' => $checkout_session['id']
@@ -103,10 +103,9 @@ if ($f == 'stripe') {
 			header("Location: " . Wo_SeoLink('index.php?link1=oops'));
 	        exit();
 		}
-		if (!empty($wo['user']['StripeSessionId']) && !empty($_GET['type']) && in_array($_GET['type'], array('wallet','fund','pro'))) {
+		if (!empty($_SESSION['stripe_session_payment_intent']) && !empty($_GET['type']) && in_array($_GET['type'], array('wallet','fund','pro'))) {
 			try {
-				$db->where('user_id',$wo['user']['id'])->update(T_USERS,array('StripeSessionId' => ''));
-				$checkout_session = \Stripe\Checkout\Session::retrieve($wo['user']['StripeSessionId']);
+				$checkout_session = \Stripe\Checkout\Session::retrieve($_SESSION['stripe_session_payment_intent']);
 				if ($checkout_session->payment_status == 'paid') {
 					$amount = ($checkout_session->amount_total / 100);
 					if ($_GET['type'] == 'wallet') {
@@ -282,7 +281,6 @@ if ($f == 'stripe') {
 		exit();
 	}
 	if ($s == 'cancel') {
-		$db->where('user_id',$wo['user']['id'])->update(T_USERS,array('StripeSessionId' => ''));
 		header("Location: " . Wo_SeoLink('index.php?link1=oops'));
 	    exit();
 	}

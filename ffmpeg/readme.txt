@@ -1,67 +1,74 @@
 
-            ______ ______                                  
-           / ____// ____/____ ___   ____   ___   ____ _
-          / /_   / /_   / __ `__ \ / __ \ / _ \ / __ `/
-         / __/  / __/  / / / / / // /_/ //  __// /_/ /
-        /_/    /_/    /_/ /_/ /_// .___/ \___/ \__, /
-                                /_/           /____/
+    ______ ______                                  __            _  __     __
+   / ____// ____/____ ___   ____   ___   ____ _   / /_   __  __ (_)/ /____/ /
+  / /_   / /_   / __ `__ \ / __ \ / _ \ / __ `/  / __ \ / / / // // // __  / 
+ / __/  / __/  / / / / / // /_/ //  __// /_/ /  / /_/ // /_/ // // // /_/ /  
+/_/    /_/    /_/ /_/ /_// .___/ \___/ \__, /  /_.___/ \__,_//_//_/ \__,_/   
+                        /_/           /____/                                 
 
 
-                build: ffmpeg-5.1.1-amd64-static.tar.xz
-              version: 5.1.1
+                build: ffmpeg-3.4.1-64bit-static.tar.xz
+              version: 3.4.1
+ 
+                  gcc: 6.4.0
+                 yasm: 1.3.0.28.g51af
+                 nasm: 2.14rc0
 
-                  gcc: 8.3.0
-                 yasm: 1.3.0.36.ge2569
-                 nasm: 2.15.05
-
-               libaom: 3.2.0-393-g402e264b9
-               libass: 0.16.0
-               libgme: 0.6.3
-               libsrt: 1.4.4
-               libvpx: 1.11.0-30-g888bafc78
-              libvmaf: 2.3.0
-              libx264: 0.164.3098 
-              libx265: 3.5+1-f0c1022b6
-              libxvid: 1.3.7 
-              libwebp: 0.6.1 
-              libzimg: 3.0.3
-              libzvbi: 0.2.36
-             libdav1d: 1.0.0
-            libgnutls: 3.7.2
+               libass: 0.14.0
+               libvpx: 1.6.1-1443-ga1689ed16
+              libvmaf: 0.6.1
+              libx264: 0.152.19 ba24899
+              libx265: 2.6+13-6b079854e56e
+              libxvid: 1.3.4-1+b2
+              libwebp: 0.6.0 
+              libzimg: 2.6.3
+              librtmp: 2.4
+            libgnutls: 3.5.16
             libtheora: 1.2.0alpha1+git
-            libfrei0r: 1.6.1-2
-           libvidstab: 1.20
-          libfreetype: 2.9.1-3+deb10u1
-          libharfbuzz: 3.1.1
-          libopenjpeg: 2.4.0 
+            libfrei0r: 1.6.1-1+b1
+           libvidstab: 1.10
+          libfreetype: 2.8.1-0.1
+          libopenjpeg: 2.3.0 
 
-              libalsa: 1.2.4
-              libsoxr: 0.1.3
-              libopus: 1.3.1
+              libalsa: 1.1.4.1
+              libsoxr: 0.1.3b1
+              libopus: 1.2.1
              libspeex: 1.2
-            libvorbis: 1.3.7
-           libmp3lame: 3.100 
-        librubberband: 1.8.2
+            libvorbis: 1.3.5
+           libmp3lame: 3.100-2
+        librubberband: 1.8.1 
        libvo-amrwbenc: 0.1.3-1+b1
     libopencore-amrnb: 0.1.3-2.1+b2
     libopencore-amrwb: 0.1.3-2.1+b2
 
+      For HEVC/H.265 encoding:  ffmpeg -h encoder=libx265
+                                http://x265.readthedocs.org/en/default/cli.html#standalone-executable-options
 
-     Notes:  A limitation of statically linking glibc is the loss of DNS resolution. Installing
-             nscd through your package manager will fix this.
+      For AVC/H.264 encoding:   ffmpeg -h encoder=libx264
+                                http://mewiki.project357.com/wiki/X264_Settings
+
+                 FFmpeg Wiki:   https://trac.ffmpeg.org/wiki
+
+
+      Notes: ffmpeg-10bit has support for AVC/H.264, HEVC/H.265, and VP9 high bit depth encoding.
+             However, the 32bit builds lack HEVC/H.265 high bit depth because it's not supported by
+             libx265.
+
+             A limitation of statically linking glibc is the loss of DNS resolution. Installing
+             nscd through your package manager will fix this or you can use
+             "ffmpeg -i http://<ip address here>/" instead of "ffmpeg -i http://example.com/"
 
              The vmaf filter needs external files to work- see model/000-README.TXT
 
-
       This static build is licensed under the GNU General Public License version 3.
 
+      If you appreciate this up-to-date build of FFmpeg and my time that goes into to maintaining it,
+      please consider making a donation. Thank you.
+
       
-      Patreon:  https://www.patreon.com/johnvansickle
-      Paypal:   https://www.paypal.me/johnvansickle 
-      Ethereum: 0x491f0b4bAd15FF178257D9Fa81ce87baa8b6E242 
-      Bitcoin:  3ErDdF5JeG9RMx2DXwXEeunrsc5dVHjmeq 
-      Dogecoin: DH4WZPTjwKh2TarQhkpQrKjHZ9kNTkiMNL
+      Paypal tinyurl: http://goo.gl/1Ol8N
+      Bitcoin: 1JfPDkULqcqzAnmHQfboa3rXTLVftJJ5qt 
 
       email: john.vansickle@gmail.com
-      irc:   relaxed @ irc://chat.freenode.net #ffmpeg
-      url:   https://johnvansickle.com/ffmpeg/
+      irc: relaxed @ irc://irc.freenode.net #ffmpeg
+      url: http://johnvansickle.com/ffmpeg/

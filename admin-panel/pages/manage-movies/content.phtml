@@ -100,7 +100,7 @@ if (($page > $db->totalPages) && !empty($_GET['page-id'])) {
 				                foreach ($posts as $value) {
                                     $value->cover  = Wo_GetMedia($value->cover);
                                     $value->source = Wo_GetMedia($value->source);
-                                    $value->url    = Wo_SeoLink("index.php?link1=watch-film&film-id=" . $value->id);
+                                    $value->url    = Wo_SeoLink("index.php?link1=watch-film&film-id=" . $value->id) . '_' . Wo_SlugPost($value->name);
                                     $wo['film'] = ToArray($value);
 				                  echo Wo_LoadAdminPage('manage-movies/list');
 				                }

@@ -74,7 +74,7 @@ if ($f == 'products') {
             $price              = Wo_Secure($_POST['price']);
             $product_data_array = array(
                 'user_id' => $wo['user']['user_id'],
-                'name' => Wo_Secure($_POST['name']),
+                'name' => Wo_Secure($_POST['name'],1),
                 'category' => Wo_Secure($_POST['category']),
                 'sub_category' => $sub_category,
                 'description' => Wo_Secure($_POST['description'],1,true,1),
@@ -209,10 +209,10 @@ if ($f == 'products') {
             }
             $price              = Wo_Secure($_POST['price']);
             $product_data_array = array(
-                'name' => $_POST['name'],
+                'name' => Wo_Secure($_POST['name'],1),
                 'category' => $_POST['category'],
                 'sub_category' => $sub_category,
-                'description' => $_POST['description'],
+                'description' => Wo_Secure($_POST['description'],1),
                 'price' => $price,
                 'location' => Wo_Secure($_POST['location']),
                 'type' => $type,
@@ -280,7 +280,7 @@ if ($f == 'products') {
                             if (!empty($product) && $wo['user']['id'] == $product['user_id']) {
                                 $deleted = Wo_DeleteProductImage($value);
                                 if ($deleted) {
-                                    if (($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1)) {
+                                    if (($wo['config']['amazone_s3'] == 1 || $wo['config']['wasabi_storage'] == 1 || $wo['config']['ftp_upload'] == 1 || $wo['config']['spaces'] == 1 || $wo['config']['cloud_upload'] == 1 || $wo['config']['backblaze_storage'] == 1)) {
                                         Wo_DeleteFromToS3($image['image']);
                                         Wo_DeleteFromToS3($small_image);
                                     }
@@ -477,7 +477,7 @@ if ($f == 'products') {
                                                            'time' => time()));
                             }
                             $db->where('user_id',$wo['user']['user_id'])->update(T_USERS,array('wallet' => $db->dec($total)));
-                            $db->where('user_id',$key)->update(T_USERS,array('balance' => $db->inc($total_final_price)));
+                            //$db->where('user_id',$key)->update(T_USERS,array('balance' => $db->inc($total_final_price)));
                             $notes = $wo['lang']['product_purchase'];
                             $notes_2 = $wo['lang']['product_sale'];
                             mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ({$wo['user']['user_id']}, 'PURCHASE', {$total}, '{$notes}')");
@@ -656,7 +656,7 @@ if ($f == 'products') {
                     $db->where('hash_id',$hash_id)->update(T_USER_ORDERS,array('status' => $status));
                     if ($status == 'delivered') {
                         $total = $db->where('hash_id',$hash_id)->getValue(T_USER_ORDERS,'SUM(final_price)');
-                        $db->where('user_id',$order->product_owner_id)->update(T_USERS,array('wallet' => $db->inc($total)));
+                        $db->where('user_id',$order->product_owner_id)->update(T_USERS,array('balance' => $db->inc($total)));
                         $notification_data_array = array(
                             'notifier_id' => $wo['user']['user_id'],
                             'recipient_id' => $order->product_owner_id,
@@ -696,7 +696,7 @@ if ($f == 'products') {
     if ($s == 'refund') {
         if (!empty($_POST['hash_order']) && !empty($_POST['message'])) {
             $hash = Wo_Secure($_POST['hash_order']);
-            $message = Wo_Secure($_POST['message']);
+            $message = Wo_Secure($_POST['message'],1);
             $order = $db->where('hash_id',$hash)->where('user_id',$wo['user']['user_id'])->getOne(T_USER_ORDERS);
             if (!empty($order)) {
                 $db->insert(T_REFUND,array('order_hash_id' => $hash,
@@ -734,7 +734,7 @@ if ($f == 'products') {
         if (!empty($_POST['rating']) && in_array($_POST['rating'], array(1,2,3,4,5)) && !empty($_POST['review']) && !empty($_POST['product_id']) && is_numeric($_POST['product_id']) && $_POST['product_id'] > 0) {
             $product_id = Wo_Secure($_POST['product_id']);
             $rating = Wo_Secure($_POST['rating']);
-            $review = Wo_Secure($_POST['review']);
+            $review = Wo_Secure($_POST['review'],1);
             $files = array();
             if (!empty($_FILES['images'])) {
                 foreach ($_FILES['images']['name'] as $key => $value) {

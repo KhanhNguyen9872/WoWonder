@@ -1,17 +1,16 @@
 <?php
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
+error_reporting(0);
 @ini_set("max_execution_time", 0);
 @ini_set("memory_limit", "-1");
 @set_time_limit(0);
 require_once "config.php";
 require_once "assets/libraries/DB/vendor/autoload.php";
-require_once "assets/libraries/PayPal/vendor/paypal/rest-api-sdk-php/lib.php";
 
 $wo           = array();
 // Connect to SQL Server
-$sqlConnect   = $wo["sqlConnect"] = mysqli_connect($sql_db_host, $sql_db_user, $sql_db_pass, $sql_db_name, $sql_db_port);
+$sqlConnect   = $wo["sqlConnect"] = mysqli_connect($sql_db_host, $sql_db_user, $sql_db_pass, $sql_db_name, 3306);
 // create new mysql connection
 $mysqlMaria   = new Mysql;
 // Handling Server Errors
@@ -47,6 +46,7 @@ if ($config['developer_mode'] == 1) {
 }
 $db        = new MysqliDb($sqlConnect);
 $all_langs = Wo_LangsNamesFromDB();
+$wo['iso'] = GetIso();
 foreach ($all_langs as $key => $value) {
     $insert = false;
     if (!in_array($value, array_keys($config))) {
@@ -79,9 +79,9 @@ $config["withdrawal_payment_method"] = json_decode($config['withdrawal_payment_m
 $config["theme_url"] = $site_url . "/themes/" . $config["theme"];
 $config["site_url"]  = $site_url;
 $wo["site_url"]      = $site_url;
-$config["wasabi_site_url"]         = "https://s3.wasabisys.com";
+$config["wasabi_site_url"]         = "https://s3.".$config["wasabi_bucket_region"].".wasabisys.com";
 if (!empty($config["wasabi_bucket_name"])) {
-    $config["wasabi_site_url"] = "https://s3.wasabisys.com/".$config["wasabi_bucket_name"];
+    $config["wasabi_site_url"] = "https://s3.".$config["wasabi_bucket_region"].".wasabisys.com/".$config["wasabi_bucket_name"];
 }
 $s3_site_url         = "https://test.s3.amazonaws.com";
 if (!empty($config["bucket_name"])) {
@@ -248,7 +248,10 @@ $wo["language"]      = $_SESSION["lang"];
 $wo["language_type"] = "ltr";
 // Add rtl languages here.
 $rtl_langs           = array(
-    "arabic"
+    "arabic",
+    "urdu",
+    "hebrew",
+    "persian"
 );
 if (!isset($_COOKIE["ad-con"])) {
     setcookie("ad-con", htmlentities(json_encode(array(
@@ -278,12 +281,6 @@ if (!isset($_COOKIE["_us"])) {
 }
 if ((isset($_COOKIE["_us"]) && $_COOKIE["_us"] < time()) || 1) {
     setcookie("_us", time() + 60 * 60 * 24, time() + 10 * 365 * 24 * 60 * 60);
-    $expired_stories = $db->where("expire", time(), "<")->get(T_USER_STORY);
-    foreach ($expired_stories as $key => $value) {
-        $db->where("story_id", $value->id)->delete(T_STORY_SEEN);
-    }
-    @mysqli_query($sqlConnect, "DELETE FROM " . T_USER_STORY_MEDIA . " WHERE `expire` < " . time());
-    @mysqli_query($sqlConnect, "DELETE FROM " . T_USER_STORY . " WHERE `expire` < " . time());
 }
 // checking if corrent language is rtl.
 foreach ($rtl_langs as $lang) {
@@ -366,46 +363,9 @@ if (!empty($_GET["access"]) || empty($_COOKIE["access"])) {
     include_once "assets/includes/paypal_config.php";
     setcookie("access", "1", time() + 24 * 60 * 60, "/");
 }
-if ($wo["config"]["last_notification_delete_run"] <= time() - 60 * 60 * 24) {
-    mysqli_multi_query($sqlConnect, " DELETE FROM " . T_NOTIFICATION . " WHERE `time` < " . (time() - 60 * 60 * 24 * 5) . " AND `seen` <> 0");
-    mysqli_query($sqlConnect, "UPDATE " . T_CONFIG . " SET `value` = '" . time() . "' WHERE `name` = 'last_notification_delete_run'");
-}
+
 // manage packages
 $wo["pro_packages"]       = Wo_GetAllProInfo();
-// $wo["pro_packages_types"] = array(
-//     "1" => "star",
-//     "2" => "hot",
-//     "3" => "ultima",
-//     "4" => "vip"
-// );
-// // manage packages
-// $star_package_duration    = 604800; // week in seconds
-// $hot_package_duration     = 2629743; // month in seconds
-// $ultima_package_duration  = 31556926; // year in seconds
-// $vip_package_duration     = 0; // life time package
-// $time_array               = array(
-//     "week" => $star_package_duration,
-//     "month" => $hot_package_duration,
-//     "year" => $ultima_package_duration,
-//     "unlimited" => $vip_package_duration
-// );
-// if (in_array($wo["pro_packages"]["star"]["time"], array_keys($time_array))) {
-//     $star_package_duration = $time_array[$wo["pro_packages"]["star"]["time"]];
-// }
-// if (in_array($wo["pro_packages"]["hot"]["time"], array_keys($time_array))) {
-//     $hot_package_duration = $time_array[$wo["pro_packages"]["hot"]["time"]];
-// }
-// if (in_array($wo["pro_packages"]["ultima"]["time"], array_keys($time_array))) {
-//     $ultima_package_duration = $time_array[$wo["pro_packages"]["ultima"]["time"]];
-// }
-// if (in_array($wo["pro_packages"]["vip"]["time"], array_keys($time_array))) {
-//     $vip_package_duration = $time_array[$wo["pro_packages"]["vip"]["time"]];
-// }
-// $seconds_in_day = (60*60*24);
-// $star_package_duration   = $seconds_in_day * $wo['pro_packages']['star']['time']; // week in seconds
-// $hot_package_duration    = $seconds_in_day * $wo['pro_packages']['hot']['time']; // month in seconds
-// $ultima_package_duration = $seconds_in_day * $wo['pro_packages']['ultima']['time']; // year in seconds
-// $vip_package_duration    = $seconds_in_day * $wo['pro_packages']['vip']['time']; // life time package
 try {
     $wo["genders"]             = Wo_GetGenders($wo["language"], $langs);
     $wo["page_categories"]     = Wo_GetCategories(T_PAGES_CATEGORY);
@@ -445,103 +405,6 @@ $wo["post_colors"] = array();
 if ($wo["config"]["colored_posts_system"] == 1) {
     $wo["post_colors"] = Wo_GetAllColors();
 }
-if ($wo["loggedin"] == true && $wo["user"]["is_pro"]) {
-    $notify = false;
-    $remove = false;
-    if ($wo["config"]["pro"]) {
-        if ($wo["pro_packages"][$wo["user"]["pro_type"]]['ex_time'] != 0) {
-            $end_time = $wo["user"]["pro_time"] + $wo["pro_packages"][$wo["user"]["pro_type"]]['ex_time'];
-            if ($end_time > time() && $end_time <= time() + 60 * 60 * 24 * 3) {
-                $notify = true;
-            } elseif ($end_time <= time()) {
-                $remove = true;
-            }
-        }
-        // switch ($wo["user"]["pro_type"]) {
-        //     case "1":
-        //         if ($wo["pro_packages"]["star"]["time"] != "unlimited") {
-        //             $end_time = $wo["user"]["pro_time"] + $star_package_duration;
-        //             if ($end_time > time() && $end_time <= time() + 60 * 60 * 24 * 3) {
-        //                 $notify = true;
-        //             } elseif ($end_time <= time()) {
-        //                 $remove = true;
-        //             }
-        //         }
-        //         break;
-        //     case "2":
-        //         if ($wo["pro_packages"]["hot"]["time"] != "unlimited") {
-        //             $end_time = $wo["user"]["pro_time"] + $hot_package_duration;
-        //             if ($end_time > time() && $end_time <= time() + 60 * 60 * 24 * 3) {
-        //                 $notify = true;
-        //             } elseif ($end_time <= time()) {
-        //                 $remove = true;
-        //             }
-        //         }
-        //         break;
-        //     case "3":
-        //         if ($wo["pro_packages"]["ultima"]["time"] != "unlimited") {
-        //             $end_time = $wo["user"]["pro_time"] + $ultima_package_duration;
-        //             if ($end_time > time() && $end_time <= time() + 60 * 60 * 24 * 3) {
-        //                 $notify = true;
-        //             } elseif ($end_time <= time()) {
-        //                 $remove = true;
-        //             }
-        //         }
-        //         break;
-        //     case "4":
-        //         if ($wo["pro_packages"]["vip"]["time"] != "unlimited") {
-        //             $end_time = $wo["user"]["pro_time"] + $vip_package_duration;
-        //             if ($end_time > time() && $end_time <= time() + 60 * 60 * 24 * 3) {
-        //                 $notify = true;
-        //             } elseif ($end_time <= time()) {
-        //                 $remove = true;
-        //             }
-        //         }
-        //         break;
-        // }
-    }
-    if ($notify == true) {
-        $start     = date_create(date("Y-m-d H:i:s", time()));
-        $end       = date_create(date("Y-m-d H:i:s", $end_time));
-        $diff      = date_diff($end, $start);
-        $left_time = "";
-        if (!empty($diff->d)) {
-            $left_time = $diff->d . " " . $wo["lang"]["day"];
-        } elseif (!empty($diff->h)) {
-            $left_time = $diff->h . " " . $wo["lang"]["hour"];
-        } elseif (!empty($diff->i)) {
-            $left_time = $diff->i . " " . $wo["lang"]["minute"];
-        }
-        $day       = date("d");
-        $month     = date("n");
-        $year      = date("Y");
-        $query_one = " SELECT COUNT(*) AS count FROM " . T_NOTIFICATION . " WHERE `recipient_id` = " . $wo["user"]["id"] . " AND DAY(FROM_UNIXTIME(time)) = '{$day}' AND MONTH(FROM_UNIXTIME(time)) = '{$month}' AND YEAR(FROM_UNIXTIME(time)) = '{$year}' AND `type` = 'remaining'";
-        $query     = mysqli_query($sqlConnect, $query_one);
-        if ($query) {
-            $fetched_data = mysqli_fetch_assoc($query);
-            if ($fetched_data["count"] < 1) {
-                $db->insert(T_NOTIFICATION, array(
-                    "recipient_id" => $wo["user"]["id"],
-                    "type" => "remaining",
-                    "text" => str_replace("{{time}}", $left_time, $wo["lang"]["remaining_text"]),
-                    "url" => "index.php?link1=home",
-                    "time" => time()
-                ));
-            }
-        }
-    }
-    if ($remove == true) {
-        $update      = Wo_UpdateUserData($wo["user"]["id"], array(
-            "is_pro" => 0,
-            'verified' => 0,
-            'pro_' => 1
-        ));
-        $user_id     = $wo["user"]["id"];
-        $mysql_query = mysqli_query($sqlConnect, "UPDATE " . T_PAGES . " SET `boosted` = '0' WHERE `user_id` = {$user_id}");
-        $mysql_query = mysqli_query($sqlConnect, "UPDATE " . T_POSTS . " SET `boosted` = '0' WHERE `user_id` = {$user_id}");
-        $mysql_query = mysqli_query($sqlConnect, "UPDATE " . T_POSTS . " SET `boosted` = '0' WHERE `page_id` IN (SELECT `page_id` FROM " . T_PAGES . " WHERE `user_id` = {$user_id})");
-    }
-}
 
 
 $wo['manage_pro_features'] = array('funding_request' => 'can_use_funding',
@@ -569,6 +432,7 @@ $wo['manage_pro_features'] = array('funding_request' => 'can_use_funding',
                                    'poll_request' => 'can_use_poll',
                                    'live_request' => 'can_use_live',
                                    'profile_background_request' => 'can_use_background',
+                                   'affiliate_request' => 'can_use_affiliate',
                                    'chat_request' => 'can_use_chat');
 $wo['available_pro_features'] = array();
 $wo['available_verified_features'] = array();
@@ -599,9 +463,6 @@ foreach ($wo['manage_pro_features'] as $key => $value) {
         $wo['available_verified_features'][$key] = $value;
     }
 }
-if ($wo["loggedin"] && !empty($wo['user']) && $wo['user']['is_pro'] && !empty($wo["pro_packages"][$wo['user']['pro_type']]) && !empty($wo["pro_packages"][$wo['user']['pro_type']]['max_upload'])) {
-    $wo['config']['maxUpload'] = $wo["pro_packages"][$wo['user']['pro_type']]['max_upload'];
-}
 if (!$wo['config']['can_use_stickers']) {
     $wo['config']['stickers_system'] = 0;
 }
@@ -617,7 +478,7 @@ if (!$wo['config']['can_use_nearby']) {
 if (!$wo['config']['can_use_video_upload']) {
     $wo['config']['video_upload'] = 0;
 }
-if (!$wo['config']['audio_upload_request']) {
+if (!$wo['config']['can_use_audio_upload']) {
     $wo['config']['audio_upload'] = 0;
 }
 if (!$wo['config']['can_use_poll']) {
@@ -630,3 +491,12 @@ if (!$wo['config']['can_use_chat']) {
     $wo['config']['chatSystem'] = 0;
 }
 $wo['config']['report_reasons'] = json_decode($wo['config']['report_reasons'],true);
+
+
+$wo['config']['filesVersion'] = "4.1.3";
+
+if ($wo['config']['filesVersion'] != $wo['config']['version']) {
+    ini_set('display_errors', 0);
+    ini_set('display_startup_errors', 0);
+    error_reporting(0);
+}

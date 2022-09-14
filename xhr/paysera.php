@@ -260,7 +260,7 @@ if ($f == 'paysera') {
             } else {
                 if (Wo_ReplenishingUserBalance($amount)) {
                     $amount                         = Wo_Secure($amount);
-                    $create_payment_log             = mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ('" . $wo['user']['id'] . "', 'WALLET', '" . $amount . "', 'Paystack')");
+                    $create_payment_log             = mysqli_query($sqlConnect, "INSERT INTO " . T_PAYMENT_TRANSACTIONS . " (`userid`, `kind`, `amount`, `notes`) VALUES ('" . $wo['user']['id'] . "', 'WALLET', '" . $amount . "', 'Paysera')");
                     $_SESSION['replenished_amount'] = $amount;
                     if (!empty($_COOKIE['redirect_page'])) {
                         $redirect_page = preg_replace('/on[^<>=]+=[^<>]*/m', '', $_COOKIE['redirect_page']);

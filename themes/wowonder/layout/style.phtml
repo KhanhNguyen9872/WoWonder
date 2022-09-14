@@ -19,9 +19,28 @@
     src: url("<?php echo $wo['config']['theme_url'];?>/fonts/OpenSansBold/OpenSansBold.woff") format("woff");
     font-weight: normal;
 }
+:root {
+	--plyr-color-main: <?php echo $wo['config']['btn_background_color'];?> ;
+}
+
+.wo_follow_btn {
+    background: <?php echo $wo['config']['btn_hover_background_color'];?> !important;
+}
+.wow_htag .htag_top {
+    color:  <?php echo $wo['config']['btn_hover_background_color'];?> !important;
+}
+.wo_follow_btn:hover {
+    background: <?php echo $wo['config']['btn_background_color'];?> !important;
+}
+.publisher-box .publisher-hidden-option #progress .progress, .publisher-box .publisher-hidden-option #percent, .wo_new_wallet .wow_mini_wallets h5 {
+	color: <?php echo $wo['config']['btn_background_color'];?>;
+}
+
+
+
 .navbar-default {
     background: <?php echo $wo['config']['header_background'];?>; border: none;
-    height: 46px;
+    height: 48px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 .round-check input[type="checkbox"]:checked + label:before, .round-check input[type="radio"]:checked + label:before {
@@ -33,19 +52,24 @@
 ul.profile-completion-bar li.completion-bar div.completion-bar-status {
     background: <?php echo $wo['config']['btn_background_color'];?> !important;
 }
-.wow_srch_innr_filtr .round_check input:checked+label {
+/*.wow_srch_innr_filtr .round_check input:checked+label {
   background: <?php echo $wo['config']['btn_background_color'];?> !important;
   color: <?php echo $wo['config']['btn_color'];?> !important;
-}
-.featured-users{
-    background: #fff !important;
-}
+}*/
 .result-bar {
     background: <?php echo $wo['config']['btn_background_color'];?> !important;
 }
 .featured-users .sidebar-title-back, .featured-users .pro-me-here a {
     color: #444 !important;
 }
+
+.lang_select_modal .language_info {
+    background: <?php echo $wo['config']['btn_background_color'];?>
+}
+.lang_select_modal .language_info h3 {
+	color: <?php echo $wo['config']['btn_color'];?>;
+}
+
 
 
 .avtive {
@@ -216,17 +240,12 @@ a.unread-update {
 .btn-active-color:hover {
     background: <?php echo $wo['config']['btn_hover_background_color'];?>;
 }
-.chat-tab .online-toggle-hdr, .wow_thread_head {
-    background: <?php echo $wo['config']['header_background'];?>;
-	  color: <?php echo $wo['config']['header_color'];?>;
-}
+
 .chat-tab .chat-textarea .chat-btns-w .chat_optns {
     color: <?php echo $wo['config']['btn_background_color'];?>;
     fill: <?php echo $wo['config']['btn_background_color'];?>;
 }
-.chat-tab .online-toggle-hdr a {
-	color: <?php echo $wo['config']['header_color'];?>;
-}
+
 .profile-style .user-follow-button button.btn-active, .btn-login, .btn-register {
     background: <?php echo $wo['config']['btn_background_color'];?>;
     color: <?php echo $wo['config']['btn_color'];?>;
@@ -370,9 +389,9 @@ if (!empty($wo['reactions_types'])) {
 .text-sender-container .outgoing .message-model .message p, .text-sender-container .outgoing .message-model .message a {color: <?php echo $wo['config']['btn_color'];?>;}
 
 <?php if ($wo['config']['google_map'] == 0 && $wo['config']['yandex_map'] == 0) { ?>
-#filterby-post li {
+/*#filterby-post li {
     width: 16.5%;
-}
+}*/
 <?php }?>
 #notification-popup {
      position: fixed;

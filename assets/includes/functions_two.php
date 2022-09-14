@@ -2102,7 +2102,7 @@ function Wo_DeletePageLike($page_id = 0, $user_id = 0) {
         return true;
     }
 }
-function Wo_UpdatePageData($page_id = 0, $update_data) {
+function Wo_UpdatePageData($page_id = 0, $update_data = array()) {
     global $wo, $sqlConnect, $cache;
     if ($wo["loggedin"] == false) {
         return false;
@@ -2206,7 +2206,7 @@ function Wo_UpdateGroupAdminData($group_id, $update_data, $user_id) {
         return false;
     }
 }
-function Wo_UpdatePostData($post_id = 0, $update_data) {
+function Wo_UpdatePostData($post_id = 0, $update_data = array()) {
     global $wo, $sqlConnect, $cache;
     if ($wo["loggedin"] == false) {
         return false;
@@ -2911,7 +2911,7 @@ function Wo_LeaveGroup($group_id = 0, $user_id = 0) {
         return true;
     }
 }
-function Wo_UpdateGroupData($group_id = 0, $update_data) {
+function Wo_UpdateGroupData($group_id = 0, $update_data = array()) {
     global $wo, $sqlConnect, $cache;
     if ($wo["loggedin"] == false) {
         return false;
@@ -5170,39 +5170,66 @@ function Wo_SendMessage($data = array()) {
         return true;
         exit();
     }
-    if ($wo["config"]["smtp_or_mail"] == "mail") {
-        $mail->IsMail();
-    } elseif ($wo["config"]["smtp_or_mail"] == "smtp") {
-        $mail->isSMTP();
-        $mail->Host        = $wo["config"]["smtp_host"]; // Specify main and backup SMTP servers
-        $mail->SMTPAuth    = true; // Enable SMTP authentication
-        $mail->Username    = $wo["config"]["smtp_username"]; // SMTP username
-        $mail->Password    = openssl_decrypt($wo["config"]["smtp_password"], "AES-128-ECB", "mysecretkey1234"); // SMTP password
-        $mail->SMTPSecure  = $wo["config"]["smtp_encryption"]; // Enable TLS encryption, `ssl` also accepted
-        $mail->Port        = $wo["config"]["smtp_port"];
-        $mail->SMTPOptions = array(
-            "ssl" => array(
-                "verify_peer" => false,
-                "verify_peer_name" => false,
-                "allow_self_signed" => true
-            )
-        );
-    } else {
+    try {
+        if (!empty($data["return"]) && $data["return"] == 'debug') {
+            $mail->SMTPDebug = 2;
+        }
+        
+        if ($wo["config"]["smtp_or_mail"] == "mail") {
+            $mail->IsMail();
+        } elseif ($wo["config"]["smtp_or_mail"] == "smtp") {
+            $mail->isSMTP();
+            $mail->Host        = $wo["config"]["smtp_host"]; // Specify main and backup SMTP servers
+            $mail->SMTPAuth    = true; // Enable SMTP authentication
+            $mail->Username    = $wo["config"]["smtp_username"]; // SMTP username
+            $mail->Password    = openssl_decrypt($wo["config"]["smtp_password"], "AES-128-ECB", "mysecretkey1234"); // SMTP password
+            $mail->SMTPSecure  = $wo["config"]["smtp_encryption"]; // Enable TLS encryption, `ssl` also accepted
+            $mail->Port        = $wo["config"]["smtp_port"];
+            $mail->SMTPOptions = array(
+                "ssl" => array(
+                    "verify_peer" => false,
+                    "verify_peer_name" => false,
+                    "allow_self_signed" => true
+                )
+            );
+        } else {
+            return false;
+        }
+        $mail->IsHTML($data["is_html"]);
+        $mail->setFrom($data["from_email"], $data["from_name"]);
+        $mail->addAddress($data["to_email"], $data["to_name"]); // Add a recipient
+        $mail->Subject = $data["subject"];
+        $mail->CharSet = $data["charSet"];
+        $mail->MsgHTML($data["message_body"]);
+        if (!empty($data["reply-to"])) {
+            $mail->ClearReplyTos();
+            $mail->AddReplyTo($data["reply-to"], $data["from_name"]);
+        }
+        if ($mail->send()) {
+            $mail->ClearAddresses();
+            return true;
+        }
+        else{
+            if (!empty($data["return"])) {
+                return $mail->ErrorInfo;
+            }
+        }
+    } catch (phpmailerException $e) {
+        if (!empty($data["return"])) {
+            if (!empty($e->errorMessage())) {
+                return $e->errorMessage();
+            }
+            return $mail->ErrorInfo;
+        }
         return false;
-    }
-    $mail->IsHTML($data["is_html"]);
-    $mail->setFrom($data["from_email"], $data["from_name"]);
-    $mail->addAddress($data["to_email"], $data["to_name"]); // Add a recipient
-    $mail->Subject = $data["subject"];
-    $mail->CharSet = $data["charSet"];
-    $mail->MsgHTML($data["message_body"]);
-    if (!empty($data["reply-to"])) {
-        $mail->ClearReplyTos();
-        $mail->AddReplyTo($data["reply-to"], $data["from_name"]);
-    }
-    if ($mail->send()) {
-        $mail->ClearAddresses();
-        return true;
+    } catch (Exception $e) {
+        if (!empty($data["return"])) {
+            if (!empty($e->getMessage())) {
+                return $e->getMessage();
+            }
+            return $mail->ErrorInfo;
+        }
+        return false;
     }
 }
 function Wo_CheckBirthdays($user_id = 0) {
@@ -5227,8 +5254,6 @@ function Wo_CheckBirthdays($user_id = 0) {
     }
     return $data;
 }
-use GuzzleHttp\InfoBipClient;
-use GuzzleHttp\RequestOptions;
 
 function Wo_SendSMSMessage($to, $message) {
     global $wo, $sqlConnect;
@@ -5236,107 +5261,76 @@ function Wo_SendSMSMessage($to, $message) {
         return false;
     }
     if ($wo["config"]["sms_provider"] == "twilio" && !empty($wo["config"]["sms_twilio_username"]) && !empty($wo["config"]["sms_twilio_password"]) && !empty($wo["config"]["sms_t_phone_number"])) {
-        include_once "assets/libraries/twilio/vendor/autoload.php";
         $account_sid = $wo["config"]["sms_twilio_username"];
         $auth_token  = $wo["config"]["sms_twilio_password"];
         $to          = Wo_Secure($to);
-        $client      = new Client($account_sid, $auth_token);
-        try {
-            $send = $client->account->messages->create($to, array(
-                "from" => $wo["config"]["sms_t_phone_number"],
-                "body" => $message
-            ));
-            if ($send) {
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, "https://api.twilio.com/2010-04-01/Accounts/".$account_sid."/Messages");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, "Body=".$message."&From=".$wo["config"]["sms_t_phone_number"]."&To=".$to);
+        curl_setopt($ch, CURLOPT_USERPWD, $account_sid . ':' . $auth_token);
+
+        $headers = array();
+        $headers[] = 'Content-Type: application/x-www-form-urlencoded';
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        curl_close($ch);
+        if (!empty($result)) {
+            $result = simplexml_load_string($result);
+            if (!empty($result->Message) && !empty($result->Message->Status)) {
                 return true;
             }
         }
-        catch (Exception $e) {
-            return false;
-        }
         return false;
     } elseif ($wo["config"]["sms_provider"] == "infobip" && !empty($wo["config"]["infobip_api_key"]) && !empty($wo["config"]["infobip_base_url"])) {
-        include_once "assets/libraries/infobip/vendor/autoload.php";
 
         $to       = Wo_Secure($to);
         if (empty($to)) {
             return false;
         }
-        $client = new InfoBipClient([
-            'base_uri' => $wo["config"]["infobip_base_url"],
-            'headers' => [
-                'Authorization' => "App ".$wo["config"]["infobip_api_key"],
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ]
-        ]);
+        $sms = '{
+                  "messages": [
+                    {
+                      "destinations": [
+                        {
+                          "to": "'.$to.'"
+                        }
+                      ],
+                      "from": "'.$wo["config"]["siteName"].'",
+                      "text": "'.$message.'"
+                    }
+                  ]
+                }';
 
-        $response = $client->request(
-            'POST',
-            'sms/2/text/advanced',
-            [
-                RequestOptions::JSON => [
-                    'messages' => [
-                        [
-                            'from' => $wo["config"]["siteName"],
-                            'destinations' => [
-                                ['to' => $to]
-                            ],
-                            'text' => $message,
-                        ]
-                    ]
-                ],
-            ]
-        );
-        if ($response->getStatusCode() == 200) {
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $wo["config"]["infobip_base_url"].'/sms/2/text/advanced');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $sms);
+
+        $headers = array();
+        $headers[] = 'Authorization: App '.$wo["config"]["infobip_api_key"];
+        $headers[] = 'Content-Type: application/json';
+        $headers[] = 'Accept: application/json';
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        curl_close($ch);
+        $result = json_decode($result,true);
+        if (!empty($result['messages'])) {
             return true;
         }
-
-
-
-        // $username = $wo["config"]["infobip_username"];
-        // $password = $wo["config"]["infobip_password"];
-        // $to       = Wo_Secure($to);
-        // if (empty($to) || empty($wo["config"]["infobip_username"]) || empty($wo["config"]["infobip_password"])) {
-        //     return false;
-        // }
-        // $postUrl      = "https://api.infobip.com/sms/1/text/single";
-        // $sms          = array(
-        //     "from" => $wo["config"]["siteName"],
-        //     "to" => $to,
-        //     "text" => $message
-        // );
-        // $postDataJson = json_encode($sms);
-        // try {
-        //     $ch     = curl_init();
-        //     $header = array(
-        //         "Content-Type:application/json",
-        //         "Accept:application/json"
-        //     );
-        //     curl_setopt($ch, CURLOPT_URL, $postUrl);
-        //     curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-        //     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        //     curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-        //     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
-        //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        //     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        //     curl_setopt($ch, CURLOPT_MAXREDIRS, 2);
-        //     curl_setopt($ch, CURLOPT_POST, 1);
-        //     curl_setopt($ch, CURLOPT_POSTFIELDS, $postDataJson);
-        //     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        //     // response of the POST request
-        //     $response     = curl_exec($ch);
-        //     $httpCode     = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        //     $responseBody = json_decode($response);
-        //     curl_close($ch);
-        //     if ($httpCode >= 200 && $httpCode < 300) {
-        //         return true;
-        //     } else {
-        //         return $responseBody->requestError->serviceException->text;
-        //     }
-        // }
-        // catch (Exception $e) {
-        //     return false;
-        // }
         return false;
     } elseif ($wo["config"]["sms_provider"] == "bulksms" && !empty($wo["config"]["sms_username"]) && !empty($wo["config"]["sms_password"])) {
         if (empty($to)) {
@@ -5533,253 +5527,7 @@ function Wo_CheckMainSession($hash = "") {
     }
     return false;
 }
-// Paypal methods
-use PayPal\Api\Payer;
-use PayPal\Api\Item;
-use PayPal\Api\ItemList;
-use PayPal\Api\Details;
-use PayPal\Api\Amount;
-use PayPal\Api\Transaction;
-use PayPal\Api\RedirectUrls;
-use PayPal\Api\Payment;
-use PayPal\Api\PaymentExecution;
-use PayPal\Api\InputFields;
-use PayPal\Api\WebProfile;
-use PayPal\Api\ChargeModel;
-use PayPal\Api\Currency;
-use PayPal\Api\MerchantPreferences;
-use PayPal\Api\PaymentDefinition;
-use PayPal\Api\Plan;
-use PayPal\Api\Agreement;
-use PayPal\Api\ShippingAddress;
-use PayPal\Api\AgreementDetails;
-function Wo_PayPal($type = "1", $type2 = "") {
-    global $wo;
-    if ($wo["config"]["pro"] == 0 || $wo["config"]["paypal"] == "no") {
-        return false;
-    }
-    include_once "assets/includes/paypal_config.php";
-    $types = array(
-        "week",
-        "year",
-        "month",
-        "life-time"
-    );
-    if (!in_array($type, array_keys($wo["pro_packages"]))) {
-        return false;
-    }
-    $product   = $wo["config"]["siteName"] . " PRO Package.";
-    $price     = $wo["pro_packages"][$type]['price'];
-    $pro_type  = $type;
-    $time_type = $wo["pro_packages"][$type]['ex_time'];
-    if ($wo["pro_packages"][$type]['ex_time'] == 0) {
-        $time_type = "unlimited";
-    }
-    if ($wo["pro_packages"][$type]['time_count'] == 1 && in_array($wo["pro_packages"][$type]['time'], array('day','week','month','year'))) {
-        $time_type = $wo["pro_packages"][$type]['time'];
-    }
-    // if ($type == "week") {
-    //     $price     = $wo["pro_packages"]["star"]["price"];
-    //     $pro_type  = 1;
-    //     $time_type = $wo["pro_packages"]["star"]["time"];
-    // } elseif ($type == "year") {
-    //     $price     = $wo["pro_packages"]["ultima"]["price"];
-    //     $pro_type  = 3;
-    //     $time_type = $wo["pro_packages"]["ultima"]["time"];
-    // } elseif ($type == "month") {
-    //     $price     = $wo["pro_packages"]["hot"]["price"];
-    //     $pro_type  = 2;
-    //     $time_type = $wo["pro_packages"]["hot"]["time"];
-    // } elseif ($type == "life-time") {
-    //     $price     = $wo["pro_packages"]["vip"]["price"];
-    //     $pro_type  = 4;
-    //     $time_type = $wo["pro_packages"]["vip"]["time"];
-    // }
-    $total = $price;
-    if ($wo["config"]["recurring_payment"] == 0 || $time_type == "unlimited") {
-        $inputFields = new InputFields();
-        $inputFields->setAllowNote(true)->setNoShipping(1)->setAddressOverride(0);
-        $webProfile = new WebProfile();
-        $webProfile->setName("Purchase pro package " . uniqid())->setInputFields($inputFields);
-        try {
-            $createdProfile   = $webProfile->create($paypal);
-            $createdProfileID = json_decode($createdProfile);
-            $profileid        = $createdProfileID->id;
-        }
-        catch (PayPal\Exception\PayPalConnectionException $pce) {
-            $data = array(
-                "type" => "ERROR",
-                "details" => json_decode($pce->getData())
-            );
-            return $data;
-        }
-        $payer = new Payer();
-        $payer->setPaymentMethod("paypal");
-        $item = new Item();
-        $item->setName($product)->setQuantity(1)->setPrice($price)->setCurrency($wo["config"]["paypal_currency"]);
-        $itemList = new ItemList();
-        $itemList->setItems(array(
-            $item
-        ));
-        $details = new Details();
-        $details->setSubtotal($price);
-        $amount = new Amount();
-        $amount->setCurrency($wo["config"]["paypal_currency"])->setTotal($total)->setDetails($details);
-        $transaction = new Transaction();
-        $transaction->setAmount($amount)->setItemList($itemList)->setDescription("Pay For " . $wo["config"]["siteName"])->setInvoiceNumber(uniqid());
-        $redirectUrls = new RedirectUrls();
-        if (!empty($type2) && $type2 == "upgrade") {
-            $redirectUrls->setReturnUrl($wo["config"]["site_url"] . "/requests.php?f=upgrade&success=true&pro_type={$pro_type}")->setCancelUrl($wo["config"]["site_url"] . "/requests.php?f=payment&success=false");
-        } else {
-            $redirectUrls->setReturnUrl($wo["config"]["site_url"] . "/requests.php?f=payment&success=true&pro_type={$pro_type}")->setCancelUrl($wo["config"]["site_url"] . "/requests.php?f=payment&success=false");
-        }
-        $payment = new Payment();
-        $payment->setExperienceProfileId($profileid)->setIntent("sale")->setPayer($payer)->setRedirectUrls($redirectUrls)->setTransactions(array(
-            $transaction
-        ));
-        try {
-            $payment->create($paypal);
-        }
-        catch (Exception $e) {
-            $data = array(
-                "type" => "ERROR",
-                "details" => json_decode($e->getData())
-            );
-            if (empty($data["details"])) {
-                $data["details"] = json_decode($e->getCode());
-            }
-            return $data;
-        }
-        $data = array(
-            "type" => "SUCCESS",
-            "url" => $payment->getApprovalLink()
-        );
-    } else {
-        $p_type = "YEAR";
-        if ($time_type == "day") {
-            $p_type = "DAY";
-        }
-        if ($time_type == "week") {
-            $p_type = "WEEK";
-        }
-        if ($time_type == "month") {
-            $p_type = "MONTH";
-        }
-        if ($time_type == "year") {
-            $p_type = "YEAR";
-        }
-        $plan = new \PayPal\Api\Plan();
-        $plan->setName("Purchase pro package user" . $wo["user"]["id"])->setDescription("Purchase pro package user" . $wo["user"]["id"])->setType("fixed");
-        // Set billing plan definitions
-        $paymentDefinition = new \PayPal\Api\PaymentDefinition();
-        $paymentDefinition->setName("Regular Payments user" . $wo["user"]["id"])->setType("REGULAR")->setFrequency($p_type)->setFrequencyInterval("1")->setCycles("48")->setAmount(new \PayPal\Api\Currency(array(
-            "value" => $total,
-            "currency" => $wo["config"]["paypal_currency"]
-        )));
-        $merchantPreferences = new \PayPal\Api\MerchantPreferences();
-        $merchantPreferences->setReturnUrl($wo["config"]["site_url"] . "/requests.php?f=payment&success=true&pro_type={$pro_type}")->setCancelUrl($wo["config"]["site_url"] . "/requests.php?f=payment&success=false")->setCancelUrl($wo["config"]["site_url"])->setAutoBillAmount("yes")->setInitialFailAmountAction("CONTINUE")->setMaxFailAttempts("0")->setSetupFee(new PayPal\Api\Currency(array(
-            "currency" => $wo["config"]["paypal_currency"],
-            "value" => $total
-        )));
-        $plan->setPaymentDefinitions(array(
-            $paymentDefinition
-        ));
-        $plan->setMerchantPreferences($merchantPreferences);
-        try {
-            $output = $plan->create($paypal);
-        }
-        catch (Exception $ex) {
-            //ResultPrinter::printError("Created Plan", "Plan", null, $request, $ex);
-        }
-        // ResultPrinter::printResult("Created Plan", "Plan", $output->getId(), $request, $output);
-        // exit();
-        $p_currency = !empty($wo["currencies"][$wo["config"]["paypal_currency"]]["symbol"]) ? $wo["currencies"][$wo["config"]["paypal_currency"]]["symbol"] : '$';
-        // if ($pt->config->payment_currency == 'EUR') {
-        //  $p_currency    = '€';
-        // }
-        $patch      = new \PayPal\Api\Patch();
-        $patch->setOp("replace")->setPath("/")->setValue(new \PayPal\Common\PayPalModel('{
-                "state": "ACTIVE"
-            }'));
-        $patchRequest = new \PayPal\Api\PatchRequest();
-        $patchRequest->addPatch($patch);
-        $resActivate = $plan->update($patchRequest, $paypal);
-        // Create new agreement
-        // Create new agreement
-        $plan->setState("ACTIVE");
-        $agreement = new Agreement();
-        $agreement->setName("Purchase Pro package user" . $wo["user"]["id"])->setDescription("Upgrade to Pro Member - " . $p_currency . "" . $total . "/" . $p_type . " user" . $wo["user"]["id"])->setStartDate(gmdate("Y-m-d\TH:i:s\Z", time() + 2629743));
-        // Set plan id
-        $cplan = new Plan();
-        $cplan->setId($plan->getId());
-        $agreement->setPlan($cplan);
-        // Add payer type
-        $payer = new Payer();
-        $payer->setPaymentMethod("paypal");
-        $agreement->setPayer($payer);
-        // Adding shipping details
-        // $shippingAddress = new ShippingAddress();
-        // $shippingAddress->setLine1('111 First Street')
-        //   ->setCity('Saratoga')
-        //   ->setState('CA')
-        //   ->setPostalCode('95070')
-        //   ->setCountryCode('US');
-        // $agreement->setShippingAddress($shippingAddress);
-        //$request = clone $agreement;
-        //*********************
-        try {
-            // Create agreement
-            $agreement   = $agreement->create($paypal);
-            // Extract approval URL to redirect user
-            $approvalUrl = $agreement->getApprovalLink();
-        }
-        catch (PayPal\Exception\PayPalConnectionException $ex) {
-            // ResultPrinter::printError("Created Plan", "Plan", null, $request, $ex);
-            // exit(1);
-        }
-        catch (Exception $ex) {
-            die($ex);
-        }
-        $data = array(
-            "type" => "SUCCESS",
-            "url" => $agreement->getApprovalLink()
-        );
-    }
-    return $data;
-}
-function Wo_CheckPayment($paymentId, $PayerID, $token = "") {
-    global $wo;
-    if ($wo["config"]["pro"] == 0) {
-        return false;
-    }
-    include_once "assets/includes/paypal_config.php";
-    if ($wo["config"]["recurring_payment"] == 0 || empty($token)) {
-        $payment = Payment::get($paymentId, $paypal);
-        $execute = new PaymentExecution();
-        $execute->setPayerId($PayerID);
-        try {
-            $result = $payment->execute($execute, $paypal);
-        }
-        catch (Exception $e) {
-            return json_decode($e->getData(), true);
-        }
-    } else {
-        $agreement = new \PayPal\Api\Agreement();
-        try {
-            // Execute agreement
-            $agreement->execute($token, $paypal);
-        }
-        catch (PayPal\Exception\PayPalConnectionException $ex) {
-            echo $ex->getCode();
-            echo $ex->getData();
-            die($ex);
-        }
-        catch (Exception $ex) {
-            die($ex);
-        }
-    }
-    return true;
-}
+
 function Wo_ReplenishingUserBalance($sum) {
     global $wo, $sqlConnect;
     if ($wo["loggedin"] == false || !$sum) {
@@ -5803,79 +5551,74 @@ function Wo_ReplenishWallet($sum) {
     if ($wo["loggedin"] == false || !$sum || $wo["config"]["paypal"] == "no") {
         return false;
     }
-    include_once "assets/includes/paypal_config.php";
-    $inputFields = new InputFields();
-    $inputFields->setAllowNote(true)->setNoShipping(1)->setAddressOverride(0);
-    $webProfile = new WebProfile();
-    $webProfile->setName("Purchase pro package " . uniqid())->setInputFields($inputFields);
-    try {
-        $createdProfile   = $webProfile->create($paypal);
-        $createdProfileID = json_decode($createdProfile);
-        $profileid        = $createdProfileID->id;
-    }
-    catch (PayPal\Exception\PayPalConnectionException $pce) {
-        $data = array(
-            "type" => "ERROR",
-            "details" => json_decode($pce->getData())
-        );
-        return $data;
-    }
-    $payer = new Payer();
-    $payer->setPaymentMethod("paypal");
-    $item = new Item();
-    $item->setName("Replenishing your balance")->setQuantity(1)->setPrice($sum)->setCurrency($wo["config"]["paypal_currency"]);
-    $itemList = new ItemList();
-    $itemList->setItems(array(
-        $item
-    ));
-    $details = new Details();
-    $details->setSubtotal($sum);
-    $amount = new Amount();
-    $amount->setCurrency($wo["config"]["paypal_currency"])->setTotal($sum)->setDetails($details);
-    $transaction = new Transaction();
-    $transaction->setAmount($amount)->setItemList($itemList)->setDescription("Replenish my balance")->setInvoiceNumber(time());
-    $redirectUrls = new RedirectUrls();
-    $redirectUrls->setReturnUrl($wo["config"]["site_url"] . "/requests.php?f=wallet&s=get-paid&success=1&amount={$sum}")->setCancelUrl($wo["config"]["site_url"] . "/requests.php?f=wallet&s=get-paid&success=1");
-    $payment = new Payment();
-    $payment->setExperienceProfileId($profileid)->setIntent("sale")->setPayer($payer)->setRedirectUrls($redirectUrls)->setTransactions(array(
-        $transaction
-    ));
-    try {
-        $payment->create($paypal);
-    }
-    catch (Exception $e) {
-        $data = array(
-            "type" => "ERROR",
-            "details" => json_decode($e->getData())
-        );
-        if (empty($data["details"])) {
-            $data["details"] = json_decode($e->getCode());
+    include_once('assets/includes/paypal_config.php');
+
+
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_URL, $url . '/v2/checkout/orders');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, '{
+      "intent": "CAPTURE",
+      "purchase_units": [
+            {
+                "items": [
+                    {
+                        "name": "Wallet Replenishment",
+                        "description":  "Pay For ' . $wo["config"]["siteName"].'",
+                        "quantity": "1",
+                        "unit_amount": {
+                            "currency_code": "'.$wo["config"]["paypal_currency"].'",
+                            "value": "'.$sum.'"
+                        }
+                    }
+                ],
+                "amount": {
+                    "currency_code": "'.$wo["config"]["paypal_currency"].'",
+                    "value": "'.$sum.'",
+                    "breakdown": {
+                        "item_total": {
+                            "currency_code": "'.$wo["config"]["paypal_currency"].'",
+                            "value": "'.$sum.'"
+                        }
+                    }
+                }
+            }
+        ],
+        "application_context":{
+            "shipping_preference":"NO_SHIPPING",
+            "return_url": "'.$wo["config"]["site_url"] . "/requests.php?f=wallet&s=get-paid&success=1&amount={$sum}".'",
+            "cancel_url": "'.$wo["config"]["site_url"] . "/requests.php?f=wallet&s=get-paid&success=1".'"
         }
+    }');
+
+    $headers = array();
+    $headers[] = 'Content-Type: application/json';
+    $headers[] = 'Authorization: Bearer '.$wo['paypal_access_token'];
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        echo 'Error:' . curl_error($ch);
+    }
+    curl_close($ch);
+    $result = json_decode($result);
+    if (!empty($result) && !empty($result->links) && !empty($result->links[1]) && !empty($result->links[1]->href)) {
+        $data = array(
+            "status" => 200,
+            "type" => "SUCCESS",
+            'url' => $result->links[1]->href
+        );
         return $data;
     }
-    $data = array(
-        "status" => 200,
-        "type" => "SUCCESS",
-        "url" => $payment->getApprovalLink()
-    );
-    return $data;
-}
-function Wo_GetWalletReplenishingDone($paymentId, $PayerID) {
-    global $wo;
-    if ($wo["loggedin"] == false || !$paymentId || !$PayerID) {
-        return false;
+    elseif(!empty($result->message)){
+        $data = array(
+            'type' => 'ERROR',
+            'details' => $result->message
+        );
+        return $data;
     }
-    include_once "assets/includes/paypal_config.php";
-    $payment = Payment::get($paymentId, $paypal);
-    $execute = new PaymentExecution();
-    $execute->setPayerId($PayerID);
-    try {
-        $result = $payment->execute($execute, $paypal);
-    }
-    catch (Exception $e) {
-        return json_decode($e->getData(), true);
-    }
-    return true;
 }
 function Wo_IsUserPro($user_pro = 0) {
     global $wo;
@@ -6054,7 +5797,6 @@ function Wo_GetProPackages() {
     // }
     return $data;
 }
-require './assets/libraries/PayPal/vendor/composer/autoload_psr4.php';
 function Wo_CreatePayment($payment_type = 1) {
     global $wo, $sqlConnect;
     if ($wo["loggedin"] == false) {
@@ -6848,7 +6590,7 @@ function Wo_GetPopularGames($limit = 10, $after = 0) {
     }
     return $data;
 }
-function Wo_GetGenders($lang = "english", $langs) {
+function Wo_GetGenders($lang = "english", $langs = array()) {
     global $wo, $db;
     if (!empty($lang) && in_array($lang, $langs)) {
         $lang = Wo_Secure($lang);
@@ -7472,10 +7214,6 @@ function Wo_CheckPaystackPayment($ref) {
         return false;
     }
     $ref  = Wo_Secure($ref);
-    $user = $db->where("user_id", $wo["user"]["id"])->where("paystack_ref", $ref)->getValue(T_USERS, "COUNT(*)");
-    if ($user < 1) {
-        return false;
-    }
     $result = array();
     //The parameter after verify/ is the transaction reference to be verified
     $url    = "https://api.paystack.co/transaction/verify/" . $ref;
@@ -7492,9 +7230,6 @@ function Wo_CheckPaystackPayment($ref) {
         if ($result) {
             if ($result["data"]) {
                 if ($result["data"]["status"] == "success") {
-                    $db->where("user_id", $wo["user"]["id"])->where("paystack_ref", $ref)->update(T_USERS, array(
-                        "paystack_ref" => ""
-                    ));
                     return true;
                 } else {
                     die("Transaction was not successful: Last gateway response was: " . $result["data"]["gateway_response"]);

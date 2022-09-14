@@ -1,3 +1,4 @@
+<?php $job_type = array('full_time','part_time','internship','volunteer','contract'); ?>
 <div class="page-margin">
 	<div class="wow_main_float_head jobs new_jobs">
 		<div class="container">
@@ -16,12 +17,12 @@
 			</form>
 		</div>
 		<div class="dropdown wo_job_main_widget">
-			<div class="m_widget_head dropdown-toggle" data-toggle="dropdown" role="button"><?php echo $wo['lang']['job_type'];?> <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M7,10L12,15L17,10H7Z"></path></svg></div>
+			<div class="m_widget_head dropdown-toggle" data-toggle="dropdown" role="button"><?php echo (!empty($_GET['type']) && in_array($_GET['type'], $job_type)) ? $wo['lang'][$_GET['type']]: $wo['lang']['job_type'];?> <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M7,10L12,15L17,10H7Z"></path></svg></div>
 			<div class="dropdown-menu">
 				<div class="wjob_categories">
 					<ul class="product-category-slider">
 						<?php 
-						$job_type = array('full_time','part_time','internship','volunteer','contract');
+						
 							$category_id = (!empty($_GET['c_id'])) ? (int) $_GET['c_id'] : 0;
 							$type = (!empty($_GET['type'])) ? $_GET['type'] : '';
 							foreach ($job_type as $key => $category) {
@@ -34,7 +35,7 @@
 			</div>
 		</div>
 		<div class="dropdown wo_job_main_widget">
-			<div class="m_widget_head dropdown-toggle" data-toggle="dropdown" role="button"><?php echo $wo['lang']['categories'];?> <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M7,10L12,15L17,10H7Z"></path></svg></div>
+			<div class="m_widget_head dropdown-toggle" data-toggle="dropdown" role="button"><?php echo (!empty($_GET['c_id']) && in_array($_GET['c_id'], array_keys($wo['job_categories']))) ? $wo['job_categories'][$_GET['c_id']]: $wo['lang']['categories'];?> <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M7,10L12,15L17,10H7Z"></path></svg></div>
 			<div class="dropdown-menu">
 				<div class="wjob_categories">
 					<ul class="product-category-slider">

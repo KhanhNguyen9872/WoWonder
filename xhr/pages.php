@@ -36,8 +36,8 @@ if ($f == 'pages') {
             $re_page_data = array(
                 'page_name' => Wo_Secure($_POST['page_name']),
                 'user_id' => Wo_Secure($wo['user']['user_id']),
-                'page_title' => Wo_Secure($_POST['page_title']),
-                'page_description' => Wo_Secure($_POST['page_description']),
+                'page_title' => Wo_Secure($_POST['page_title'],1),
+                'page_description' => Wo_Secure($_POST['page_description'],1),
                 'page_category' => Wo_Secure($_POST['page_category']),
                 'sub_category' => $sub_category,
                 'active' => '1',
@@ -88,9 +88,9 @@ if ($f == 'pages') {
                 if (empty($errors)) {
                     $Update_data = array(
                         'website' => $_POST['website'],
-                        'page_description' => $_POST['page_description'],
+                        'page_description' => Wo_Secure($_POST['page_description'],1),
                         'company' => $_POST['company'],
-                        'address' => $_POST['address'],
+                        'address' => Wo_Secure($_POST['address'],1),
                         'phone' => $_POST['phone']
                     );
                     if (Wo_UpdatePageData($_POST['page_id'], $Update_data)) {
@@ -229,7 +229,7 @@ if ($f == 'pages') {
                         }
                         $Update_data = array(
                             'page_name' => $_POST['page_name'],
-                            'page_title' => $_POST['page_title'],
+                            'page_title' => Wo_Secure($_POST['page_title'],1),
                             'page_category' => $_POST['page_category'],
                             'sub_category' => $sub_category,
                             'call_action_type' => $call_action_type,
@@ -414,7 +414,7 @@ if ($f == 'pages') {
     if ($s == 'rate_page' && isset($_POST['page_id']) && is_numeric($_POST['page_id']) && $_POST['page_id'] > 0 && isset($_POST['val'])) {
         $val  = Wo_Secure($_POST['val']);
         $id   = Wo_Secure($_POST['page_id']);
-        $text = Wo_Secure($_POST['text']);
+        $text = Wo_Secure($_POST['text'],1);
         $data = array(
             'status' => 304,
             'message' => $wo['lang']['page_rated']

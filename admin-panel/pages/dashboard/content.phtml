@@ -266,6 +266,7 @@ $groups_array = array();
         </nav>
     </div>
     <!-- Widgets -->
+    <?php $getStatus = getStatus(); if (!empty($getStatus) && !empty(checkIfThereIsError($getStatus))) {?><div class="alert alert-danger"><strong>Important!</strong> There are some errors found on your system, please review <a href="<?php echo Wo_LoadAdminLinkSettings('system_status'); ?>" data-ajax="?path=system_status">System Status</a>.</div><?php }?>
     <div class="row clearfix">
         <div class="col-md-3">
             <div class="card">

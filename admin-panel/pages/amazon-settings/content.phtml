@@ -331,22 +331,42 @@ if (!isEnabled('shell_exec')) {
                                 <small class="admin-info">Your Amazon Secret from <a href="https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html" target="_blank">AWS credentials</a></small>
                             </div>
                         </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Amazon S3 Custom Endpoint (Optional)</label>
+                                <input type="text" name="amazon_endpoint" class="form-control" value="<?php echo ($wo['config']['amazon_endpoint']);?>">
+                                <small class="admin-info">Your Amazon custom domain name, e.g: https://customCDNdomain.com</small>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
                         <label for="region">Amazon S3 Bucket Region</label>
                         <select class="form-control show-tick" id="region" name="region">
-                          <option value="us-east-1" <?php echo ($wo['config']['region'] == 'us-east-1')   ? ' selected' : '';?> >US East (N. Virginia)</option>
-                          <option value="us-east-2" <?php echo ($wo['config']['region'] == 'us-east-2')   ? ' selected' : '';?> >US East (Ohio)</option>
-                          <option value="us-west-1" <?php echo ($wo['config']['region'] == 'us-west-1')   ? ' selected' : '';?> >US West (N. California)</option>
-                          <option value="us-west-2" <?php echo ($wo['config']['region'] == 'us-west-2')   ? ' selected' : '';?> >US West (Oregon)</option>
-                          <option value="ap-northeast-2" <?php echo ($wo['config']['region'] == 'ap-northeast-2')   ? ' selected' : '';?> >Asia Pacific (Seoul)</option>
-                          <option value="ap-south-1" <?php echo ($wo['config']['region'] == 'ap-south-1')   ? ' selected' : '';?> >Asia Pacific (Mumbai)</option>
-                          <option value="ap-southeast-1" <?php echo ($wo['config']['region'] == 'ap-southeast-1')   ? ' selected' : '';?> >Asia Pacific (Singapore)</option>
-                          <option value="ap-southeast-2" <?php echo ($wo['config']['region'] == 'ap-southeast-2')   ? ' selected' : '';?> >Asia Pacific (Sydney)</option>
-                          <option value="ap-northeast-1" <?php echo ($wo['config']['region'] == 'ap-northeast-1')   ? ' selected' : '';?> >Asia Pacific (Tokyo)</option>
-                          <option value="ca-central-1" <?php echo ($wo['config']['region'] == 'ca-central-1')   ? ' selected' : '';?> >Canada (Central)</option>
-                          <option value="eu-central-1" <?php echo ($wo['config']['region'] == 'eu-central-1')   ? ' selected' : '';?> >EU (Frankfurt)</option>
-                          <option value="eu-west-1" <?php echo ($wo['config']['region'] == 'eu-west-1')   ? ' selected' : '';?> >EU (Ireland)</option>
-                          <option value="eu-west-2" <?php echo ($wo['config']['region'] == 'eu-west-2')   ? ' selected' : '';?> >EU (London)</option>
-                          <option value="sa-east-1" <?php echo ($wo['config']['region'] == 'sa-east-1')   ? ' selected' : '';?> >South America (São Paulo)</option>
+                          <option value="us-east-2" <?php echo ($wo['config']['region'] == 'us-east-2')   ? ' selected' : '';?> >US East (Ohio) us-east-2</option>
+                          <option value="us-east-1" <?php echo ($wo['config']['region'] == 'us-east-1')   ? ' selected' : '';?> >US East (N. Virginia) us-east-1</option>
+                          <option value="us-west-1" <?php echo ($wo['config']['region'] == 'us-west-1')   ? ' selected' : '';?> >US West (N. California) us-west-1</option>
+                          <option value="us-west-2" <?php echo ($wo['config']['region'] == 'us-west-2')   ? ' selected' : '';?> >US West (Oregon) us-west-2</option>
+                          <option value="af-south-1" <?php echo ($wo['config']['region'] == 'af-south-1')   ? ' selected' : '';?> >Africa (Cape Town) af-south-1</option>
+                          <option value="ap-east-1" <?php echo ($wo['config']['region'] == 'ap-east-1')   ? ' selected' : '';?> >Asia Pacific (Hong Kong) ap-east-1</option>
+                          <option value="ap-south-1" <?php echo ($wo['config']['region'] == 'ap-south-1')   ? ' selected' : '';?> >Asia Pacific (Mumbai) ap-south-1</option>
+                          <option value="ap-northeast-3" <?php echo ($wo['config']['region'] == 'ap-northeast-3')   ? ' selected' : '';?> >Asia Pacific (Osaka) ap-northeast-3</option>
+                          <option value="ap-northeast-2" <?php echo ($wo['config']['region'] == 'ap-northeast-2')   ? ' selected' : '';?> >Asia Pacific (Seoul) ap-northeast-2</option>
+                          <option value="ap-southeast-1" <?php echo ($wo['config']['region'] == 'ap-southeast-1')   ? ' selected' : '';?> >Asia Pacific (Singapore) ap-southeast-1</option>
+                          <option value="ap-southeast-2" <?php echo ($wo['config']['region'] == 'ap-southeast-2')   ? ' selected' : '';?> >Asia Pacific (Sydney) ap-southeast-2</option>
+                          <option value="ap-northeast-1" <?php echo ($wo['config']['region'] == 'ap-northeast-1')   ? ' selected' : '';?> >Asia Pacific (Tokyo) ap-northeast-1</option>
+                          <option value="ca-central-1" <?php echo ($wo['config']['region'] == 'ca-central-1')   ? ' selected' : '';?> >Canada (Central) ca-central-1</option>
+                          <option value="cn-northwest-1" <?php echo ($wo['config']['region'] == 'cn-northwest-1')   ? ' selected' : '';?> >China (Ningxia) cn-northwest-1</option>
+                          <option value="eu-central-1" <?php echo ($wo['config']['region'] == 'eu-central-1')   ? ' selected' : '';?> >Europe (Frankfurt) eu-central-1</option>
+                          <option value="eu-west-1" <?php echo ($wo['config']['region'] == 'eu-west-1')   ? ' selected' : '';?> >Europe (Ireland) eu-west-1</option>
+                          <option value="eu-west-2" <?php echo ($wo['config']['region'] == 'eu-west-2')   ? ' selected' : '';?> >Europe (London) eu-west-2</option>
+                          <option value="eu-south-1" <?php echo ($wo['config']['region'] == 'eu-south-1')   ? ' selected' : '';?> >Europe (Milan) eu-south-1</option>
+                          <option value="eu-west-3" <?php echo ($wo['config']['region'] == 'eu-west-3')   ? ' selected' : '';?> >Europe (Paris) eu-west-3</option>
+                          <option value="eu-north-1" <?php echo ($wo['config']['region'] == 'eu-north-1')   ? ' selected' : '';?> >Europe (Stockholm) eu-north-1</option>
+                          <option value="ap-southeast-3" <?php echo ($wo['config']['region'] == 'ap-southeast-3')   ? ' selected' : '';?> >Asia Pacific (Jakarta) ap-southeast-3</option>
+                          <option value="me-south-1" <?php echo ($wo['config']['region'] == 'me-south-1')   ? ' selected' : '';?> >Middle East(Bahrain) me-south-1</option>
+                          <option value="sa-east-1" <?php echo ($wo['config']['region'] == 'sa-east-1')   ? ' selected' : '';?> >South America (São Paulo) sa-east-1</option>
+                          <option value="us-gov-east-1" <?php echo ($wo['config']['region'] == 'us-gov-east-1')   ? ' selected' : '';?> >AWS GovCloud (US-East) us-gov-east-1</option>
+                          <option value="us-gov-west-1" <?php echo ($wo['config']['region'] == 'us-gov-west-1')   ? ' selected' : '';?> >AWS GovCloud (US-West) us-gov-west-1</option>
                         </select>
                         <small class="admin-info">Your Amazon's S3 Region</small>
                         <div class="clearfix"></div>
@@ -360,6 +380,7 @@ if (!isEnabled('shell_exec')) {
                         <div class="general-settings-alert"></div>
                         <input type="hidden" name="hash_id" value="<?php echo Wo_CreateSession();?>">
                         <button type="button" class="btn btn-success m-t-15 waves-effect" onclick="Wo_TestS3()">Test & Verify Connection</button>
+                        <a href="<?php echo Wo_LoadAdminLinkSettings('upload-to-storage?storage=amazon'); ?>" class="btn btn-info m-t-15 waves-effect">Upload Files To Amazon</a>
                     </form>
                 </div>
             </div>
@@ -399,12 +420,36 @@ if (!isEnabled('shell_exec')) {
                                 <small class="admin-info">Your Digitalocean Space credentials secret key.</small>
                             </div>
                         </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Digitalocean Custom Endpoint (Optional)</label>
+                                <input type="text" name="spaces_endpoint" class="form-control" value="<?php echo ($wo['config']['spaces_endpoint']);?>">
+                                <small class="admin-info">Your Digitalocean custom domain name, e.g: https://customCDNdomain.com</small>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
                         <label for="space_region">Digitalocean bucket region</label>
                         <select class="form-control show-tick" id="space_region" name="space_region">
-                          <option value="nyc3" <?php echo ($wo['config']['space_region'] == 'nyc3')   ? ' selected' : '';?> >New York</option>
-                          <option value="ams3" <?php echo ($wo['config']['space_region'] == 'ams3')   ? ' selected' : '';?> >Amsterdam</option>
-                          <option value="sgp1" <?php echo ($wo['config']['space_region'] == 'sgp1')   ? ' selected' : '';?> >Singapore</option>
-                          <option value="FRA1" <?php echo ($wo['config']['space_region'] == 'FRA1')   ? ' selected' : '';?> >Frankfurt</option>
+                          <option value="nyc1" <?php echo ($wo['config']['space_region'] == 'nyc1')   ? ' selected' : '';?> >New York [NYC1]</option>
+                          <option value="nyc2" <?php echo ($wo['config']['space_region'] == 'nyc2')   ? ' selected' : '';?> >New York [NYC2]</option>
+                          <option value="nyc3" <?php echo ($wo['config']['space_region'] == 'nyc3')   ? ' selected' : '';?> >New York [NYC3]</option>
+
+                          <option value="sfo1" <?php echo ($wo['config']['space_region'] == 'sfo1')   ? ' selected' : '';?> >SAN FRANCISCO [SFO1]</option>
+                          <option value="sfo2" <?php echo ($wo['config']['space_region'] == 'sfo2')   ? ' selected' : '';?> >SAN FRANCISCO [SFO2]</option>
+
+                          <option value="tor1" <?php echo ($wo['config']['space_region'] == 'tor1')   ? ' selected' : '';?> >TORONTO [TOR1]</option>
+
+                          <option value="lon1" <?php echo ($wo['config']['space_region'] == 'lon1')   ? ' selected' : '';?> >LONDON [LON1]</option>
+
+                          <option value="FRA1" <?php echo ($wo['config']['space_region'] == 'FRA1')   ? ' selected' : '';?> >Frankfurt [FRA1]</option>
+
+
+                          <option value="ams2" <?php echo ($wo['config']['space_region'] == 'ams2')   ? ' selected' : '';?> >Amsterdam [AMS2]</option>
+                          <option value="ams3" <?php echo ($wo['config']['space_region'] == 'ams3')   ? ' selected' : '';?> >Amsterdam [AMS3]</option>
+                          <option value="sgp1" <?php echo ($wo['config']['space_region'] == 'sgp1')   ? ' selected' : '';?> >Singapore [SGP1]</option>
+                          <option value="blr1" <?php echo ($wo['config']['space_region'] == 'blr1')   ? ' selected' : '';?> >Bangalore [BLR1]</option>
+                          
                         </select>
                         <div class="clearfix"></div>
                         <br>
@@ -416,6 +461,7 @@ if (!isEnabled('shell_exec')) {
                         <input type="hidden" name="hash_id" value="<?php echo Wo_CreateSession();?>">
                         <div class="spaces-settings-alert"></div>
                         <button type="button" class="btn btn-success m-t-15 waves-effect" onclick="Wo_TestSpaces()">Test & Verify Connection</button>
+                        <a href="<?php echo Wo_LoadAdminLinkSettings('upload-to-storage?storage=digitalocean'); ?>" class="btn btn-info m-t-15 waves-effect">Upload Files To Digitalocean</a>
                     </form>
                 </div>
             </div>
@@ -455,17 +501,32 @@ if (!isEnabled('shell_exec')) {
                                 <small class="admin-info">Your Wasabi Secret Key.</small>
                             </div>
                         </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Wasabi Custom Endpoint (Optional)</label>
+                                <input type="text" name="wasabi_endpoint" class="form-control" value="<?php echo ($wo['config']['wasabi_endpoint']);?>">
+                                <small class="admin-info">Your Wasabi custom domain name, e.g: https://customCDNdomain.com</small>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
                         <label for="wasabi_bucket_region">Wasabi bucket region</label>
                         <select class="form-control show-tick" id="wasabi_bucket_region" name="wasabi_bucket_region">
                           <option value="us-west-1" <?php echo ($wo['config']['wasabi_bucket_region'] == 'us-west-1')   ? ' selected' : '';?> >us-west-1</option>
-                          <option value="ap-northeast-1" <?php echo ($wo['config']['wasabi_bucket_region'] == 'ap-northeast-1')   ? ' selected' : '';?> >ap-northeast-1</option>
-                          <option value="ap-northeast-2" <?php echo ($wo['config']['wasabi_bucket_region'] == 'ap-northeast-2')   ? ' selected' : '';?> >ap-northeast-2</option>
-                          <option value="eu-central-1" <?php echo ($wo['config']['wasabi_bucket_region'] == 'eu-central-1')   ? ' selected' : '';?> >eu-central-1</option>
-                          <option value="eu-west-1" <?php echo ($wo['config']['wasabi_bucket_region'] == 'eu-west-1')   ? ' selected' : '';?> >eu-west-1</option>
-                          <option value="eu-west-2" <?php echo ($wo['config']['wasabi_bucket_region'] == 'eu-west-2')   ? ' selected' : '';?> >eu-west-2</option>
-                          <option value="us-central-1" <?php echo ($wo['config']['wasabi_bucket_region'] == 'us-central-1')   ? ' selected' : '';?> >us-central-1</option>
                           <option value="us-east-1" <?php echo ($wo['config']['wasabi_bucket_region'] == 'us-east-1')   ? ' selected' : '';?> >us-east-1</option>
                           <option value="us-east-2" <?php echo ($wo['config']['wasabi_bucket_region'] == 'us-east-2')   ? ' selected' : '';?> >us-east-2</option>
+                          <option value="us-central-1" <?php echo ($wo['config']['wasabi_bucket_region'] == 'us-central-1')   ? ' selected' : '';?> >us-central-1</option>
+                          <option value="ca-central-1" <?php echo ($wo['config']['wasabi_bucket_region'] == 'ca-central-1')   ? ' selected' : '';?> >ca-central-1</option>
+
+                          <option value="eu-west-1" <?php echo ($wo['config']['wasabi_bucket_region'] == 'eu-west-1')   ? ' selected' : '';?> >eu-west-1</option>
+                          <option value="eu-west-2" <?php echo ($wo['config']['wasabi_bucket_region'] == 'eu-west-2')   ? ' selected' : '';?> >eu-west-2</option>
+                          <option value="eu-central-1" <?php echo ($wo['config']['wasabi_bucket_region'] == 'eu-central-1')   ? ' selected' : '';?> >eu-central-1</option>
+                          <option value="eu-central-2" <?php echo ($wo['config']['wasabi_bucket_region'] == 'eu-central-2')   ? ' selected' : '';?> >eu-central-2</option>
+
+                          <option value="ap-northeast-1" <?php echo ($wo['config']['wasabi_bucket_region'] == 'ap-northeast-1')   ? ' selected' : '';?> >ap-northeast-1</option>
+                          <option value="ap-northeast-2" <?php echo ($wo['config']['wasabi_bucket_region'] == 'ap-northeast-2')   ? ' selected' : '';?> >ap-northeast-2</option>
+                          <option value="ap-southeast-2" <?php echo ($wo['config']['wasabi_bucket_region'] == 'ap-southeast-2')   ? ' selected' : '';?> >ap-southeast-2</option>
+                          <option value="ap-southeast-1" <?php echo ($wo['config']['wasabi_bucket_region'] == 'ap-southeast-1')   ? ' selected' : '';?> >ap-southeast-1</option>
                         </select>
                         <div class="clearfix"></div>
                         <br>
@@ -476,6 +537,8 @@ if (!isEnabled('shell_exec')) {
                         <input type="hidden" name="hash_id" value="<?php echo Wo_CreateSession();?>">
                         <div class="wasabi_storage_alert"></div>
                         <button type="button" class="btn btn-success m-t-15 waves-effect" onclick="Wo_TestWasabi()">Test & Verify Connection</button>
+                        <a href="<?php echo Wo_LoadAdminLinkSettings('upload-to-storage?storage=wasabi'); ?>" class="btn btn-info m-t-15 waves-effect">Upload Files To Wasabi</a>
+
                     </form>
                 </div>
             </div>
@@ -591,6 +654,14 @@ if (!isEnabled('shell_exec')) {
                             </div>
                         </div>
                         <div class="clearfix"></div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Google Cloud Custom Endpoint (Optional)</label>
+                                <input type="text" name="cloud_endpoint" class="form-control" value="<?php echo ($wo['config']['cloud_endpoint']);?>">
+                                <small class="admin-info">Your Google Cloud custom domain name, e.g: https://customCDNdomain.com</small>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
                         <div class="alert alert-info">
                             Make sure you upload the whole "upload/" folder to your bucket.<br><br>
                             Make sure to keep (Google Cloud File) on your server. in Google Cloud File Path (<?php echo $wo['config']['cloud_file_path']?>)<br>
@@ -601,66 +672,172 @@ if (!isEnabled('shell_exec')) {
                     </form>
                 </div>
             </div>
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Backblaze Configuration</h6>
+                    <form class="backblaze_storage-settings" method="POST">
+                         <div class="float-left">
+                            <label for="backblaze_storage" class="main-label">Backblaze Storage</label>
+                            <br><small class="admin-info">Enable Backblaze Storage to store your files in Backblaze Spaces.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="backblaze_storage" value="0" />
+                            <input type="checkbox" name="backblaze_storage" id="chck-backblaze_storage" value="1" <?php echo ($wo['config']['backblaze_storage'] == '1') ? 'checked': '';?>>
+                            <label for="chck-backblaze_storage" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Backblaze Bucket ID</label>
+                                <input type="text" id="backblaze_bucket_id" name="backblaze_bucket_id" class="form-control" value="<?php echo $wo['config']['backblaze_bucket_id']?>">
+                                <small class="admin-info">Your Backblaze Bucket ID.</small>
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Backblaze Bucket Name</label>
+                                <input type="text" id="backblaze_bucket_name" name="backblaze_bucket_name" class="form-control" value="<?php echo $wo['config']['backblaze_bucket_name']?>">
+                                <small class="admin-info">Your Backblaze Bucket Name.</small>
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Backblaze Bucket Region</label>
+                                <input type="text" id="backblaze_bucket_region" name="backblaze_bucket_region" class="form-control" value="<?php echo $wo['config']['backblaze_bucket_region']?>">
+                                <small class="admin-info">Your Backblaze Bucket Region.</small>
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Backblaze Access Key ID</label>
+                                <input type="text" id="backblaze_access_key_id" name="backblaze_access_key_id" class="form-control" value="<?php echo $wo['config']['backblaze_access_key_id'] ?>">
+                                <small class="admin-info">Your Backblaze Access Key ID.</small>
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Backblaze Access Key</label>
+                                <input type="text" id="backblaze_access_key" name="backblaze_access_key" class="form-control" value="<?php echo $wo['config']['backblaze_access_key'] ?>">
+                                <small class="admin-info">Your Backblaze Access Key.</small>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Backblaze Custom Endpoint (Optional)</label>
+                                <input type="text" name="backblaze_endpoint" class="form-control" value="<?php echo ($wo['config']['backblaze_endpoint']);?>">
+                                <small class="admin-info">Your Backblaze custom domain name, e.g: https://customCDNdomain.com</small>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <br>
+                        <div class="alert alert-info">
+                            Before enabling Backblaze, make sure you upload the whole "upload/" folder to your bucket. <br><br>
+                            Before disabling Backblaze, make sure you download the whole "upload/" folder to your server. <br><br>
+                        </div>
+                        <div class="backblaze_storage_alert"></div>
+                        <button type="button" class="btn btn-success m-t-15 waves-effect" onclick="Wo_TestBackblaze()">Test & Verify Connection</button>
+                        <a href="<?php echo Wo_LoadAdminLinkSettings('upload-to-storage?storage=backblaze'); ?>" class="btn btn-info m-t-15 waves-effect">Upload Files To BackBlaze</a>
+                    </form>
+                </div>
+            </div>
         </div>
         <div class="clearfix"></div>
     </div>
     <!-- #END# Vertical Layout -->
 <script>
+function Wo_TestBackblaze() {
+    $('form.backblaze_storage-settings').find('.btn-success').text('Please wait..');
+    $('.backblaze_storage_alert').empty();
+    $.get(Wo_Ajax_Requests_File() + '?f=admin_setting&s=test_backblaze', function (data) {
+        if (data.status == 200) {
+            $('.backblaze_storage_alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Connection established!</div>');
+            setTimeout(function () {
+                $('.backblaze_storage_alert').empty();
+            }, 5000);
+        } else if (data.status == 300) {
+            $('.backblaze_storage_alert').html('<div class="alert alert-danger">Bucket doesn\'t exists</div>');
+            // setTimeout(function () {
+            //     $('.backblaze_storage_alert').empty();
+            // }, 5000);
+        } else if (data.status == 500) {
+            $('.backblaze_storage_alert').html('<div class="alert alert-danger">Your s3 account doesn\'t have any buckets, please create one.</div>');
+            // setTimeout(function () {
+            //     $('.backblaze_storage_alert').empty();
+            // }, 5000);
+        } else if (data.status == 400) {
+            $('.backblaze_storage_alert').html('<div class="alert alert-danger">'+data.message+'</div>');
+            // setTimeout(function () {
+            //     $('.backblaze_storage_alert').empty();
+            // }, 5000);
+        } else  {
+            $('.backblaze_storage_alert').html('<div class="alert alert-danger">Error while connecting to Backblaze, please check your details</div>');
+            // setTimeout(function () {
+            //     $('.backblaze_storage_alert').empty();
+            // }, 5000);
+        }
+        $('form.backblaze_storage-settings').find('.btn-success').text('Test & Verify Connection');
+    });
+}
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 });
 
 function Wo_TestWasabi() {
     $('form.wasabi_storage-settings').find('.btn-success').text('Please wait..');
+    $('.wasabi_storage_alert').empty();
     $.get(Wo_Ajax_Requests_File(), {f:'admin_setting', s: 'test_wasabi'}, function (data) {
         if (data.status == 200) {
             $('.wasabi_storage_alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Connection established!</div>');
             setTimeout(function () {
                 $('.wasabi_storage_alert').empty();
-            }, 2000);
+            }, 5000);
         } else if (data.status == 300) {
             $('.wasabi_storage_alert').html('<div class="alert alert-danger">Bucket doesn\'t exists</div>');
-            setTimeout(function () {
-                $('.wasabi_storage_alert').empty();
-            }, 5000);
+            // setTimeout(function () {
+            //     $('.wasabi_storage_alert').empty();
+            // }, 5000);
         } else if (data.status == 500) {
             $('.wasabi_storage_alert').html('<div class="alert alert-danger">Your s3 account doesn\'t have any buckets, please create one.</div>');
-            setTimeout(function () {
-                $('.wasabi_storage_alert').empty();
-            }, 5000);
+            // setTimeout(function () {
+            //     $('.wasabi_storage_alert').empty();
+            // }, 5000);
         } else if (data.status == 400) {
             $('.wasabi_storage_alert').html('<div class="alert alert-danger">'+data.message+'</div>');
-            setTimeout(function () {
-                $('.wasabi_storage_alert').empty();
-            }, 5000);
+            // setTimeout(function () {
+            //     $('.wasabi_storage_alert').empty();
+            // }, 5000);
         } else  {
             $('.wasabi_storage_alert').html('<div class="alert alert-danger">Error while connecting to amazone, please check your details</div>');
-            setTimeout(function () {
-                $('.wasabi_storage_alert').empty();
-            }, 5000);
+            // setTimeout(function () {
+            //     $('.wasabi_storage_alert').empty();
+            // }, 5000);
         }
         $('form.wasabi_storage-settings').find('.btn-success').text('Test & Verify Connection');
     });
 }
 function Wo_TestCloud() {
-    $('form.drive-settings').find('.btn-warning').text('Please wait..');
+    $('form.drive-settings').find('.btn-success').text('Please wait..');
+    $('.drive-settings-alert').empty();
     $.get(Wo_Ajax_Requests_File(), {f:'admin_setting', s: 'test_cloud'}, function (data) {
         if (data.status == 200) {
             $('.drive-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Connection established!</div>');
             setTimeout(function () {
                 $('.drive-settings-alert').empty();
-            }, 2000);
+            }, 5000);
         } else {
             $('.drive-settings-alert').html('<div class="alert alert-danger">'+data.message+'</div>');
-            setTimeout(function () {
-                $('.drive-settings-alert').empty();
-            }, 2000);
+            // setTimeout(function () {
+            //     $('.drive-settings-alert').empty();
+            // }, 2000);
         }
-        $('form.drive-settings').find('.btn-warning').text('Test Cloud Connection');
+        $('form.drive-settings').find('.btn-success').text('Test Cloud Connection');
     });
 }
 function Wo_TestS3() {
 	$('form.general-settings').find('.btn-success').text('Please wait..');
+    $('.general-settings-alert').empty();
 	$.get(Wo_Ajax_Requests_File(), {f:'admin_setting', s: 'test_s3'}, function (data) {
 		if (data.status == 200) {
             $('.general-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Connection established!</div>');
@@ -669,24 +846,24 @@ function Wo_TestS3() {
             }, 5000);
 		} else if (data.status == 300) {
             $('.general-settings-alert').html('<div class="alert alert-danger">Bucket doesn\'t exists</div>');
-            setTimeout(function () {
-                $('.general-settings-alert').empty();
-            }, 5000);
+            // setTimeout(function () {
+            //     $('.general-settings-alert').empty();
+            // }, 5000);
 		} else if (data.status == 500) {
             $('.general-settings-alert').html('<div class="alert alert-danger">Your s3 account doesn\'t have any buckets, please create one.</div>');
-            setTimeout(function () {
-                $('.general-settings-alert').empty();
-            }, 5000);
+            // setTimeout(function () {
+            //     $('.general-settings-alert').empty();
+            // }, 5000);
 		} else if (data.status == 400) {
 			$('.general-settings-alert').html('<div class="alert alert-danger">'+data.message+'</div>');
-            setTimeout(function () {
-                $('.general-settings-alert').empty();
-            }, 5000);
+            // setTimeout(function () {
+            //     $('.general-settings-alert').empty();
+            // }, 5000);
 		} else  {
             $('.general-settings-alert').html('<div class="alert alert-danger">Error while connecting to amazone, please check your details</div>');
-            setTimeout(function () {
-                $('.general-settings-alert').empty();
-            }, 5000);
+            // setTimeout(function () {
+            //     $('.general-settings-alert').empty();
+            // }, 5000);
 		}
 		$('form.general-settings').find('.btn-success').text('Test & Verify Connection');
 	});
@@ -694,49 +871,51 @@ function Wo_TestS3() {
 
 function Wo_TestSpaces() {
     $('form.spaces-settings').find('.btn-success').text('Please wait..');
+    $('.spaces-settings-alert').empty();
     $.get(Wo_Ajax_Requests_File(), {f:'admin_setting', s: 'test_spaces'}, function (data) {
         if (data.status == 200) {
             $('.spaces-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Connection established!</div>');
             setTimeout(function () {
                 $('.spaces-settings-alert').empty();
-            }, 2000);
+            }, 5000);
         } else if (data.status == 300) {
             $('.spaces-settings-alert').html('<div class="alert alert-danger">Bucket doesn\'t exists</div>');
-            setTimeout(function () {
-                $('.spaces-settings-alert').empty();
-            }, 2000);
+            // setTimeout(function () {
+            //     $('.spaces-settings-alert').empty();
+            // }, 2000);
         } else if (data.status == 500) {
             $('.spaces-settings-alert').html('<div class="alert alert-danger">Your s3 account doesn\'t have any buckets, please create one.</div>');
-            setTimeout(function () {
-                $('.spaces-settings-alert').empty();
-            }, 2000);
+            // setTimeout(function () {
+            //     $('.spaces-settings-alert').empty();
+            // }, 2000);
         } else if (data.status == 400) {
             $('.spaces-settings-alert').html('<div class="alert alert-danger">'+data.message+'</div>');
-            setTimeout(function () {
-                $('.spaces-settings-alert').empty();
-            }, 2000);
+            // setTimeout(function () {
+            //     $('.spaces-settings-alert').empty();
+            // }, 2000);
         } else  {
             $('.spaces-settings-alert').html('<div class="alert alert-danger">Error while connecting to amazone, please check your details</div>');
-            setTimeout(function () {
-                $('.spaces-settings-alert').empty();
-            }, 2000);
+            // setTimeout(function () {
+            //     $('.spaces-settings-alert').empty();
+            // }, 2000);
         }
         $('form.spaces-settings').find('.btn-success').text('Test Connection');
     });
 }
 function Wo_TestFTP() {
     $('form.ftp-settings').find('.btn-success').text('Please wait..');
+    $('.ftp-settings-alert').empty();
     $.get(Wo_Ajax_Requests_File(), {f:'admin_setting', s: 'test_ftp'}, function (data) {
         if (data.status == 200) {
             $('.ftp-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Connection established!</div>');
             setTimeout(function () {
                 $('.ftp-settings-alert').empty();
-            }, 2000);
+            }, 5000);
         } else if (data.status == 400) {
             $('.ftp-settings-alert').html('<div class="alert alert-danger">'+data.message+'</div>');
-            setTimeout(function () {
-                $('.ftp-settings-alert').empty();
-            }, 2000);
+            // setTimeout(function () {
+            //     $('.ftp-settings-alert').empty();
+            // }, 2000);
         }
         $('form.ftp-settings').find('.btn-success').text('Test FTP Connection');
     });
@@ -812,7 +991,7 @@ $(function() {
         });
     });
 	
-    $('input[type=text], input[type=number]').on('keyup', delay(function() {
+    $('input[type=text], input[type=number]').on('input', delay(function() {
             clearTimeout(setTimeOutColor);
             var thisElement = $(this);
             var configName = thisElement.attr('name');

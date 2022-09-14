@@ -94,6 +94,7 @@ $non_login_array = array(
     'aamarpay',
     'pay_with_bitcoin',
     'resend_two_factor',
+    'cashfree',
 );
 if ($wo['config']['membership_system'] == 1) {
     $non_login_array[] = 'pro_register';
@@ -130,6 +131,11 @@ if ($wo['loggedin'] && $wo['user']['banned'] == 1 && !in_array($f, $non_login_ar
 $files = scandir('xhr');
 unset($files[0]);
 unset($files[1]);
+if ($f != 'admin_setting' && $f != 'admincp') {
+    if ($wo["loggedin"] && !empty($wo['user']) && $wo['user']['is_pro'] && !empty($wo["pro_packages"][$wo['user']['pro_type']]) && !empty($wo["pro_packages"][$wo['user']['pro_type']]['max_upload'])) {
+        $wo['config']['maxUpload'] = $wo["pro_packages"][$wo['user']['pro_type']]['max_upload'];
+    }
+}
 if (file_exists('xhr/' . $f . '.php') && in_array($f . '.php', $files)) {
     include 'xhr/' . $f . '.php';
 }

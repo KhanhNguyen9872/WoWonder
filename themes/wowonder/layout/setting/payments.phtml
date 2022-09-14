@@ -1,9 +1,9 @@
 <div class="wo_settings_page wow_content">
-	<div class="avatar-holder earning">
+	<div class="avatar-holder my_earnings">
 		<img src="<?php echo $wo['setting']['avatar']?>" alt="<?php echo $wo['setting']['name']?> Profile Picture" class="avatar">
 		<div class="infoz">
 			<h5 title="<?php echo $wo['setting']['name']?>"><a href="<?php echo Wo_SeoLink('index.php?link1=timeline&u=' . $wo['setting']['username'] . '');?>" data-ajax="?link1=timeline&u=<?php echo $wo['setting']['username'] ?>"><?php echo $wo['setting']['name']?></a></h5>
-			<p><?php echo $wo['lang']['my_earnings'] ?> <?php echo Wo_GetCurrency($wo['config']['ads_currency']) . ($wo['setting']['balance'] + $wo['setting']['wallet']);?></p>
+			<p><?php echo $wo['lang']['my_earnings'] ?> <?php echo Wo_GetCurrency($wo['config']['ads_currency']) . ($wo['setting']['balance']);?></p>
 		</div>
 	</div>
 	<hr>
@@ -29,8 +29,13 @@
 					<div class="wow_form_fields">
 						<label for="withdraw_method"><?php echo $wo['lang']['withdraw_method']; ?></label>  
 						<select id="withdraw_method" name="withdraw_method" class="form-control" onchange="Wo_ShowWithdrawMethod(this)">
-							<?php foreach ($wo['config']['withdrawal_payment_method'] as $key => $value) { 
+							<?php 
+							$first = 0;
+							foreach ($wo['config']['withdrawal_payment_method'] as $key => $value) { 
 								if ($value == 1) {
+									if ($first == 0) {
+										$first = $key;
+									}
 									if ($key != 'custom') { ?>
 										<option value="<?php echo $key; ?>"><?php echo $wo['lang'][$key]; ?></option>
 							<?php	}elseif(!empty($wo['config']['custom_name'])){ ?>
@@ -39,7 +44,7 @@
 						</select>
 					</div>
 				</div>
-			<div class="paypal_withdrawal">
+			<div class="paypal_withdrawal" <?php echo($first == 'paypal' ? '' : 'style="display: none;"'); ?>>
 				<div class="col-md-6">
 					<div class="wow_form_fields">
 						<label for="paypal_email"><?php echo $wo['lang']['paypal_email']; ?></label>  
@@ -48,7 +53,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="transfer_to_withdrawal" style="display: none;">
+			<div class="transfer_to_withdrawal" <?php echo(($first == 'skrill' || $first == 'custom') ? '' : 'style="display: none;"'); ?>>
 				<div class="col-md-6">
 					<div class="wow_form_fields">
 						<label for="transfer_to"><?php echo $wo['lang']['transfer_to']; ?></label>
@@ -63,7 +68,7 @@
 					<input name="amount" id="amount" type="text" class="form-control input-md" value="<?php echo $wo['setting']['balance'];?>">
 				</div>
 			</div>
-				<div class="bank_withdrawal" style="display: none;">
+				<div class="bank_withdrawal" <?php echo($first == 'bank' ? '' : 'style="display: none;"'); ?>>
 					<div class="col-md-6">
 						<div class="wow_form_fields">
 							<label for="iban"><?php echo $wo['lang']['iban']; ?></label>  

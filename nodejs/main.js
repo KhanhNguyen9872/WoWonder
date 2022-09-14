@@ -31,21 +31,23 @@ async function loadConfig(ctx) {
   if (ctx.globalconfig["bucket_name"] && ctx.globalconfig["bucket_name"] != '') {
       ctx.globalconfig["s3_site_url"] = "https://"+ctx.globalconfig["bucket_name"]+".s3.amazonaws.com";
   }
-  ctx.globalconfig["wasabi_site_url"]         = "https://s3.wasabisys.com";
+  ctx.globalconfig["wasabi_site_url"]         = "https://s3."+ctx.globalconfig["wasabi_bucket_region"]+".wasabisys.com";
   if (ctx.globalconfig["wasabi_bucket_name"] && ctx.globalconfig["wasabi_bucket_name"] != '') {
-      ctx.globalconfig["wasabi_site_url"] = "https://s3.wasabisys.com/"+ctx.globalconfig["wasabi_bucket_name"];
+      ctx.globalconfig["wasabi_site_url"] = "https://s3."+ctx.globalconfig["wasabi_bucket_region"]+".wasabisys.com/"+ctx.globalconfig["wasabi_bucket_name"];
   }
   ctx.globalconfig["s3_site_url_2"]          = "https://test.s3.amazonaws.com";
   if (ctx.globalconfig["bucket_name_2"] && ctx.globalconfig["bucket_name_2"] != '') {
       ctx.globalconfig["s3_site_url_2"] = "https://"+ctx.globalconfig["bucket_name_2"]+".s3.amazonaws.com";
   }
+  var endpoint_url = ctx.globalconfig['ftp_endpoint']; 
+  ctx.globalconfig['ftp_endpoint'] = endpoint_url.replace('https://', '');
 
   // if (ctx.globalconfig["redis"] === "Y") {
   //   const redisAdapter = require('socket.io-redis');
   //   io.adapter(redisAdapter({ host: 'localhost', port: ctx.globalconfig["redis_port"] }));
   // }
 
-    
+
   if (ctx.globalconfig["nodejs_ssl"] == 1) {
     var https = require('https');
     var options = {
@@ -58,7 +60,7 @@ async function loadConfig(ctx) {
     serverPort = ctx.globalconfig["nodejs_port"];
     server = require('http').createServer(app);
   }
-  
+
 }
 
 
@@ -71,10 +73,18 @@ async function loadLangs(ctx) {
 
 
 async function init() {
-  var sequelize = new Sequelize('mysql://' + configFile.sql_db_user + ':' + configFile.sql_db_pass + '@' + configFile.sql_db_host + '/' + configFile.sql_db_name, {
-    // Look to the next section for possible options
-    logging: false
-  })
+  var sequelize = new Sequelize(configFile.sql_db_name, configFile.sql_db_user, configFile.sql_db_pass, {
+    host: configFile.sql_db_host,
+    dialect: "mysql",
+    logging: function () {},
+    pool: {
+        max: 20,
+        min: 0,
+        idle: 10000
+    }
+  });
+
+
 
   ctx.wo_messages = require("./models/wo_messages")(sequelize, DataTypes)
   ctx.wo_userschat = require("./models/wo_userschat")(sequelize, DataTypes)
@@ -124,7 +134,13 @@ async function main() {
   app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
   });
-  io = require('socket.io')(server);
+  io = require('socket.io')(server, {
+    allowEIO3: true,
+    cors: {
+        origin: true,
+        credentials: true
+    },
+  });
   if (ctx.globalconfig["redis"] === "Y") {
     const redisAdapter = require('socket.io-redis');
     io.adapter(redisAdapter({ host: 'localhost', port: ctx.globalconfig["redis_port"] }));

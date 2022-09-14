@@ -1,4 +1,3 @@
-<style>textarea.postText {padding-left: 15px !important;}</style>
 <div class="row page-margin wo_event_profile" style="margin-top: 0px;" data-id="<?php echo $wo['event']['id'];?>">
 	<div class="profile-container">
 		<div class="card hovercard">
@@ -224,7 +223,9 @@
 					<span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M21,6V8H3V6H21M3,18H12V16H3V18M3,13H21V11H3V13Z"></path></svg></span> <?php echo $wo['lang']['description']; ?>
 				</div>
 			</div>
-            <p class="page-margin"><?php echo $wo['event']['description']?></p>
+			<div class="page-margin">
+				<p class="wo_event_desc"><?php echo $wo['event']['description']?></p>
+			</div>
         </div>
 
 		<?php echo Wo_LoadPage('events/includes/delete-event')?>
@@ -233,6 +234,25 @@
 </div>
 <!-- JS Pages functions -->
 <script>
+ReadMoreEventText(".wo_event_desc");
+
+function ReadMoreEventText(selector) {
+  let text = "<?php echo($wo['lang']['read_more_text']); ?>";
+  if (typeof selector == 'object') {
+	selector = $(selector).attr('class');
+  }
+  for (var i = 0; i < $(selector).length; i++) {
+	var t = $(selector)[i];
+	if (!$(t).hasClass('ReadMoreAdded') && $(t).text().trim().length > 0 && $(t).height() > 190) {
+	  var c = new Date().getUTCMilliseconds() + (Math.floor(Math.random() * 9999)) + 100 + "_" + i;
+	  $(t).addClass(c);
+	  $(t).addClass('ReadMoreAdded');
+	  $(t).css({ maxHeight: "165px" })
+	  $(t).after('<a href="javascript:void(0)" onclick="ShowReadMoreText(\'.'+c+'\',this)">'+text+'</a>');
+	}
+  }
+};
+
 const second = 1000,
       minute = second * 60,
       hour = minute * 60,

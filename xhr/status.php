@@ -25,6 +25,7 @@ if ($f == 'status') {
         if (!$error) {
             $amazone_s3                   = $wo['config']['amazone_s3'];
             $wasabi_storage                   = $wo['config']['wasabi_storage'];
+            $backblaze_storage                   = $wo['config']['backblaze_storage'];
             $ftp_upload                   = $wo['config']['ftp_upload'];
             $spaces                       = $wo['config']['spaces'];
             $cloud_upload                 = $wo['config']['cloud_upload'];
@@ -39,20 +40,24 @@ if ($f == 'status') {
                 $registration_data['description'] = Wo_Secure($_POST['description']);
             }
             if (count($registration_data) > 0) {
-                $last_id = Wo_InsertUserStory($registration_data);
-                if ($last_id && is_numeric($last_id) && !empty($_FILES["statusMedia"])) {
+                if (!empty($_FILES["statusMedia"])) {
+
                     $files   = Wo_MultipleArrayFiles($_FILES["statusMedia"]);
                     $sources = array();
                     $thumb   = '';
                     foreach ($files as $fileInfo) {
+                        $registration_data['posted']  += 1;
+                        $registration_data['expire']  = time() + (60 * 60 * 24);
+                        $last_id = Wo_InsertUserStory($registration_data);
                         if (!in_array(strtolower(pathinfo($fileInfo['name'], PATHINFO_EXTENSION)), array(
                             "m4v",
                             "avi",
                             "mpg",
-                            'mp4'
-                        ))) {
+                            'mp4'))) 
+                        {
                             $wo['config']['amazone_s3']   = 0;
                             $wo['config']['wasabi_storage']   = 0;
+                            $wo['config']['backblaze_storage']   = 0;
                             $wo['config']['ftp_upload']   = 0;
                             $wo['config']['spaces']       = 0;
                             $wo['config']['cloud_upload'] = 0;
@@ -62,6 +67,7 @@ if ($f == 'status') {
                             if (empty($_FILES["cover"]) && $wo['config']['ffmpeg_system'] == 'on') {
                                 $wo['config']['amazone_s3']   = 0;
                                 $wo['config']['wasabi_storage']   = 0;
+                                $wo['config']['backblaze_storage']   = 0;
                                 $wo['config']['ftp_upload']   = 0;
                                 $wo['config']['spaces']       = 0;
                                 $wo['config']['cloud_upload'] = 0;
@@ -99,10 +105,11 @@ if ($f == 'status') {
                                 $dir              = "upload/photos/" . date('Y') . '/' . date('m');
                                 $image_thumb      = $dir . '/' . Wo_GenerateKey() . '_' . date('d') . '_' . md5(time()) . "_image.jpeg";
                                 $output_thumb     = shell_exec("$ffmpeg_b -ss \"$thumb_1_duration\" -i " . $media['filename'] . " -vframes 1 -f mjpeg $image_thumb 2<&1");
-                                if (file_exists($image_thumb) && !empty(getimagesize($image_thumb))) {
+                                if (file_exists($image_thumb) && !empty(@getimagesize($image_thumb))) {
                                     $crop_image                   = Wo_Resize_Crop_Image(400, 400, $image_thumb, $image_thumb, 60);
                                     $wo['config']['amazone_s3']   = $amazone_s3;
                                     $wo['config']['wasabi_storage']   = $wasabi_storage;
+                                    $wo['config']['backblaze_storage']   = $backblaze_storage;
                                     $wo['config']['ftp_upload']   = $ftp_upload;
                                     $wo['config']['spaces']       = $spaces;
                                     $wo['config']['cloud_upload'] = $cloud_upload;
@@ -113,6 +120,7 @@ if ($f == 'status') {
                                 }
                                 $wo['config']['amazone_s3']   = $amazone_s3;
                                 $wo['config']['wasabi_storage']   = $wasabi_storage;
+                                $wo['config']['backblaze_storage']   = $backblaze_storage;
                                 $wo['config']['ftp_upload']   = $ftp_upload;
                                 $wo['config']['spaces']       = $spaces;
                                 $wo['config']['cloud_upload'] = $cloud_upload;
@@ -151,6 +159,7 @@ if ($f == 'status') {
                                     $crop_image                   = Wo_Resize_Crop_Image(400, 400, $thumb, $last_file, 60);
                                     $wo['config']['amazone_s3']   = $amazone_s3;
                                     $wo['config']['wasabi_storage']   = $wasabi_storage;
+                                    $wo['config']['backblaze_storage']   = $backblaze_storage;
                                     $wo['config']['ftp_upload']   = $ftp_upload;
                                     $wo['config']['spaces']       = $spaces;
                                     $wo['config']['cloud_upload'] = $cloud_upload;
@@ -160,72 +169,77 @@ if ($f == 'status') {
                                 }
                             }
                         }
-                    }
-                    $img_types = array(
-                        'image/png',
-                        'image/jpeg',
-                        'image/jpg',
-                        'image/gif'
-                    );
-                    if (in_array(strtolower(pathinfo($media['filename'], PATHINFO_EXTENSION)), array(
-                        "m4v",
-                        "avi",
-                        "mpg",
-                        'mp4'
-                    )) && !empty($_FILES["cover"]) && in_array($_FILES["cover"]["type"], $img_types)) {
-                        $wo['config']['amazone_s3']   = 0;
-                        $wo['config']['wasabi_storage']   = 0;
-                        $wo['config']['ftp_upload']   = 0;
-                        $wo['config']['spaces']       = 0;
-                        $wo['config']['cloud_upload'] = 0;
-                        $fileInfo                     = array(
-                            'file' => $_FILES["cover"]["tmp_name"],
-                            'name' => $_FILES['cover']['name'],
-                            'size' => $_FILES["cover"]["size"],
-                            'type' => $_FILES["cover"]["type"]
+
+                        $img_types = array(
+                            'image/png',
+                            'image/jpeg',
+                            'image/jpg',
+                            'image/gif'
                         );
-                        $media                        = Wo_ShareFile($fileInfo);
-                        $file_type                    = explode('/', $fileInfo['type']);
-                        if (empty($thumb)) {
-                            if (in_array(strtolower(pathinfo($media['filename'], PATHINFO_EXTENSION)), array(
-                                "gif",
-                                "jpg",
-                                "png",
-                                'jpeg'
-                            ))) {
-                                $thumb             = $media['filename'];
-                                $explode2          = @end(explode('.', $thumb));
-                                $explode3          = @explode('.', $thumb);
-                                $last_file         = $explode3[0] . '_small.' . $explode2;
-                                $arrContextOptions = array(
-                                    "ssl" => array(
-                                        "verify_peer" => false,
-                                        "verify_peer_name" => false
-                                    )
-                                );
-                                $fileget           = file_get_contents(Wo_GetMedia($thumb), false, stream_context_create($arrContextOptions));
-                                if (!empty($fileget)) {
-                                    $importImage = @file_put_contents($thumb, $fileget);
+                        if (in_array(strtolower(pathinfo($media['filename'], PATHINFO_EXTENSION)), array(
+                            "m4v",
+                            "avi",
+                            "mpg",
+                            'mp4'
+                        )) && !empty($_FILES["cover"]) && in_array($_FILES["cover"]["type"], $img_types)) {
+                            $wo['config']['amazone_s3']   = 0;
+                            $wo['config']['wasabi_storage']   = 0;
+                            $wo['config']['backblaze_storage']   = 0;
+                            $wo['config']['ftp_upload']   = 0;
+                            $wo['config']['spaces']       = 0;
+                            $wo['config']['cloud_upload'] = 0;
+                            $fileInfo                     = array(
+                                'file' => $_FILES["cover"]["tmp_name"],
+                                'name' => $_FILES['cover']['name'],
+                                'size' => $_FILES["cover"]["size"],
+                                'type' => $_FILES["cover"]["type"]
+                            );
+                            $media                        = Wo_ShareFile($fileInfo);
+                            $file_type                    = explode('/', $fileInfo['type']);
+                            if (empty($thumb)) {
+                                if (in_array(strtolower(pathinfo($media['filename'], PATHINFO_EXTENSION)), array(
+                                    "gif",
+                                    "jpg",
+                                    "png",
+                                    'jpeg'
+                                ))) {
+                                    $thumb             = $media['filename'];
+                                    $explode2          = @end(explode('.', $thumb));
+                                    $explode3          = @explode('.', $thumb);
+                                    $last_file         = $explode3[0] . '_small.' . $explode2;
+                                    $arrContextOptions = array(
+                                        "ssl" => array(
+                                            "verify_peer" => false,
+                                            "verify_peer_name" => false
+                                        )
+                                    );
+                                    $fileget           = file_get_contents(Wo_GetMedia($thumb), false, stream_context_create($arrContextOptions));
+                                    if (!empty($fileget)) {
+                                        $importImage = @file_put_contents($thumb, $fileget);
+                                    }
+                                    $crop_image                   = Wo_Resize_Crop_Image(400, 400, $thumb, $last_file, 60);
+                                    $wo['config']['amazone_s3']   = $amazone_s3;
+                                    $wo['config']['wasabi_storage']   = $wasabi_storage;
+                                    $wo['config']['backblaze_storage']   = $backblaze_storage;
+                                    $wo['config']['ftp_upload']   = $ftp_upload;
+                                    $wo['config']['spaces']       = $spaces;
+                                    $wo['config']['cloud_upload'] = $cloud_upload;
+                                    $upload_s3                    = Wo_UploadToS3($last_file);
+                                    $thumb                        = $last_file;
                                 }
-                                $crop_image                   = Wo_Resize_Crop_Image(400, 400, $thumb, $last_file, 60);
-                                $wo['config']['amazone_s3']   = $amazone_s3;
-                                $wo['config']['wasabi_storage']   = $wasabi_storage;
-                                $wo['config']['ftp_upload']   = $ftp_upload;
-                                $wo['config']['spaces']       = $spaces;
-                                $wo['config']['cloud_upload'] = $cloud_upload;
-                                $upload_s3                    = Wo_UploadToS3($last_file);
-                                $thumb                        = $last_file;
                             }
-                        }
-                    }
-                    if (count($sources) > 0) {
-                        foreach ($sources as $registration_data) {
-                            Wo_InsertUserStoryMedia($registration_data);
                         }
                         if (!empty($thumb)) {
                             $thumb        = Wo_Secure($thumb, 0);
                             $mysqli_query = mysqli_query($sqlConnect, "UPDATE " . T_USER_STORY . " SET thumbnail = '$thumb' WHERE id = $last_id");
                         }
+                    }
+                        
+                    if (count($sources) > 0) {
+                        foreach ($sources as $registration_data) {
+                            Wo_InsertUserStoryMedia($registration_data);
+                        }
+                        
                         $data = array(
                             'message' => $success_icon . $wo['lang']['status_added'],
                             'status' => 200

@@ -62,7 +62,6 @@ if ($f == 'request_payment') {
                     }
                     $insert_payment = Wo_RequestNewPayment($wo['user']['user_id'], $_POST['amount'], $insert_array);
                     if ($insert_payment) {
-                        $update_balance = Wo_UpdateBalance($wo['user']['user_id'], $_POST['amount'], '-');
                         $data           = array(
                             'status' => 200,
                             'message' => $success_icon . $wo['lang']['you_request_sent']

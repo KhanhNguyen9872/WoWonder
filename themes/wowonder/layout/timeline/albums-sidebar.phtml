@@ -5,14 +5,12 @@
 		</div>
 	</div>
 	<li>
-		<div class="sidebar-albums-container">
-			<?php 
+		<div class="sidebar-albums-container list-sidebar-element"><?php 
 			foreach (Wo_GetUserAlbums($wo['user_profile']['user_id'], 'sidebar', 12) as $wo['album']) {
-				$wo['album']['album_name'] = mb_substr($wo['album']['album_name'], 0, 10);
+				$wo['album']['album_name'] = $wo['album']['album_name'];
 				echo Wo_LoadPage('sidebar/sidebar-album-list');
 			}
-			?>
-		</div>
+			?></div>
 	</li>
 	<li><div class="clear"></div></li>
 </ul>

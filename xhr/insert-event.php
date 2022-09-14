@@ -49,9 +49,9 @@ if ($f == "insert-event") {
         }
         if (empty($error)) {
             $registration_data = array(
-                'name' => Wo_Secure($_POST['event-name']),
+                'name' => Wo_Secure($_POST['event-name'],1),
                 'location' => Wo_Secure($_POST['event-locat']),
-                'description' => Wo_Secure($_POST['event-description']),
+                'description' => Wo_Secure($_POST['event-description'],1),
                 'start_date' => Wo_Secure($_POST['event-start-date']),
                 'start_time' => Wo_Secure($_POST['event-start-time']),
                 'end_date' => Wo_Secure($_POST['event-end-date']),

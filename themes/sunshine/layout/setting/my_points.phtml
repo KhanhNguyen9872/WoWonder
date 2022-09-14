@@ -50,7 +50,7 @@
 					<h2 class="timer count-title count-number" data-to="<?php echo $wo['setting']['points'];?>" data-speed="1500"><?php echo $wo['setting']['points'];?></h2>
 					<p class="point-text"><?php echo $wo['lang']['points']; ?></p>
 					<?php if ($wo['config']['point_allow_withdrawal'] == 1) {?>
-						<p class="count-text">( <?php echo $wo['config']['dollar_to_point_cost'] . " " . $wo['lang']['points'] . " = $1.00"; ?> )</p>
+						<p class="count-text">( <?php echo $wo['config']['dollar_to_point_cost'] . " " . $wo['lang']['points'] . " = ".Wo_GetCurrency($wo['config']['ads_currency'])."1.00"; ?> )</p>
 					<?php } ?>
 				</div>
 			</div>

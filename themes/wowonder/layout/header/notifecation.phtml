@@ -460,8 +460,8 @@ if ($wo['notification']['type2'] == 'ffmpeg') {
             <?php echo $wo['notification']['type_text']; ?>
             <div class="notification-time active">
                <?php echo $wo['notification']['icon'];?>
-               <span class="ajax-time" title="<?php echo date('c',$wo['notification']['time']); ?>">
-               <?php echo Wo_Time_Elapsed_String($wo['notification']['time'])?>
+               <span class="ajax-time notification-time" title="<?php echo date('c',$wo['notification']['time']); ?>">
+               <?php echo Wo_Time_Elapsed_String_word($wo['notification']['time'])?>
                </span>
             </div>
          </div>

@@ -44,7 +44,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     exit();
 }
 if (!empty($wo['description'])) {
-    $wo['title'] = Wo_GetShortTitle($wo['story']['Orginaltext'], false, 50);
+    $wo['title'] =  FilterStripTags(Wo_Secure(Wo_GetShortTitle($wo['story']['Orginaltext'], false, 50)));
 } else {
     $wo['title'] = $wo['config']['siteTitle'];
 }
@@ -52,10 +52,10 @@ if (empty($wo['description'])) {
     $wo['description'] = $wo['config']['siteDesc'];
 }
 if (!empty($wo['story']['album_name'])) {
-    $wo['title'] = $wo['story']['album_name'];
+    $wo['title'] = FilterStripTags(Wo_Secure($wo['story']['album_name']));
 }
 if (!empty($wo['story']['product_id'])) {
-    $wo['description'] = strip_tags($wo['story']['product']['description']);
-    $wo['title']       = $wo['story']['product']['name'];
+    $wo['description'] = FilterStripTags(strip_tags(Wo_Secure($wo['story']['product']['description'])));
+    $wo['title']       = FilterStripTags(Wo_Secure($wo['story']['product']['name']));
 }
 ?>
