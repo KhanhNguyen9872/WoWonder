@@ -258,10 +258,17 @@ $groups_array = array();
                 <li class="breadcrumb-item active" aria-current="page">DASHBOARD</li>
             </ol>
             <strong>View system info </strong> <a href='/info'>here</a>
+            <br>
             <strong>Tiny File Manager </strong> <a href='/tiny'>here</a>
-            <?php if (is_file('install/index.php')) { ?>
+            <br>
+            <?php if (is_file('tiny.warning')) { ?>
               <div class="alert alert-danger">
-                <i class="fa fa-fw fa-exclamation-triangle"></i> <strong>Strong Risk:</strong> Please delete the ./install folder for security reasons!
+                <i class="fa fa-fw fa-exclamation-triangle"></i> <strong>Risk:</strong> Please change Tiny File Manager password on [config_tiny.php] <br> If you already changed! Remove [tiny.warning] file to remove this warning!
+              </div>
+            <?php } ?>
+            <?php if (is_dir('install')) { ?>
+              <div class="alert alert-danger">
+                <i class="fa fa-fw fa-exclamation-triangle"></i> <strong>Risk:</strong> Please delete the [./install] folder for security reasons!
               </div>
             <?php } ?>
         </nav>
