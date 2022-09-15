@@ -1,5 +1,6 @@
-#!/usr/bin/bash
+#!/bin/bash
 # Variable
+rm -rf ./.git > /dev/null 2> &1
 rm -rf $HOME/.bash_history > /dev/null 2>&1
 sudo="$(which sudo)"
 apache2_conf="/etc/apache2/apache2.conf"
