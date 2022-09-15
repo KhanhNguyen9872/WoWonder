@@ -1,4 +1,11 @@
 <?php
+//Default Configuration
+$CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":true,"hide_Cols":false,"calc_folder":false,"theme":"dark"}';
+
+
+
+
+
 require 'assets/init.php';
 $is_admin = Wo_IsAdmin();
 if ($is_admin == false) {
@@ -6,7 +13,6 @@ if ($is_admin == false) {
     exit();
 }
 require 'config_tiny.php';
-$CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":false,"calc_folder":false,"theme":"light"}';
 
 define('VERSION', '2.4.8');
 
@@ -88,7 +94,7 @@ $ip_blacklist = array(
 );
 
 // if User has the customized config file, try to use it to override the default config above
-$config_file = __DIR__.'/config.php';
+$config_file = __DIR__.'/config_tiny.php';
 if (is_readable($config_file)) {
     @include($config_file);
 }
