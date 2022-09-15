@@ -19,7 +19,7 @@ function stop_mysql () {
 if [[ -d /goorm/bin ]]; then
 	${sudo} apt update -y
 	${sudo} dpkg --configure -a
-	${sudo} apt install p7zip-full unzip tar curl zip wget nano mesa-utils dialog php-gettext pv ffmpeg npm nodejs apache2 php mariadb-server phpmyadmin -y
+	${sudo} apt install p7zip-full unzip tar curl zip wget nano mesa-utils dialog php-gettext pv ffmpeg apache2 php mariadb-server phpmyadmin -y
 	if [[ "$(cat /etc/hosts | grep -a -w -m1 '127.0.0.1 localhost')" == "" ]]; then
 		${sudo} printf "\n127.0.0.1 localhost\n" >> /etc/hosts
 	fi
@@ -116,21 +116,38 @@ EOF
 	${sudo} ln -s ${phpmyadmin_conf1} ${phpmyadmin_conf2} > /dev/null 2>&1
 	${sudo} chmod -R 777 /usr/share/phpmyadmin > /dev/null 2>&1
 	${sudo} rm -rf ./phpmyadmin* > /dev/null 2>&1
-	echo "Starting WoWonder...."
-	${sudo} service apache2 start > /dev/null 2>&1
-	sleep 1
-	${sudo} service mysql start > /dev/null 2>&1
 	${sudo} rm -rf *.sh *.md > /dev/null 2>&1
 	${sudo} cat > /usr/bin/wowonder << EOF
 #!/bin/bash
 sudo="\$(which sudo)"
-echo "Starting WoWonder...."
-\${sudo} service apache2 start > /dev/null 2>&1
-sleep 1
-\${sudo} service mysql start > /dev/null 2>&1
+case "\${1}" in
+    "start")
+        echo "Starting WoWonder...."
+        \${sudo} service apache2 start > /dev/null 2>&1
+        sleep 1
+        \${sudo} service mysql start > /dev/null 2>&1
+    ;;
+    "stop")
+        echo "Stopping WoWonder...."
+        \${sudo} service apache2 stop > /dev/null 2>&1
+        sleep 1
+        \${sudo} service mysql stop > /dev/null 2>&1
+    ;;
+    "restart")
+        echo "Restarting WoWonder...."
+        \${sudo} service apache2 restart > /dev/null 2>&1
+        sleep 1
+        \${sudo} service mysql restart > /dev/null 2>&1
+    ;;
+    *)
+        echo "wowonder [ARG]"
+        echo "ARG: start, stop, restart"
+    ;;
+esac
 exit 0
 EOF
 	${sudo} chmod 777 /usr/bin/wowonder > /dev/null 2>&1
+        ${sudo} wowonder start
 	echo "Done!"
 else
        printf "\n\nNot a Goorm Ubuntu!\n"
