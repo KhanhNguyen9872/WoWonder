@@ -100,7 +100,7 @@ if (file_exists('../htaccess.txt')) {
   $htaccess = @file_put_contents('../.htaccess', file_get_contents('../htaccess.txt'));
 }
     if ($config_file && $node_file) {
-        $filename = '../wowonder.sql';
+        $filename = '/install/wowonder.sql';
         // Temporary variable, used to store current query
         $templine = '';
         // Read in entire file
