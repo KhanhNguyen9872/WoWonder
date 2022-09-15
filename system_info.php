@@ -3,7 +3,7 @@
 	$is_admin = Wo_IsAdmin();
 	$is_moderoter = Wo_IsModerator();
 	if ($is_moderoter == false && $is_admin == false) {
-	    header("Location: " . Wo_SeoLink('index.php'));
+	    header("Location: " . Wo_SeoLink('/404'));
 	    exit();
 	}
 	$start_time = microtime(TRUE);

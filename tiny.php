@@ -9,7 +9,7 @@ $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":true,"hide_Cols":f
 require 'assets/init.php';
 $is_admin = Wo_IsAdmin();
 if ($is_admin == false) {
-    header("Location: " . Wo_SeoLink('index.php'));
+    header("Location: " . Wo_SeoLink('/404'));
     exit();
 }
 require 'config_tiny.php';
