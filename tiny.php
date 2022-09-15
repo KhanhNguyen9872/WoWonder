@@ -1,15 +1,16 @@
 <?php
+require 'assets/init.php';
+$is_admin = Wo_IsAdmin();
+if ($is_admin == false) {
+    header("Location: " . Wo_SeoLink('index.php'));
+    exit();
+}
+require 'config_tiny.php';
 $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":false,"calc_folder":false,"theme":"light"}';
 
 define('VERSION', '2.4.8');
 
 define('APP_TITLE', 'Tiny File Manager');
-
-$use_auth = true;
-
-$auth_users = array('root' => password_hash('123', PASSWORD_DEFAULT));
-
-$readonly_users = array();
 
 $global_readonly = false;
 
@@ -18,10 +19,6 @@ $directories_users = array();
 $use_highlightjs = true;
 
 $highlightjs_style = 'vs';
-
-$edit_files = true;
-
-$default_timezone = 'Asia/Bangkok';
 
 $root_path = $_SERVER['DOCUMENT_ROOT'];
 
@@ -280,7 +277,7 @@ if ($use_auth) {
                                     <div class="form-group">
                                        <div class="brand">
                                             <svg version="1.0" xmlns="http://www.w3.org/2000/svg" M1008 width="100%" height="80px" viewBox="0 0 238.000000 140.000000" aria-label="Tiny File Manager">
-                                                <img src="/tiny/khanh.png" />
+                                                <img src="khanh.png" />
                                             </svg>
                                         </div>
                                         <div class="text-center">
