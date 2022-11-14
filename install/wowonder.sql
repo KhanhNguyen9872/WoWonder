@@ -912,7 +912,7 @@ INSERT INTO `Wo_Config` (`id`, `name`, `value`) VALUES
 (261, 'paypal_currency', 'USD'),
 (262, 'stripe_currency', 'USD'),
 (263, '2checkout_currency', 'USD'),
-(264, 'version', '4.1.3'),
+(264, 'version', '4.1.4'),
 (265, 'forum_visibility', '1'),
 (266, 'events_visibility', '1'),
 (267, 'product_visibility', '1'),
