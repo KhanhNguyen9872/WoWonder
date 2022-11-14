@@ -31,13 +31,19 @@
 </video>
 
 <script>
+
 var wovideo = '.plyrr-<?php echo $wo['story']['id'];?>';
-var players = Plyr.setup(wovideo, {
+var players = new Plyr(wovideo, {
 	<?php if (Wo_IsMobile() == false) { ?>
 	ratio: '16:9',
 	<?php } ?>
 	fullscreen: {
 		iosNative: true
-	}
+	},
+	resetOnEnd: true,
+});
+
+players.on('play', (event) => {
+  $('video').not('.plyrr-<?php echo $wo['story']['id'];?>').trigger('pause');
 });
 </script>

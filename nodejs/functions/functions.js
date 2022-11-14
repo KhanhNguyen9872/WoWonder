@@ -530,7 +530,7 @@ class FunctionsUtils {
         if (ctx.globalconfig['amazone_s3'] == 1) {
             return ctx.globalconfig['s3_site_url'] + '/' + media;
         } else if(ctx.globalconfig['wasabi_storage'] == 1){
-            return ctx.globalconfig['wasabi_site_url'] + '/' + media;
+            return 'https://s3.' + ctx.globalconfig['wasabi_bucket_region'] + '.wasabisys.com/' +  ctx.globalconfig['wasabi_bucket_name'] + '/' + media;
         } else if (ctx.globalconfig['spaces'] == 1) {
             return 'https://' + ctx.globalconfig['space_name'] + '.' + ctx.globalconfig['space_region'] + '.digitaloceanspaces.com/' + media;
         } else if (ctx.globalconfig['ftp_upload'] == 1) {

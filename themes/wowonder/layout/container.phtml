@@ -73,23 +73,7 @@
       <meta name="twitter:title" content="<?php echo $wo['title'];?>" />
       <meta name="twitter:description" content="<?php echo $wo['description'];?>" />
       <meta name="twitter:image" content="<?php echo $wo['config']['theme_url'];?>/img/og.jpg" />
-      <?php } ?>
-      <?php
-      if (!empty($wo['story']['postFile'])) {
-          echo Wo_LoadPage('header/og-meta');
-      }
-      if (!empty($wo['story']['postSticker'])) {
-          echo Wo_LoadPage('header/og-meta-5');
-      }
-      if (!empty($wo['story']['postLink'])) {
-          echo Wo_LoadPage('header/og-meta-2');
-      }
-
-      if (!empty($wo['story']['product_id'])) {
-          echo Wo_LoadPage('header/og-meta-4');
-          // print_r($wo['story']['product']);
-          // exit();
-      }
+      <?php } 
       if ($wo['page'] == 'timeline') { ?>
       <meta property="og:type" content="article" />
       <meta property="og:image" content="<?php echo $wo['user_profile']['avatar']?>" />
@@ -100,6 +84,7 @@
       <meta name="twitter:title" content="<?php echo $wo['title'];?>" />
       <meta name="twitter:description" content="<?php echo $wo['description'];?>" />
       <meta name="twitter:image" content="<?php echo $wo['user_profile']['avatar']; ?>" />
+      <script src="<?php echo $wo['config']['theme_url'];?>/javascript/circle-progress.min.js"></script>
       <?php if ($wo['user_profile']['share_my_data'] == 0) { ?>
       <meta name="robots" content="noindex,nofollow">
       <meta name="googlebot" content="noindex">
@@ -158,6 +143,23 @@
       <meta name="twitter:description" content="<?php echo $wo['article']['description'];?>" />
       <meta name="twitter:image" content="<?php echo $wo['article']['thumbnail']; ?>" />
       <?php } ?>
+      <?php
+      if (!empty($wo['story']['postFile'])) {
+          echo Wo_LoadPage('header/og-meta');
+      }
+      if (!empty($wo['story']['postSticker'])) {
+          echo Wo_LoadPage('header/og-meta-5');
+      }
+      if (!empty($wo['story']['postLink'])) {
+          echo Wo_LoadPage('header/og-meta-2');
+      }
+
+      if (!empty($wo['story']['product_id'])) {
+          echo Wo_LoadPage('header/og-meta-4');
+          // print_r($wo['story']['product']);
+          // exit();
+      }
+      ?>
       <?php if (!empty($_SERVER) && !empty($_SERVER['REQUEST_URI'])) {
         $link_text = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
         //$link_text = substr($wo['config']['site_url'], 0,strpos($wo['config']['site_url'], '://') + 2).parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

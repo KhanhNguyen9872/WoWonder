@@ -100,9 +100,9 @@ if ($f == 'groups') {
             if (empty($errors)) {
                 $Update_data = array(
                     'website' => $_POST['website'],
-                    'page_description' => Wo_Secure($_POST['page_description'],1),
+                    'page_description' => $_POST['page_description'],
                     'company' => $_POST['company'],
-                    'address' => Wo_Secure($_POST['address'],1),
+                    'address' => $_POST['address'],
                     'phone' => $_POST['phone']
                 );
                 if (Wo_UpdatePageData($_POST['page_id'], $Update_data)) {
@@ -242,10 +242,10 @@ if ($f == 'groups') {
                         }
                         $Update_data = array(
                             'group_name' => $_POST['group_name'],
-                            'group_title' => Wo_Secure($_POST['group_title'],1),
+                            'group_title' => $_POST['group_title'],
                             'category' => $_POST['group_category'],
                             'sub_category' => $sub_category,
-                            'about' => Wo_Secure($_POST['about'],1)
+                            'about' => $_POST['about']
                         );
                         $fields      = Wo_GetCustomFields('group');
                         if (!empty($fields)) {

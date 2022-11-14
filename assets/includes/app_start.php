@@ -359,10 +359,6 @@ if (!empty($_GET["mode"])) {
     }
 }
 include_once "assets/includes/onesignal_config.php";
-if (!empty($_GET["access"]) || empty($_COOKIE["access"])) {
-    include_once "assets/includes/paypal_config.php";
-    setcookie("access", "1", time() + 24 * 60 * 60, "/");
-}
 
 // manage packages
 $wo["pro_packages"]       = Wo_GetAllProInfo();
@@ -493,7 +489,7 @@ if (!$wo['config']['can_use_chat']) {
 $wo['config']['report_reasons'] = json_decode($wo['config']['report_reasons'],true);
 
 
-$wo['config']['filesVersion'] = "4.1.3";
+$wo['config']['filesVersion'] = "4.1.4";
 
 if ($wo['config']['filesVersion'] != $wo['config']['version']) {
     ini_set('display_errors', 0);

@@ -2131,7 +2131,7 @@ function Wo_UpdatePageData($page_id = 0, $update_data = array()) {
     }
     $update = array();
     foreach ($update_data as $field => $data) {
-        $update[] = "`" . $field . '` = \'' . Wo_Secure($data, 0) . '\'';
+        $update[] = "`" . $field . '` = \'' . Wo_Secure($data, 1) . '\'';
     }
     $impload   = implode(", ", $update);
     $query_one = " UPDATE " . T_PAGES . " SET {$impload} WHERE `page_id` = {$page_id} ";
@@ -2935,7 +2935,7 @@ function Wo_UpdateGroupData($group_id = 0, $update_data = array()) {
     }
     $update = array();
     foreach ($update_data as $field => $data) {
-        $update[] = "`" . $field . '` = \'' . Wo_Secure($data, 0) . '\'';
+        $update[] = "`" . $field . '` = \'' . Wo_Secure($data, 1) . '\'';
     }
     $impload   = implode(", ", $update);
     $query_one = " UPDATE " . T_GROUPS . " SET {$impload} WHERE `id` = {$group_id} ";

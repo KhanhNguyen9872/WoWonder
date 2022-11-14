@@ -209,12 +209,12 @@ if ($f == 'products') {
             }
             $price              = Wo_Secure($_POST['price']);
             $product_data_array = array(
-                'name' => Wo_Secure($_POST['name'],1),
+                'name' => $_POST['name'],
                 'category' => $_POST['category'],
                 'sub_category' => $sub_category,
-                'description' => Wo_Secure($_POST['description'],1),
+                'description' => $_POST['description'],
                 'price' => $price,
-                'location' => Wo_Secure($_POST['location']),
+                'location' => $_POST['location'],
                 'type' => $type,
                 'currency' => $currency,
                 'units' => $units,

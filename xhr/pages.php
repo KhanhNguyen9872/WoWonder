@@ -88,9 +88,9 @@ if ($f == 'pages') {
                 if (empty($errors)) {
                     $Update_data = array(
                         'website' => $_POST['website'],
-                        'page_description' => Wo_Secure($_POST['page_description'],1),
+                        'page_description' => $_POST['page_description'],
                         'company' => $_POST['company'],
-                        'address' => Wo_Secure($_POST['address'],1),
+                        'address' => $_POST['address'],
                         'phone' => $_POST['phone']
                     );
                     if (Wo_UpdatePageData($_POST['page_id'], $Update_data)) {

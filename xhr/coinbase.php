@@ -114,7 +114,7 @@ if ($f == "coinbase") {
 	if ($s == 'coinbase_cancel') {
 	    if (!empty($_GET['user_id']) && is_numeric($_GET['user_id'])) {
 	        $user_id = Wo_Secure($_GET['user_id']);
-	        $user = $db->where('id',$user_id)->getOne(T_USERS);
+	        $user = $db->where('user_id',$user_id)->getOne(T_USERS);
 	        if (!empty($user)) {
 	            $db->where('user_id', $user->id)->where('method_name', 'coinbase')->delete(T_PENDING_PAYMENTS);
 	        }

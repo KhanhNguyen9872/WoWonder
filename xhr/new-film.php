@@ -1,6 +1,6 @@
 <?php 
 if ($f == "new-film") {
-    if (Wo_IsAdmin() == true) {
+    if (Wo_IsAdmin() == true || Wo_IsModerator() == true) {
         if (empty($_POST['name']) || empty($_POST['description']) || !isset($_FILES["cover"]["tmp_name"])) {
             $error = $error_icon . $wo['lang']['please_check_details'];
             if (empty($_FILES["cover"]["tmp_name"]) || (!isset($_FILES["source"]["tmp_name"]) && empty($_POST['iframe']) && empty($_POST['other']))) {

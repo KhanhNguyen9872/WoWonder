@@ -834,6 +834,9 @@ function Wo_Resize_Crop_Image($max_width, $max_height, $source_file, $dst_dir, $
         case 'image/jpeg':
             $image_create = "imagecreatefromjpeg";
             break;
+        case 'image/webp':
+            $image_create = "imagecreatefromwebp";
+            break;
         default:
             return false;
             break;
@@ -1100,6 +1103,8 @@ function Wo_CompressImage($source_url, $destination_url, $quality) {
         $image = @imagecreatefromgif($source_url);
     } else if ($finfof == 'image/png') {
         $image = @imagecreatefrompng($source_url);
+    } else if ($finfof == 'image/webp') {
+        $image = @imagecreatefromwebp($source_url);
     } else {
         $image = @imagecreatefromjpeg($source_url);
     }
@@ -1159,8 +1164,8 @@ function validate_ip($ip) {
     }
     return true;
 }
-function Wo_Backup($sql_db_host, $sql_db_user, $sql_db_pass, $sql_db_name, $tables = false, $backup_name = false) {
-    $mysqli = new mysqli($sql_db_host, $sql_db_user, $sql_db_pass, $sql_db_name);
+function Wo_Backup($sql_db_host, $sql_db_user, $sql_db_pass, $sql_db_name, $sql_db_port, $tables = false, $backup_name = false) {
+    $mysqli = new mysqli($sql_db_host, $sql_db_user, $sql_db_pass, $sql_db_name, $sql_db_port);
     $mysqli->select_db($sql_db_name);
     $mysqli->query("SET NAMES 'utf8'");
     $queryTables = $mysqli->query('SHOW TABLES');

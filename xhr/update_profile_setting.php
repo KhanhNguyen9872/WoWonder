@@ -49,13 +49,13 @@ if ($f == "update_profile_setting") {
             }
             if (empty($errors)) {
                 $Update_data = array(
-                    'first_name' => Wo_Secure($_POST['first_name'],1),
-                    'last_name' => Wo_Secure($_POST['last_name'],1),
+                    'first_name' => $_POST['first_name'],
+                    'last_name' => $_POST['last_name'],
                     'website' => $_POST['website'],
-                    'about' => Wo_Secure($_POST['about'],1),
+                    'about' => $_POST['about'],
                     'working' => $_POST['working'],
                     'working_link' => $_POST['working_link'],
-                    'address' => Wo_Secure($_POST['address'],1),
+                    'address' => $_POST['address'],
                     'school' => $_POST['school'],
                     'relationship_id' => $_POST['relationship']
                 );

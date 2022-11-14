@@ -238,6 +238,15 @@ if ($f == 'posts') {
             ));
             exit();
         }
+        if (!Wo_CheckIfUserCanPost($wo['config']['post_limit'])) {
+            $errors = $wo['lang']['limit_exceeded'];
+            header("Content-type: application/json");
+            echo json_encode(array(
+                'status' => 400,
+                'errors' => $errors
+            ));
+            exit();
+        }
         if (isset($_POST['recipient_id']) && !empty($_POST['recipient_id'])) {
             $recipient_id = Wo_Secure($_POST['recipient_id']);
         } else if (isset($_POST['event_id']) && !empty($_POST['event_id'])) {

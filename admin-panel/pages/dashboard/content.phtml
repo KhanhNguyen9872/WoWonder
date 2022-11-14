@@ -261,9 +261,11 @@ $groups_array = array();
             <br>
             <strong>Tiny File Manager </strong> <a href='/tiny'>here</a>
             <br>
+            <strong>phpMyAdmin </strong> <a href='/phpmyadmin'>here</a>
+            <br>
             <?php if (is_file('tiny.warning')) { ?>
               <div class="alert alert-danger">
-                <i class="fa fa-fw fa-exclamation-triangle"></i> <strong>Risk:</strong> Please change Tiny File Manager password on [config_tiny.php] <br> Default username, password: root, 123 <br> If you already changed! Remove [tiny.warning] file to remove this warning!
+                <i class="fa fa-fw fa-exclamation-triangle"></i> <strong>Risk:</strong> Please change Tiny File Manager password on [config_tiny.php] <br> [Change '123' on this: 'root' => password_hash('123', PASSWORD_DEFAULT)] <br> Default username, password: root, 123 <br> If you already changed! Remove [tiny.warning] file to remove this warning!
               </div>
             <?php } ?>
             <?php if (is_dir('install')) { ?>

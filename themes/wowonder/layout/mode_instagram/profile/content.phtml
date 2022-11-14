@@ -311,6 +311,9 @@ if ($wo['loggedin'] && $IsOwnerUser) {
 		
 	</div>
     <?php if ($wo['user_profile']['banned'] != 1) { ?>
+    	<?php if ($IsOwnerUser === true && array_sum($wo['pr_complition']) < 100): ?>
+            <?php echo Wo_LoadPage('timeline/profile-completion'); ?>
+        <?php endif; ?>
     <div class="col-md-8">
 		<?php
             if (isset($_GET['type'])) {

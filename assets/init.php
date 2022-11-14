@@ -1,7 +1,6 @@
 <?php
 @ini_set('session.cookie_httponly',1);
 @ini_set('session.use_only_cookies',1);
-@header("X-FRAME-OPTIONS: SAMEORIGIN");
 if (!version_compare(PHP_VERSION, '7.1.0', '>=')) {
     exit("Required PHP_VERSION >= 7.1.0 , Your PHP_VERSION is : " . PHP_VERSION . "\n");
 }
